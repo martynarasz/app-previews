@@ -23575,13 +23575,14 @@ _.r=_.f=$
 _.w=0
 _.x=2
 _.at=_.as=_.Q=_.z=_.y=0
-_.ax=d
-_.ay=0
-_.CW=-1
-_.cx=!1
-_.cy=90
-_.dx=_.db=!1
-_.dy="Tap a lane to steer. Tap again to drop!"},
+_.ax=!1
+_.ay=d
+_.ch=0
+_.cx=-1
+_.cy=!1
+_.db=90
+_.dy=_.dx=!1
+_.fr="Tap a lane to steer. Tap again to drop!"},
 a0U:function a0U(a){this.a=a},
 a0V:function a0V(a){this.a=a},
 a0W:function a0W(a,b){this.a=a
@@ -73983,8 +73984,8 @@ s=this.r
 if(s!=null)s.aO()},
 a5M(){var s=this,r=s.d
 r===$&&A.a()
-s.ah(new A.agz(s,r.ay,r.w,r.x))
-if(r.db)s.Lj()},
+s.ah(new A.agz(s,r.ch,r.w,r.x))
+if(r.dx)s.Lj()},
 a4C(){var s=this,r=s.e
 r===$&&A.a()
 r.sp(r.a)
@@ -73992,16 +73993,16 @@ s.ah(new A.agw(s))
 s.Lf()},
 a24(a){var s=this,r=s.d
 r===$&&A.a()
-if(r.db||s.x||s.y)return
+if(r.dx||s.x||s.y)return
 if(a===r.x){s.yw()
 return}s.ah(new A.agu(s,a))},
 a2B(a){var s=this,r=s.d
 r===$&&A.a()
-if(r.db||s.x||s.y)return
+if(r.dx||s.x||s.y)return
 s.ah(new A.agv(s,a))},
 yw(){var s=this,r=s.d
 r===$&&A.a()
-if(r.db||s.x||s.y)return
+if(r.dx||s.x||s.y)return
 s.ah(new A.agt(s))},
 JW(a,b){var s,r=null
 if(a===-1){s=A.fe(18)
@@ -74011,21 +74012,21 @@ Xw(){var s=null,r=A.fe(25)
 return new A.ua(1,A.fK(s,A.atL(new A.ags(this)),B.A,s,new A.co(B.j,s,s,r,B.P_,s,B.ai),s,s,s,B.nj,s,s,s),s)},
 J(a){var s,r,q,p,o,n=this,m=null,l=A.dM("\u26a1 Color Merge \xd7"+n.a.c,m,m),k=n.ga4B(),j=t.E,i=A.c([A.atk(m,m,B.L5,m,m,k,m,m,"Restart round")],j),h=n.d
 h===$&&A.a()
-s=h.cy
+s=h.db
 s=A.c([A.dM("\u23f1 "+s+"s   \u2b50 "+h.y+"   \u2728 "+h.z,B.a2F,B.aQ),B.a17,A.dM("LEVEL "+(1+B.i.dN(90-s,20))+"  \xb7  \xd7"+n.a.c+" SPEED",B.a4R,B.aQ),B.iv,n.Xw()],j)
 r=h.Q
-if(r>0){q=h.ax
+if(r>0){q=h.ay
 q=q!==B.hU&&q!==B.zy}else q=!1
-if(q){q=h.ax
+if(q){q=h.ay
 p=q===B.kJ
 if(p)q="\ud83d\udca5  MEGA POP!  +150  \ud83d\udca5"
 else if(q===B.zz)q="\ud83c\udf08  RAINBOW CLEAR!  \ud83c\udf08"
 else q=q===B.zx?"\u2601\ufe0f  ULTRA SOFT!  \u2601\ufe0f":"\u2728  SQUISH!  \u2728"
 o=p?23:26
 s.push(A.zz(new A.agA(),A.dM(q,A.ol(m,m,p?B.IP:B.IJ,m,m,m,m,m,m,m,m,o,m,m,B.br,m,m,!0,m,m,m,m,m,m,m,m),B.aQ),B.fk,B.K2,new A.bU("sparkle-"+r,t.kK),new A.au(0.5,1,t.Y),t.i))}s.push(B.iv)
-s.push(A.dM(h.dy,B.a3a,B.aQ))
+s.push(A.dM(h.fr,B.a3a,B.aQ))
 s.push(B.iw)
-if(h.db)s.push(A.hW(A.c([A.dM(h.dx?"The stack reached the top!":"Round complete!",B.a30,m),B.ls,A.at1(B.L6,B.a6j,k,m)],j),B.a8,B.aK,B.aB))
+if(h.dx)s.push(A.hW(A.c([A.dM(h.dy?"The stack reached the top!":"Round complete!",B.a30,m),B.ls,A.at1(B.L6,B.a6j,k,m)],j),B.a8,B.aK,B.aB))
 else{k=h.r
 k===$&&A.a()
 s.push(A.iq(A.c([A.Hr(A.hW(A.c([B.a6o,A.yO(n.tC(k),56,56)],j),B.a8,B.aK,B.aB),1),A.Hr(A.at1(B.L8,B.a6s,n.gZf(),A.at3(B.J8,m,B.a0Y,m,m)),2)],j),B.a8,B.aB,0))}s.push(B.iw)
@@ -74050,7 +74051,7 @@ A.agx.prototype={
 $1(a){var s,r,q,p=this.a
 if(p.c!=null){s=p.d
 s===$&&A.a()
-s=s.db||p.x}else s=!0
+s=s.dx||p.x}else s=!0
 if(s)return
 p.w+=16
 s=p.y
@@ -74064,18 +74065,18 @@ A.agy.prototype={
 $1(a){var s,r=this.a
 if(r.c!=null){s=r.d
 s===$&&A.a()
-s=s.db}else s=!0
+s=s.dx}else s=!0
 if(s)return
 s=r.d
 s===$&&A.a()
 r.ah(s.ga7j())
-if(s.db)r.Lj()},
+if(s.dx)r.Lj()},
 $S:177}
 A.agz.prototype={
 $0(){var s,r=this,q=r.a,p=q.d
 p===$&&A.a()
 s=p.a7i()
-if(p.ay!==r.b){q.x=!0
+if(p.ch!==r.b){q.x=!0
 q.z=r.c
 q.Q=r.d
 q.as=p.w
@@ -74094,12 +74095,12 @@ $S:0}
 A.agu.prototype={
 $0(){var s=this.a.d
 s===$&&A.a()
-if(!s.Q1(this.b))s.dy="That lane is blocked. Pick another!"},
+if(!s.Q1(this.b))s.fr="That lane is blocked. Pick another!"},
 $S:0}
 A.agv.prototype={
 $0(){var s=this.a.d
 s===$&&A.a()
-if(!s.Q1(s.x+this.b))s.dy="Try a free lane!"},
+if(!s.Q1(s.x+this.b))s.fr="Try a free lane!"},
 $S:0}
 A.agt.prototype={
 $0(){var s=this.a
@@ -74124,7 +74125,7 @@ h=c.JW(m.e,j)
 g=B.Ix.dj(0.85)
 f=new A.aR(16,16)
 j=""+j
-a.push(new A.fY(m.c*d+2,k*d+2,e,e,i,i,new A.jf(!0,new A.lu(new A.au(0.5,1,p),new A.ago(),new A.z_(B.d6,B.cn,A.c([new A.fY(0,0,0,0,e,e,h,e),new A.fY(e,12,12,e,e,e,A.fK(e,A.dM(j+"\xd7"+j,B.a48,e),B.A,e,new A.co(g,e,e,new A.cw(f,f,f,f),e,e,B.ai),e,e,e,B.Kr,e,e,e),e)],b),e),B.fk,B.K6,e,new A.bU("merged-"+l,q),o),e),new A.bU("merged-position-"+l,q)))}if(!a0.db&&!c.x){b=a0.as
+a.push(new A.fY(m.c*d+2,k*d+2,e,e,i,i,new A.jf(!0,new A.lu(new A.au(0.5,1,p),new A.ago(),new A.z_(B.d6,B.cn,A.c([new A.fY(0,0,0,0,e,e,h,e),new A.fY(e,12,12,e,e,e,A.fK(e,A.dM(j+"\xd7"+j,B.a48,e),B.A,e,new A.co(g,e,e,new A.cw(f,f,f,f),e,e,B.ai),e,e,e,B.Kr,e,e,e),e)],b),e),B.fk,B.K6,e,new A.bU("merged-"+l,q),o),e),new A.bU("merged-position-"+l,q)))}if(!a0.dx&&!c.x){b=a0.as
 if(c.y)s=48
 else{s=c.a.c
 if(s===4)s=45
@@ -74134,7 +74135,7 @@ p=a0.w
 o=d-4
 l=a0.f
 l===$&&A.a()
-a.push(new A.tZ(A.i5(c.tC(l),!0,e),r*d+2,p*d+2,o,o,B.jr,s,e,new A.bU("falling-"+b,q)))}if(!a0.db&&c.x){b=c.e
+a.push(new A.tZ(A.i5(c.tC(l),!0,e),r*d+2,p*d+2,o,o,B.jr,s,e,new A.bU("falling-"+b,q)))}if(!a0.dx&&c.x){b=c.e
 b===$&&A.a()
 a0=a0.f
 a0===$&&A.a()
@@ -74157,10 +74158,10 @@ s=m.c
 s===$&&A.a()
 r=s[b]
 q=B.i.bb(b,6)
-s=q===m.x&&!m.db?B.Ja:B.Il
+s=q===m.x&&!m.dx?B.Ja:B.Il
 p=A.fe(12)
 if(r==null)m=o
-else{m=m.CW===b?m.as:0
+else{m=m.cx===b?m.as:0
 m=A.zz(new A.agl(),n.tC(r),B.fk,B.K0,new A.bU("landed-"+b+"-"+A.j(r)+"-"+m,t.kK),new A.au(0,1,t.Y),t.i)}return A.HL(B.aG,A.fK(o,m,B.A,o,new A.co(s,o,o,p,o,o,B.ai),o,o,B.nh,o,o,o,o),B.b1,!1,o,o,o,o,o,o,o,o,o,o,o,o,o,new A.agm(n,q),o,o,o,o)},
 $S:480}
 A.agm.prototype={
@@ -74203,45 +74204,46 @@ A.hj.prototype={}
 A.kP.prototype={
 H(){return"MergeOutcome."+this.b}}
 A.Hu.prototype={
-gOe(){return Math.max(40,B.c.aP(Math.max(170,560-(90-this.cy)*3-this.z*15)/this.b))},
-Ky(){var s=this.a
-if(s.vW(24)===0)return-1
-return s.vW(Math.min(5,3+B.i.dN(this.z,6)))},
+gOe(){return Math.max(40,B.c.aP(Math.max(170,560-(90-this.db)*3-this.z*15)/this.b))},
+Ky(){var s=this
+if(!s.ax&&s.as>=25&&s.a.vW(240)===0){s.ax=!0
+return-1}return s.a.vW(Math.min(5,3+B.i.dN(s.z,6)))},
 QO(){var s=this
 s.c=A.bh(36,null,!1,t.bo)
 B.b.L(s.d)
 s.at=s.as=s.Q=s.z=s.y=s.e=0
-s.ax=B.hU
-s.ay=0
-s.CW=-1
-s.cx=!1
-s.cy=90
-s.dx=s.db=!1
-s.dy="Tap a lane to steer. Tap again to drop!"
+s.ax=!1
+s.ay=B.hU
+s.ch=0
+s.cx=-1
+s.cy=!1
+s.db=90
+s.dy=s.dx=!1
+s.fr="Tap a lane to steer. Tap again to drop!"
 s.r=s.Ky()
 s.L8()},
 L8(){var s,r,q=this,p=J.w9(6,t.y)
 for(s=0;s<6;++s)p[s]=q.iw(s)!=null
-if(B.b.q(p,!0)){q.dx=q.db=!0
-q.dy="GAME OVER! One column reached the top."
+if(B.b.q(p,!0)){q.dy=q.dx=!0
+q.fr="GAME OVER! One column reached the top."
 return}q.x=2
 q.w=0
-q.cx=!1
+q.cy=!1
 r=q.r
 r===$&&A.a()
 q.f=r
 q.r=q.Ky()},
 Q1(a){var s=this
-if(s.db||a<0||a>=6)return!1
+if(s.dx||a<0||a>=6)return!1
 if(s.iw(s.w*6+a)!=null)return!1
 s.x=a
 return!0},
-a7i(){if(this.db)return!1
+a7i(){if(this.dx)return!1
 return this.Zt()},
 Jn(a){var s=this.w
 for(;;){if(!(s<5&&this.iw((s+1)*6+a)==null))break;++s}return s},
 a4I(){var s,r,q,p,o,n=this
-if(n.cx||n.w===5)return null
+if(n.cy||n.w===5)return null
 s=A.c([],t.t)
 for(r=[-1,1],q=0;q<2;++q){p=r[q]
 o=n.x+p
@@ -74254,30 +74256,30 @@ Zt(){var s,r,q,p=this,o=p.w
 if(o<5&&p.iw((o+1)*6+p.x)==null){++p.w
 return!1}s=p.a4I()
 if(s!=null){p.x=s;++p.w
-p.cx=!0;++p.ay
-return!1}p.ax=B.hU
+p.cy=!0;++p.ch
+return!1}p.ay=B.hU
 o=p.w*6+p.x
-p.CW=o
+p.cx=o
 r=p.f
 r===$&&A.a()
 if(r===-1){p.c=A.bh(36,null,!1,t.bo)
 B.b.L(p.d)
 p.y+=200;++p.Q
-p.ax=B.zz
-p.dy="RAINBOW BLAST! Board cleared!"}else{q=p.c
+p.ay=B.zz
+p.fr="RAINBOW BLAST! Board cleared!"}else{q=p.c
 q===$&&A.a()
 q[o]=r
 p.y+=5
-p.dy="Match 3 stones to grow a fluffy pillow!"
+p.fr="Match 3 stones to grow a fluffy pillow!"
 p.a4z()}++p.as
-if(!p.db)p.L8()
+if(!p.dx)p.L8()
 return!0},
 a7k(){var s,r=this
-if(r.db)return
-s=Math.max(0,r.cy-1)
-r.cy=s
-if(s===0){r.db=!0
-r.dy="Time! Final score: "+r.y}},
+if(r.dx)return
+s=Math.max(0,r.db-1)
+r.db=s
+if(s===0){r.dx=!0
+r.fr="Time! Final score: "+r.y}},
 iw(a){var s,r,q,p,o,n,m,l,k=this.c
 k===$&&A.a()
 if(k[a]!=null)return a
@@ -74415,8 +74417,8 @@ if(c&&a0==null){d=!0
 break A}f=a
 g=a0
 h=b
-break}}if(h==null){if(d&&p===0){a3.ax=B.zy
-a3.dy="Not enough space to grow! Clear room for a bigger pillow."}break}k=B.b.gU(h)
+break}}if(h==null){if(d&&p===0){a3.ay=B.zy
+a3.fr="Not enough space to grow! Clear room for a bigger pillow."}break}k=B.b.gU(h)
 if(k>=0){k=a3.c[k]
 k.toString
 a1=k}else a1=s[-k-1].e
@@ -74432,11 +74434,11 @@ k=a3.y+h.length*75*B.c.ca(Math.min(p,5))*B.c.ca(Math.min(f-1,3))
 a3.y=k
 if(f>3){++a3.at
 a3.y=k+150
-a3.ax=B.kJ
-a3.dy="MEGA POP! 3\xd73 cloud burst! +150 bonus!"}else{s.push(new A.hj(a3.e++,g.a,g.b,f,a1))
+a3.ay=B.kJ
+a3.fr="MEGA POP! 3\xd73 cloud burst! +150 bonus!"}else{s.push(new A.hj(a3.e++,g.a,g.b,f,a1))
 k=f===2
-a3.ax=k?B.Y4:B.zx
-a3.dy=k?"SQUISH! Stones became a soft 2\xd72 pillow!":"SO FLUFFY! Your pillow grew into a 3\xd73 cloud!"}a3.Zv()}if(p>1&&a3.ax!==B.kJ)a3.dy="SUPER CHAIN \xd7"+p+"! Bigger and bigger!"}}
+a3.ay=k?B.Y4:B.zx
+a3.fr=k?"SQUISH! Stones became a soft 2\xd72 pillow!":"SO FLUFFY! Your pillow grew into a 3\xd73 cloud!"}a3.Zv()}if(p>1&&a3.ay!==B.kJ)a3.fr="SUPER CHAIN \xd7"+p+"! Bigger and bigger!"}}
 A.a0U.prototype={
 $2(a,b){var s=this.a,r=B.i.b7(s.Jn(b),s.Jn(a))
 if(r!==0)return r
