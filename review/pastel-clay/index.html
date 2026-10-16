@@ -35,7 +35,7 @@ button:active{transform:scale(.96)}.actionRow{display:flex;gap:12px;align-items:
 <div class="hud" id="hud">⭐ 0</div>
 <div id="arenaWrap"><canvas id="arena" width="720" height="930" aria-label="Interaktywna gra z miękkimi elementami"></canvas><div id="countdown" aria-live="off"></div></div>
 <div id="message"></div>
-<div class="actionRow"><button id="drop">⬇ ZRZUĆ</button><button id="restart">↻ OD NOWA</button></div>
+<div class="actionRow"><button id="restart">↻ OD NOWA</button></div>
 <button id="back" style="background:transparent;box-shadow:none;color:#917ba7;font-size:12px">← WRÓĆ DO MENU</button>
 </section>
 </main>
@@ -61,7 +61,7 @@ let px=Math.cos(a)*r*.94*ripple,py=Math.sin(a)*r*.94*ripple;
 i===0?path.moveTo(px,py):path.lineTo(px,py)}path.closePath();
 let grad=c.createRadialGradient(-r*.38,-r*.43,r*.07,0,0,r*1.45);
 grad.addColorStop(0,tint(palette[c._col||0],.67));grad.addColorStop(.37,tint(palette[c._col||0],.39));grad.addColorStop(.72,palette[c._col||0]);grad.addColorStop(1,darken(palette[c._col||0],.20));
-c.fillStyle=grad;c.fill(path);c.shadowBlur=0;c.shadowOffsetY=0;c.strokeStyle='#ffffff55';c.lineWidth=big?2.1:1.6;c.stroke(path);
+c.fillStyle=grad;c.fill(path);c.shadowBlur=0;c.shadowOffsetY=0;if(c._col>=0)fruitSkin(c,r,c._col);c.strokeStyle='#ffffff55';c.lineWidth=big?2.1:1.6;c.stroke(path);
 c.fillStyle='#ffffff56';c.beginPath();c.ellipse(-r*.32,-r*.45,r*.31,r*.105,-.12,0,Math.PI*2);c.fill();
 if(big){c.strokeStyle='#ffffff60';c.lineWidth=1.7;c.beginPath();c.ellipse(0,0,r*.77,r*.75,0,.2,Math.PI*.80);c.stroke()}
 c.fillStyle='#554366';for(const k of [-.26,.26]){
@@ -82,36 +82,78 @@ c.fillStyle='#58466f';for(const x of [-r*.23,r*.23]){c.beginPath();c.ellipse(x,-
 c.strokeStyle='#58466f';c.lineWidth=2;c.beginPath();c.arc(0,r*.12,r*.15,0,Math.PI);c.stroke();
 c.restore();
 }
+function fruitSkin(c,r,col){
+  c.save();c.beginPath();c.arc(0,0,r*.90,0,Math.PI*2);c.clip();
+  // Fixed geometry: 3D material details stay still even when the toy rolls.
+  if(col===0){
+    for(let i=0;i<46;i++){let a=i*2.4,dist=Math.sqrt((i+.5)/46)*r*.83;
+      c.fillStyle='#e7c7ff79';c.beginPath();c.arc(Math.cos(a)*dist,Math.sin(a)*dist,r*.014,0,7);c.fill()}
+  }
+  if(col===1||col===3){
+    for(let i=0;i<46;i++){
+      const a=i*2.39996,d=Math.sqrt((i+.5)/46)*r*.81,x=Math.cos(a)*d,y=Math.sin(a)*d;
+      c.fillStyle=col===1?'#fff2bdcc':'#ffe3aa57';
+      c.beginPath();c.ellipse(x,y,r*(col===1?.027:.014),r*(col===1?.045:.018),a,0,7);c.fill();
+    }
+  }
+  if(col===2){
+    c.fillStyle='#e1f7a4ad';c.beginPath();c.arc(0,0,r*.55,0,7);c.fill();
+    for(let i=0;i<38;i++){
+      const a=i*Math.PI*2/38;let dx=Math.cos(a),dy=Math.sin(a);
+      c.strokeStyle='#78b8474f';c.lineWidth=r*.028;
+      c.beginPath();c.moveTo(dx*r*.32,dy*r*.32);c.lineTo(dx*r*.82,dy*r*.82);c.stroke();
+      c.fillStyle='#463923bd';c.save();c.translate(dx*r*.71,dy*r*.71);c.rotate(a);
+      c.beginPath();c.ellipse(0,0,r*.039,r*.022,0,0,7);c.fill();c.restore();
+    }
+  }
+  if(col===4){
+    c.fillStyle='#fff1d0';c.beginPath();c.arc(0,0,r*.70,0,7);c.fill();
+    c.strokeStyle='#f1d5a6';c.lineWidth=r*.14;c.beginPath();c.arc(0,0,r*.68,0,7);c.stroke();
+    for(let i=0;i<60;i++){const a=i*2.3999,d=(.80+.07*Math.sin(i*2.5))*r;
+      c.strokeStyle='#7042227d';c.lineWidth=.8;c.beginPath();
+      c.moveTo(Math.cos(a)*d,Math.sin(a)*d);
+      c.lineTo(Math.cos(a)*d-r*.09,Math.sin(a)*d+r*.035);c.stroke();}
+  }
+  if(col===5){
+    for(let i=-2;i<=2;i++){
+      c.strokeStyle=i%2===0?'#2f7b50a9':'#32834b91';
+      c.lineWidth=r*.125;c.lineCap='round';c.beginPath();
+      c.ellipse(i*r*.38,0,r*.22,r*.98,-.03,Math.PI*1.48,Math.PI*2.48);c.stroke();}
+  }
+  c.restore();
+}
 function fruitCandyDetail(c,item){
 if(item.col<0)return;
-const r=rad(item);
-c.save();c.translate(item.x,item.y);c.rotate(item.a||0);
-if(item.col===0||item.col===2||item.col===3){
-  // Strawberry, lime and apricot: little sculpted leaves and stems.
-  c.fillStyle=item.col===2?'#4ba977':'#6fae74';
-  c.beginPath();c.ellipse(-r*.17,-r*.78,r*.22,r*.095,-.7,0,Math.PI*2);
-  c.ellipse(r*.10,-r*.81,r*.20,r*.09,.5,0,Math.PI*2);c.fill();
-  c.strokeStyle='#568857';c.lineWidth=2;c.beginPath();c.moveTo(0,-r*.72);c.quadraticCurveTo(2,-r*.95,r*.06,-r*.99);c.stroke();
-  if(item.col===0){c.fillStyle='#fff9d1';for(const [x,y] of [[-.35,-.22],[.35,-.18],[-.48,.20],[.45,.26],[0,.50]]){c.beginPath();c.ellipse(x*r,y*r,r*.045,r*.079,.4,0,Math.PI*2);c.fill()}}
-}else if(item.col===1||item.col===4){
-  // Wrapped pastel sweet, with soft ribbons on both sides.
-  for(const side of [-1,1]){
-    c.fillStyle=item.col===1?'#cec2ff':'#bfe2fc';
-    c.beginPath();c.moveTo(side*r*.78,-r*.22);
-    c.lineTo(side*r*1.11,-r*.37);c.lineTo(side*r*1.05,r*.33);
-    c.lineTo(side*r*.76,r*.16);c.closePath();c.fill();
-    c.strokeStyle='#ffffff66';c.lineWidth=2;c.stroke();
-  }
-  c.strokeStyle='#ffffff8f';c.lineWidth=2.5;
-  c.beginPath();c.moveTo(-r*.47,-r*.45);c.quadraticCurveTo(r*.45,r*.10,-r*.22,r*.55);c.stroke();
-}else{
-  c.fillStyle='#ffffff88';
-  c.beginPath();c.arc(-r*.52,-r*.45,r*.12,0,Math.PI*2);c.arc(r*.51,-r*.44,r*.12,0,Math.PI*2);c.fill();
+const r=rad(item);c.save();c.translate(item.x,item.y);c.rotate(item.a||0);
+if(item.col===0){
+  c.fillStyle='#8764d9';
+  for(let i=-2;i<=2;i++){c.beginPath();c.arc(i*r*.14,-r*.84,r*.145,0,7);c.fill();}
+}else if(item.col===1||item.col===3||item.col===5){
+  c.fillStyle='#6bb34b';c.beginPath();
+  c.ellipse(-r*.15,-r*.85,r*.28,r*.105,-.35,0,7);
+  c.ellipse(r*.16,-r*.86,r*.23,r*.08,.4,0,7);c.fill();
+  c.strokeStyle='#548b3e';c.lineWidth=r*.05;c.lineCap='round';
+  c.beginPath();c.moveTo(0,-r*.84);c.lineTo(r*.07,-r*1.05);c.stroke();
+}else if(item.col===2){
+  c.strokeStyle='#b28a4b9c';c.lineWidth=r*.04;c.beginPath();c.arc(0,0,r*.90,-.2,.6);c.stroke();
 }
 c.restore();
 }
+function candyToy(c,item,opacity){
+const r=rad(item);c.save();c.translate(item.x,item.y);c.rotate(item.a||0);
+for(let k of [-1,1]){
+  c.fillStyle='#ffb5dc';c.beginPath();c.moveTo(k*r*.62,-r*.3);
+  c.lineTo(k*r*1.20,-r*.53);c.lineTo(k*r*1.12,r*.52);
+  c.lineTo(k*r*.63,r*.3);c.closePath();c.fill();
+  c.strokeStyle='#fff8';c.lineWidth=1.5;c.stroke();
+}c.restore();
+c._col=1;clay(c,item.x,item.y,r,false,item.a||0,item.impact||0,opacity);
+c.save();c.translate(item.x,item.y);c.rotate(item.a||0);c.strokeStyle='#ffe8f9aa';c.lineWidth=r*.10;
+c.beginPath();c.arc(0,0,r*.67,-1.3,.7);c.stroke();c.restore();
+}
 function toy(c,item,opacity){
-if(item.col<0){rainbowToy(c,item,opacity);return}
+if(item.col===-1){rainbowToy(c,item,opacity);return}
+if(item.col===-2){candyToy(c,item,opacity);return}
 c._col=item.col;clay(c,item.x,item.y,rad(item),item.big,item.a||0,item.impact||0,opacity);
 fruitCandyDetail(c,item);
 }
@@ -140,8 +182,28 @@ if(p.y>=H-4-Math.random()*3){p.settled=true;p.y=H-3-Math.random()*5;p.vy=0;p.rot
 }
 petals=petals.filter(p=>p.age<(p.settled?18:28));
 }
-function heroDraw(){h.save();h.scale(2,2);let g=h.createLinearGradient(0,0,340,208);g.addColorStop(0,'#fffaf7');g.addColorStop(.55,'#f4eafb');g.addColorStop(1,'#e7f9f2');h.fillStyle=g;h.fillRect(0,0,340,208);
-[{x:104,y:147,big:true,col:1,a:-.08},{x:230,y:150,big:true,col:0,a:.07},{x:62,y:61,col:2,a:-.12},{x:173,y:59,col:3,a:.1},{x:280,y:73,col:4,a:.04}].forEach(obj=>{toy(h,{...obj, x:obj.x,y:obj.y,a:obj.a,impact:0,big:!!obj.big})});for(let i=0;i<9;i++)drawPetal(h,{x:22+i*36,y:23+i%3*31,rot:i*.7,size:5+i%3,alpha:.64,settled:false});h.restore()}heroDraw();
+function heroDraw(){
+h.save();h.scale(2,2);const g=h.createLinearGradient(0,0,340,208);
+g.addColorStop(0,'#fff5fa');g.addColorStop(.6,'#eecffa');g.addColorStop(1,'#dafff0');
+h.fillStyle=g;h.fillRect(0,0,340,208);
+// All six progressively bigger 3D clay fruits are visible on the title.
+[
+{x:42,y:58,col:0,a:-.06},
+{x:101,y:60,col:1,a:.04},
+{x:168,y:61,col:2,a:-.06},
+{x:258,y:63,col:3,a:.07},
+{x:97,y:149,col:4,a:.04},
+{x:257,y:152,col:5,a:-.06},
+].forEach((o)=>{
+const r=[24,29,36,45,51,62][o.col];
+const s={...o,x:o.x,y:o.y,big:o.col>0,a:o.a,impact:0};
+h._col=o.col;clay(h,o.x,o.y,r,s.big,s.a,0); // sized for composition
+h.save();h.translate(o.x,o.y);h.scale(r/rad(s),r/rad(s));h.translate(-o.x,-o.y);
+fruitCandyDetail(h,s);h.restore();
+});
+for(let i=0;i<10;i++)drawPetal(h,{x:19+i*33,y:18+(i%3)*32,rot:i*.7,size:5+i%3,alpha:.56,settled:false});
+h.restore();
+}heroDraw();
 function weightedFruit(){
 const x=Math.random()*100;
 return x<43?0:x<68?1:x<82?2:x<91?3:x<97?4:5;
@@ -170,7 +232,6 @@ arena.addEventListener('pointerdown',e=>{pointerDown={x:e.clientX,y:e.clientY,dr
 arena.addEventListener('pointermove',e=>{if(pointerDown){target(e);if(Math.hypot(e.clientX-pointerDown.x,e.clientY-pointerDown.y)>12)pointerDown.dragged=true}});
 arena.addEventListener('pointerup',e=>{if(pointerDown&&!pointerDown.dragged)drop();else if(pointerDown&&e.clientY-pointerDown.y>58)drop();pointerDown=null});
 arena.addEventListener('pointercancel',()=>{pointerDown=null});
-document.getElementById('drop').onclick=drop;
 function drop(){if(!playing||!current||!current.held)return;current.held=false;current.vy=Math.max(current.vy,120);current.isMoving=true}
 function collide(a,b){const dx=b.x-a.x,dy=b.y-a.y;let d=Math.hypot(dx,dy);const min=rad(a)+rad(b);if(d>=min)return;const nx=d>.01?dx/d:1,ny=d>.01?dy/d:.08;d=Math.max(.1,d);
 const ia=(R1/rad(a))**2,ib=(R1/rad(b))**2,weight=ia+ib,overlap=Math.max(0,min-d)*.8;
@@ -275,7 +336,7 @@ counter.style.display=countdown?'flex':'none';
 if(countdown&&counter.textContent!==String(countdown)){counter.textContent=String(countdown);counter.style.animation='none';void counter.offsetWidth;counter.style.animation='pulse .45s ease-in-out';}
 if(!countdown)counter.textContent='';
 document.getElementById('message').textContent=(!playing||message.includes('PUF')||message.includes('poduszka')||message.includes('zablok'))?message:'';
-document.getElementById('drop').disabled=!playing||!current||!current.held}
+}
 function loop(ts){if(!last)last=ts;const dt=Math.min(.05,(ts-last)/1000);last=ts;if(playing){accum+=dt;let n=0;while(accum>=1/120&&n<8){simulate(1/120);accum-=1/120;n++}}paint();requestAnimationFrame(loop)}
 requestAnimationFrame(loop);
 document.getElementById('start').onclick=()=>{document.getElementById('home').style.display='none';document.getElementById('gameScreen').style.display='block';reset()};
