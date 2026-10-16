@@ -48,6 +48,25 @@ const W=360,H=465,R1=22,R2=32,mochiRadii=[22,32,43,55,69],
 const mochiNames=['Fioletowy','Czerwony','Brokatowy','Brązowy','Zielony'];
 const hero=document.getElementById('hero'),arena=document.getElementById('arena');
 const h=hero.getContext('2d'),ctx=arena.getContext('2d');
+// The actual generated high-gloss 3D artwork, not Canvas gradients.
+// Tiles: 4 columns × 2 rows; purple, red, orange, brown,
+// green, rainbow, striped candy, glass marble.
+const spriteAtlas = new Image();
+let spriteReady = false;
+fetch('./squishy_sprites_128.b64')
+  .then(response => {
+    if (!response.ok) throw new Error('Sprite atlas: '+response.status);
+    return response.text();
+  })
+  .then(base64 => {
+    spriteAtlas.onload = () => {
+      spriteReady = true;
+      heroDraw();
+    };
+    spriteAtlas.onerror = () => console.warn('Squishy sprite decoding failed');
+    spriteAtlas.src = 'data:image/webp;base64,'+base64.trim();
+  })
+  .catch(error => console.warn('Squishy 3D sprites unavailable', error));
 let speed=1,items=[],puffs=[],current=null,aim=180,points=0,merges=0,accum=0,frame=0,last=0,playing=false,locked=false;
 let nextId=0,roundDrops=0,rainbow=false,message='',heldFor=0,roofFor=0,petals=[],petalClock=0,candyClears=0,marblesReleased=0;
 function hex(hex){return [1,3,5].map(i=>parseInt(hex.slice(i,i+2),16))}
@@ -170,6 +189,28 @@ c.moveTo(-r*1.35,y+r*.61);c.lineTo(r*1.35,y-r*.61);c.stroke()}
 c.restore();
 }
 function toy(c,item,opacity){
+if (spriteReady) {
+  // Image already contains lighting, translucency, glitter, eye highlights,
+  // sculpted pleats and realistic material texture.
+  const index=item.col>=0?item.col:item.col===-1?5:item.col===-2?6:7;
+  const r=item.displayRadius||rad(item);
+  const x=(index%4)*128,y=Math.floor(index/4)*128;
+  const puff=1+(item.impact||0)*.055;
+  const pulse=item.col===-1?1+Math.sin(performance.now()/190)*.07:1;
+  c.save();
+  c.globalAlpha=opacity===undefined?1:opacity;
+  c.translate(item.x,item.y);
+  c.rotate((item.a||0)*.30);
+  c.scale(puff*pulse,(2-puff)*pulse);
+  c.shadowColor='#8159a855';
+  c.shadowBlur=r*.22;
+  c.shadowOffsetY=r*.09;
+  const diameter=r*2.34;
+  c.drawImage(spriteAtlas,x,y,128,128,-diameter/2,-diameter/2-r*.045,
+    diameter,diameter);
+  c.restore();
+  return;
+}
 if(item.col===-1){rainbowToy(c,item,opacity);return}
 if(item.col===-2){candyToy(c,item,opacity);return}
 if(item.col===-3){c.save();c.translate(item.x,item.y);glassBall(c,rad(item),item.id);c.restore();return}
@@ -202,20 +243,31 @@ if(p.y>=H-4-Math.random()*3){p.settled=true;p.y=H-3-Math.random()*5;p.vy=0;p.rot
 petals=petals.filter(p=>p.age<(p.settled?18:28));
 }
 function heroDraw(){
+h.clearRect(0,0,680,416);
 h.save();h.scale(2,2);
-const g=h.createLinearGradient(0,0,340,208);
-g.addColorStop(0,'#fff0fa');g.addColorStop(.5,'#f4ddff');g.addColorStop(1,'#d8fff4');
-h.fillStyle=g;h.fillRect(0,0,340,208);
-for(const o of [
-{x:33,y:129,col:0,r:23},{x:92,y:130,col:1,r:31},
-{x:161,y:128,col:2,r:41},{x:258,y:122,col:3,r:54},
-{x:211,y:55,col:4,r:54}]){
-const item={...o,big:o.col>0,a:0,impact:0};
-h._col=o.col;clay(h,o.x,o.y,o.r,item.big,0,0);
-h.save();h.translate(o.x,o.y);h.scale(o.r/rad(item),o.r/rad(item));
-h.translate(-o.x,-o.y);fruitCandyDetail(h,item);h.restore();
+const gradient=h.createLinearGradient(0,0,340,208);
+gradient.addColorStop(0,'#fff4fa');
+gradient.addColorStop(.52,'#f3e2ff');
+gradient.addColorStop(1,'#defdf6');
+h.fillStyle=gradient;h.fillRect(0,0,340,208);
+// Back-to-front: huge pearl mochi, wrapped brown, orange,
+ // striped red, tiny purple. Every character is from the game atlas.
+const stars=[
+  {x:220,y:83,col:4,displayRadius:66},
+  {x:272,y:158,col:3,displayRadius:47},
+  {x:162,y:158,col:2,displayRadius:43},
+  {x:98,y:151,col:1,displayRadius:33},
+  {x:41,y:161,col:0,displayRadius:26},
+  {x:36,y:65,col:6,displayRadius:23},
+  {x:116,y:49,col:5,displayRadius:30},
+  {x:70,y:57,col:-3,displayRadius:12}
+];
+for(const mochi of stars) {
+  toy(h,{...mochi,big:mochi.col>0,a:0,impact:0,id:2});
 }
-for(let i=0;i<12;i++)drawPetal(h,{x:19+i*29,y:18+i%4*35,rot:i*.71,size:5+i%3,alpha:.60,settled:false});
+for(let i=0;i<11;i++)drawPetal(h,{
+x:16+i*31,y:17+i%4*38,rot:i*.71,size:5+i%3,alpha:.60,settled:false
+});
 h.restore();
 }heroDraw();
 function weightedMochi(){
