@@ -28,7 +28,7 @@ button:active{transform:scale(.96)}.actionRow{display:flex;gap:12px;align-items:
 <h1>☁️ Pastel Blocks</h1>
 <p class="subtitle">Mięciutkie plastelinowe przytulaki. Bez kratek i szalonego wirowania.</p>
 <canvas id="hero" width="680" height="416" aria-label="Pastelowe plastelinowe kamyczki i poduszki"></canvas>
-<div class="legend">🪨 Trzy kamyczki tego samego koloru tworzą większą poduszkę.<br>🧸 Dwie poduszki łączą się w wielką chmurkę. ☁️ PUF! — i zostaje mgiełka.</div>
+<div class="legend">🪨 Trzy kamyczki tego samego koloru tworzą większą poduszkę.<br>🧸 Dwie duże poduszki łączą się w największą chmurkę ☁️, która pęka i zostawia mgiełkę. Rzadko spada od razu duża kulka.</div>
 <strong>Tempo rozgrywki</strong>
 <div class="speed"><button class="active" data-speed="1">×1</button><button data-speed="2">×2</button><button data-speed="4">×4</button></div>
 <button id="start">▶ GRAJ TERAZ</button>
@@ -36,11 +36,11 @@ button:active{transform:scale(.96)}.actionRow{display:flex;gap:12px;align-items:
 </section>
 <section id="gameScreen">
 <div class="hud" id="hud">⏱ 90s　⭐ 0</div>
-<div class="hint">Dotknij i ustaw kamyczek na górze, potem kliknij ZRZUĆ</div>
+<div class="hint">Kliknij planszę, żeby zrzucić kulkę. Przeciągnij, żeby wycelować.</div>
 <canvas id="arena" width="720" height="930" aria-label="Interaktywna gra z miękkimi elementami"></canvas>
 <div id="message">Celuj palcem, zanim zrzucisz kamyczek!</div>
 <div class="actionRow"><button id="drop">⬇ ZRZUĆ</button><button id="restart">↻ OD NOWA</button></div>
-<div class="legend">3 małe tego samego koloru → większa poducha • 2 poduchy → PUF z mgiełką. Wróć do menu, aby zmienić tempo.</div>
+<div class="legend">3 małe kule → duża plastelinka. 2 duże → największa chmurka → PUF i mgła. Rzadko wypada duża od razu. Blokada góry kończy rundę.</div>
 <button id="back" style="background:transparent;box-shadow:none;color:#917ba7;font-size:12px">← WRÓĆ DO MENU</button>
 </section>
 </main>
@@ -52,7 +52,7 @@ const W=360,H=465,R1=25,R2=49,rad=(a)=>a.big?R2:R1;
 const hero=document.getElementById('hero'),arena=document.getElementById('arena');
 const h=hero.getContext('2d'),ctx=arena.getContext('2d');
 let speed=1,items=[],puffs=[],current=null,aim=180,points=0,merges=0,time=90,accum=0,frame=0,last=0,playing=false,locked=false;
-let nextId=0,roundDrops=0,rainbow=false,message='Celuj, a potem zrzucaj!';
+let nextId=0,roundDrops=0,rainbow=false,message='Kliknij planszę, aby zrzucić!',bigDrops=0,lastBigDrop=-100,heldFor=0,roofFor=0;
 function hex(hex){return [1,3,5].map(i=>parseInt(hex.slice(i,i+2),16))}
 function tint(color,f){const rgb=hex(color),r=rgb.map(v=>Math.round(v+(255-v)*f));return 'rgb('+r.join(',')+')'}
 function darken(color,f){const rgb=hex(color),r=rgb.map(v=>Math.round(v*(1-f)));return 'rgb('+r.join(',')+')'}
@@ -76,16 +76,30 @@ c.strokeStyle='#554366';c.lineWidth=r*.085;c.lineCap='round';c.beginPath();c.mov
 function toy(c,item,opacity){c._col=item.col;clay(c,item.x,item.y,rad(item),item.big,item.a||0,item.impact||0,opacity)}
 function heroDraw(){h.save();h.scale(2,2);let g=h.createLinearGradient(0,0,340,208);g.addColorStop(0,'#fffaf7');g.addColorStop(.55,'#f4eafb');g.addColorStop(1,'#e7f9f2');h.fillStyle=g;h.fillRect(0,0,340,208);
 [{x:104,y:147,big:true,col:1,a:-.08},{x:230,y:150,big:true,col:0,a:.07},{x:62,y:61,col:2,a:-.12},{x:173,y:59,col:3,a:.1},{x:280,y:73,col:4,a:.04}].forEach(obj=>{h._col=obj.col;clay(h,obj.x,obj.y,obj.big?55:29,!!obj.big,obj.a,0)});h.restore()}heroDraw();
-function newStone(){if(!playing)return;if(items.some(p=>p.y-rad(p)<48&&!p.isMoving)){playing=false;locked=true;message='Stos dotarł do góry. Spróbuj ponownie!';return}current={id:nextId++,x:aim,y:R1+4,vx:0,vy:0,col:Math.floor(Math.random()*Math.min(5,3+Math.floor(merges/6))),big:false,a:0,spin:0,impact:0,held:true,isMoving:true,cool:.16};items.push(current)}
-function reset(){items=[];puffs=[];aim=180;points=0;merges=0;time=90;accum=0;nextId=0;roundDrops=0;rainbow=false;locked=false;playing=true;message='Przesuń kamyczek palcem, potem ZRZUĆ';newStone()}
+function newStone(){
+if(!playing)return;
+const occupied=items.filter(b=>!b.held);
+const density=occupied.reduce((v,b)=>v+Math.PI*Math.pow(rad(b),2),0)/(W*H);
+if(occupied.some(b=>b.y-rad(b)<68)||density>.51||occupied.length>=30){
+playing=false;locked=true;message='⛔ Plastelinki zablokowały planszę! Wynik: '+points;current=null;return;}
+const big=roundDrops>=5&&bigDrops<2&&roundDrops-lastBigDrop>=7&&Math.random()<.075;
+if(big){bigDrops++;lastBigDrop=roundDrops;}
+const r=big?R2:R1;
+aim=Math.max(r,Math.min(W-r,aim));
+current={id:nextId++,x:aim,y:r+4,vx:0,vy:0,col:Math.floor(Math.random()*Math.min(5,3+Math.floor(merges/6))),big,a:0,spin:0,impact:0,held:true,isMoving:true,cool:.25};
+heldFor=0;items.push(current);
+if(big)message='🎁 RZADKA DUŻA KULKA! Kliknij, żeby ją zrzucić.';
+}
+function reset(){items=[];puffs=[];aim=180;points=0;merges=0;time=90;accum=0;nextId=0;roundDrops=0;rainbow=false;locked=false;bigDrops=0;lastBigDrop=-100;heldFor=0;roofFor=0;playing=true;message='Kliknij planszę, żeby upuścić kulkę';newStone()}
 function toWorld(e){const rect=arena.getBoundingClientRect();return (e.clientX-rect.left)/rect.width*W}
-function target(e){aim=Math.max(R1,Math.min(W-R1,toWorld(e)));if(current&&current.held){current.x=aim;current.vx=0;current.a=0}}
-let startTouchY=null;
-arena.addEventListener('pointerdown',e=>{target(e);startTouchY=e.clientY;arena.setPointerCapture(e.pointerId)});
-arena.addEventListener('pointermove',e=>{if(e.buttons===1)target(e)});
-arena.addEventListener('pointerup',e=>{if(startTouchY!==null&&e.clientY-startTouchY>52)drop();startTouchY=null});
+function target(e){const r=current?rad(current):R1;aim=Math.max(r,Math.min(W-r,toWorld(e)));if(current&&current.held){current.x=aim;current.vx=0;current.a=0}}
+let pointerDown=null;
+arena.addEventListener('pointerdown',e=>{pointerDown={x:e.clientX,y:e.clientY,dragged:false};target(e);arena.setPointerCapture(e.pointerId)});
+arena.addEventListener('pointermove',e=>{if(pointerDown){target(e);if(Math.hypot(e.clientX-pointerDown.x,e.clientY-pointerDown.y)>12)pointerDown.dragged=true}});
+arena.addEventListener('pointerup',e=>{if(pointerDown&&!pointerDown.dragged)drop();else if(pointerDown&&e.clientY-pointerDown.y>58)drop();pointerDown=null});
+arena.addEventListener('pointercancel',()=>{pointerDown=null});
 document.getElementById('drop').onclick=drop;
-function drop(){if(!playing||!current)return;current.held=false;current.vy=Math.max(current.vy,115);current.isMoving=true}
+function drop(){if(!playing||!current||!current.held)return;current.held=false;current.vy=Math.max(current.vy,120);current.isMoving=true}
 function collide(a,b){const dx=b.x-a.x,dy=b.y-a.y;let d=Math.hypot(dx,dy);const min=rad(a)+rad(b);if(d>=min)return;const nx=d>.01?dx/d:1,ny=d>.01?dy/d:.08;d=Math.max(.1,d);
 const ia=a.big?.22:1,ib=b.big?.22:1,weight=ia+ib,overlap=Math.max(0,min-d)*.8;
 a.x-=nx*overlap*ia/weight;a.y-=ny*overlap*ia/weight;b.x+=nx*overlap*ib/weight;b.y+=ny*overlap*ib/weight;
@@ -104,6 +118,10 @@ else{let q={id:nextId++,x:Math.max(R2,Math.min(W-R2,x)),y:Math.max(R2,Math.min(H
 if(wasActive){current=null;roundDrops++;points+=5}return true}}return false}
 function simulate(dt){
 time-=dt;if(time<=0){time=0;playing=false;locked=true;message='Koniec rundy! Wynik: '+points;return}
+if(current&&current.held){heldFor+=dt;if(heldFor>3.6){drop();message='⏳ Automatyczny zrzut — bez czekania w nieskończoność.'}}
+const blocked=items.some(b=>!b.held&&b.y-rad(b)<78);
+roofFor=blocked?roofFor+dt:0;
+if(roofFor>1.0){playing=false;locked=true;message='⛔ Zablokowana góra — KONIEC GRY! Wynik: '+points;return}
 for(const p of puffs)p.age+=dt;puffs=puffs.filter(p=>p.age<1.45);
 for(const b of items){b.cool=Math.max(0,b.cool-dt);b.impact=Math.max(0,b.impact-dt*2.5);
 if(b.held){b.x=aim;b.y=rad(b)+4;b.vx=b.vy=b.spin=b.a=0;continue}
@@ -126,7 +144,7 @@ function paint(){ctx.clearRect(0,0,720,930);ctx.save();ctx.scale(2,2);
 for(const b of items)toy(ctx,b);
 for(const p of puffs)puffDraw(ctx,p);
 ctx.restore();document.getElementById('hud').textContent='⏱ '+Math.ceil(time)+'s　⭐ '+points+'　🧸 '+merges+'　×'+speed;
-document.getElementById('message').textContent=message;document.getElementById('drop').disabled=!playing}
+document.getElementById('message').textContent=message;document.getElementById('drop').disabled=!playing||!current||!current.held}
 function loop(ts){if(!last)last=ts;const dt=Math.min(.05,(ts-last)/1000);last=ts;if(playing){accum+=dt;let n=0;while(accum>=1/120&&n<8){simulate(1/120);accum-=1/120;n++}}paint();requestAnimationFrame(loop)}
 requestAnimationFrame(loop);
 document.querySelectorAll('[data-speed]').forEach(el=>{el.onclick=()=>{speed=Number(el.dataset.speed);document.querySelectorAll('[data-speed]').forEach(a=>a.classList.remove('active'));el.classList.add('active')}});
