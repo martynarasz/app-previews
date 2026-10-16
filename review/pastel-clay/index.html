@@ -330,7 +330,7 @@ if(supported&&Math.abs(b.vy)<70)b.rest=(b.rest||0)+dt;else b.rest=0;if(b.rest>.1
 current=null;roundDrops++;points+=5;
 if(b.col===-1){
   items=[];roofFor=0;points+=250;message='🌈 TĘCZOWY CLEAR!';
-  for(let j=0;j<6;j++)puffs.push({x:50+(j%3)*122,y:190+Math.floor(j/3)*145,col:j%6,age:j*.045});
+  for(let j=0;j<6;j++)puffs.push({x:50+(j%3)*122,y:190+Math.floor(j/3)*145,col:j%palette.length,age:j*.045});
 }else if(b.col===-2){
   const cx=b.x,cy=b.y;items=items.filter(other=>
     other!==b&&((other.col===-1||other.col===-2)||Math.hypot(other.x-cx,other.y-cy)>116+rad(other)*.15));
