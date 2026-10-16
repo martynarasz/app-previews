@@ -42,13 +42,14 @@ button:active{transform:scale(.96)}.actionRow{display:flex;gap:12px;align-items:
 <script>
 (function(){
 'use strict';
-const palette=['#7351c8','#f75164','#a4cf4a','#ffa334','#9b5934','#4ba973'];
-const W=360,H=465,R1=22,R2=30,fruitRadii=[22,30,39,48,59,72],rad=(a)=>a.col<0?R1:fruitRadii[a.col];
-const fruitNames=['Jagoda','Truskawka','Kiwi','Pomarańcza','Kokos','Arbuz'];
+const palette=['#9955e9','#ff5474','#ffa62d','#c67c48','#8ed966'];
+const W=360,H=465,R1=22,R2=32,mochiRadii=[22,32,43,55,69],
+  rad=a=>a.col===-3?11:a.col<0?R1:mochiRadii[a.col];
+const mochiNames=['Fioletowy','Czerwony','Brokatowy','Brązowy','Zielony'];
 const hero=document.getElementById('hero'),arena=document.getElementById('arena');
 const h=hero.getContext('2d'),ctx=arena.getContext('2d');
 let speed=1,items=[],puffs=[],current=null,aim=180,points=0,merges=0,accum=0,frame=0,last=0,playing=false,locked=false;
-let nextId=0,roundDrops=0,rainbow=false,message='',heldFor=0,roofFor=0,petals=[],petalClock=0,candyClears=0;
+let nextId=0,roundDrops=0,rainbow=false,message='',heldFor=0,roofFor=0,petals=[],petalClock=0,candyClears=0,marblesReleased=0;
 function hex(hex){return [1,3,5].map(i=>parseInt(hex.slice(i,i+2),16))}
 function tint(color,f){const rgb=hex(color),r=rgb.map(v=>Math.round(v+(255-v)*f));return 'rgb('+r.join(',')+')'}
 function darken(color,f){const rgb=hex(color),r=rgb.map(v=>Math.round(v*(1-f)));return 'rgb('+r.join(',')+')'}
@@ -204,27 +205,27 @@ fruitCandyDetail(h,s);h.restore();
 for(let i=0;i<10;i++)drawPetal(h,{x:19+i*33,y:18+(i%3)*32,rot:i*.7,size:5+i%3,alpha:.56,settled:false});
 h.restore();
 }heroDraw();
-function weightedFruit(){
-const x=Math.random()*100;
-return x<43?0:x<68?1:x<82?2:x<91?3:x<97?4:5;
+function weightedMochi(){
+const v=Math.random()*100;
+return v<54?0:v<84?1:v<94?2:v<98?3:4;
 }
 function newStone(){
 if(!playing)return;
-const occupied=items.filter(b=>!b.held);
-const density=occupied.reduce((v,b)=>v+Math.PI*rad(b)**2,0)/(W*H);
-if(occupied.some(b=>b.y-rad(b)<78)||density>.65||occupied.length>=30){
-playing=false;locked=true;message='⛔ KONIEC GRY! '+points+' punktów';current=null;return;}
-const rareRainbow=!rainbow&&roundDrops>=25&&Math.random()<1/240;
-if(rareRainbow)rainbow=true;
-const specialCandy=!rareRainbow&&roundDrops>=4&&Math.random()<1/26;
-const col=rareRainbow?-1:specialCandy?-2:weightedFruit();
-const r=col<0?R1:fruitRadii[col];
-aim=Math.max(r,Math.min(W-r,aim));
-current={id:nextId++,x:aim,y:r+4,vx:0,vy:0,col,big:col>=1,a:0,spin:0,impact:0,held:true,isMoving:true,cool:.25};
-heldFor=0;items.push(current);
-message='';
+const density=items.filter(b=>!b.held)
+  .reduce((v,b)=>v+Math.PI*rad(b)**2,0)/(W*H);
+if(items.some(b=>!b.held&&b.y-rad(b)<78)||density>.68||items.length>=30){
+  playing=false;locked=true;message='⛔ GAME OVER! '+points+' punktów';current=null;return;
 }
-function reset(){items=[];puffs=[];petals=[];petalClock=0;aim=180;points=0;merges=0;accum=0;nextId=0;roundDrops=0;rainbow=false;locked=false;candyClears=0;heldFor=0;roofFor=0;playing=true;message='';newStone()}
+const rain=!rainbow&&roundDrops>=25&&Math.random()<1/240;
+if(rain)rainbow=true;
+const candy=!rain&&roundDrops>=4&&Math.random()<1/26;
+const col=rain?-1:candy?-2:weightedMochi();
+const r=col<0?R1:mochiRadii[col];
+aim=Math.max(r,Math.min(W-r,aim));
+current={id:nextId++,x:aim,y:r+4,vx:0,vy:0,col,big:col>=1,a:0,spin:0,impact:0,held:true,isMoving:true,cool:.24};
+heldFor=0;items.push(current);message='';
+}
+function reset(){items=[];puffs=[];petals=[];petalClock=0;aim=180;points=0;merges=0;accum=0;nextId=0;roundDrops=0;rainbow=false;locked=false;candyClears=0;marblesReleased=0;heldFor=0;roofFor=0;playing=true;message='';newStone()}
 function toWorld(e){const rect=arena.getBoundingClientRect();return (e.clientX-rect.left)/rect.width*W}
 function target(e){const r=current?rad(current):R1;aim=Math.max(r,Math.min(W-r,toWorld(e)));if(current&&current.held){current.x=aim;current.vx=0;current.a=0}}
 let pointerDown=null;
@@ -243,44 +244,52 @@ if(b.y>H-r){b.y=H-r;if(b.vy>75){b.impact=Math.min(.45,b.vy/1100);b.vy*= -.08}els
 if(b.y<r){b.y=r;b.vy=Math.max(0,b.vy)}}
 function touching(a,b){return Math.hypot(a.x-b.x,a.y-b.y)<=rad(a)+rad(b)+3}
 function merge(){
-for(let fruit=5;fruit>=0;fruit--){
+for(let tier=4;tier>=0;tier--){
  const visited=new Set();
  for(const seed of items){
-  if(seed.col!==fruit||seed.cool>0||seed.held||visited.has(seed.id))continue;
+  if(seed.col!==tier||seed.cool>0||seed.held||visited.has(seed.id))continue;
   const group=[seed];visited.add(seed.id);
-  for(let i=0;i<group.length;i++){
-   for(const other of items){
-    if(other.col===fruit&&other.cool<=0&&!other.held&&!visited.has(other.id)&&touching(group[i],other)){
-     visited.add(other.id);group.push(other);
+  for(let j=0;j<group.length;j++){
+    for(const other of items){
+      if(other.col===tier&&other.cool<=0&&!other.held&&
+        !visited.has(other.id)&&touching(group[j],other)){
+        visited.add(other.id);group.push(other);
+      }
     }
-   }
   }
-  const needed=fruit===0?3:2;
+  const needed=tier===0?3:2;
   if(group.length<needed)continue;
-  const matching=group.slice(0,needed);
-  const x=matching.reduce((v,b)=>v+b.x,0)/needed;
-  const y=matching.reduce((v,b)=>v+b.y,0)/needed;
-  const wasActive=matching.includes(current);
-  items=items.filter(q=>!matching.includes(q));
-  merges++;
-  points+=fruit===5?900:(fruit+1)*90;
-  if(fruit===5){
-    puffs.push({x:Math.max(99,Math.min(W-99,x)),y:Math.max(99,Math.min(H-99,y)),col:5,age:0});
-    message='🍉 PUFF!';
+  const found=group.slice(0,needed),
+    x=found.reduce((v,b)=>v+b.x,0)/needed,
+    y=found.reduce((v,b)=>v+b.y,0)/needed;
+  const wasActive=found.includes(current);
+  items=items.filter(q=>!found.includes(q));
+  merges++;points+=tier===4?950:(tier+2)*90;
+  if(tier===4){
+    // A giant green POP clears every object, but glass marbles spill out.
+    items=[];current=null;roofFor=0;
+    puffs.push({x:Math.max(85,Math.min(W-85,x)),
+       y:Math.max(85,Math.min(H-85,y)),col:4,age:0});
+    for(let j=0;j<8;j++){
+      const a=2*Math.PI*j/8;
+      items.push({id:nextId++,col:-3,x:Math.max(12,Math.min(W-12,x+Math.cos(a)*21)),
+        y:Math.max(12,Math.min(H-12,y+Math.sin(a)*19)),
+        vx:Math.cos(a)*110,vy:-45+Math.sin(a)*35,
+        spin:0,a:0,impact:0,cool:.6,held:false});
+    }
+    marblesReleased+=8;
+    message='🟢 PUF! Szklane kuleczki!';
   }else{
-    const nextFruit=fruit+1, rr=fruitRadii[nextFruit];
-    const merged={
-      id:nextId++,x:Math.max(rr,Math.min(W-rr,x)),
-      y:Math.max(rr,Math.min(H-rr,y)),vx:0,vy:0,
-      col:nextFruit,big:true,a:0,spin:0,impact:.45,cool:.31
-    };
-    items.push(merged);
-    // Push touching neighbours instead of teleporting or deleting them.
+    const col=tier+1,r=mochiRadii[col];
+    const bigger={id:nextId++,x:Math.max(r,Math.min(W-r,x)),
+      y:Math.max(r,Math.min(H-r,y)),vx:0,vy:0,col,big:true,
+      a:0,spin:0,impact:.5,cool:.33,held:false};
+    items.push(bigger);
     for(let k=0;k<8;k++){
-      for(const other of items)if(other!==merged&&!other.held)collide(merged,other);
+      for(const other of items)if(other!==bigger&&!other.held)collide(bigger,other);
       items.forEach(v=>{if(!v.held)bounds(v)});
     }
-    message='✨ '+fruitNames[nextFruit]+'!';
+    message='✨ '+mochiNames[col]+'!';
   }
   if(wasActive){current=null;roundDrops++;points+=5}
   return true;
@@ -311,11 +320,11 @@ if(b.col===-1){
   for(let j=0;j<6;j++)puffs.push({x:50+(j%3)*122,y:190+Math.floor(j/3)*145,col:j%6,age:j*.045});
 }else if(b.col===-2){
   const cx=b.x,cy=b.y;items=items.filter(other=>
-    other!==b&&(other.col<0||Math.hypot(other.x-cx,other.y-cy)>116+rad(other)*.15));
+    other!==b&&((other.col===-1||other.col===-2)||Math.hypot(other.x-cx,other.y-cy)>116+rad(other)*.15));
   candyClears++;
   roofFor=0;points+=120;
   puffs.push({x:cx,y:cy,col:1,age:0});
-  message='🍬 SWEET POP!';
+  message='🍬 CUKIERKOWE PUF!';
 }
 newStone()}}
 if(!current&&playing)newStone()
@@ -329,7 +338,7 @@ for(const p of petals.filter(p=>p.settled))drawPetal(ctx,p);
 for(const b of items)toy(ctx,b);
 for(const p of puffs)puffDraw(ctx,p);
 for(const p of petals.filter(p=>!p.settled))drawPetal(ctx,p);
-ctx.restore();document.getElementById('hud').textContent='⭐ '+points+'　🍉 '+merges;
+ctx.restore();document.getElementById('hud').textContent='⭐ '+points+'　🍡 '+merges;
 const counter=document.getElementById('countdown');
 const countdown=playing&&current&&current.held&&heldFor>=2?Math.max(1,3-Math.floor(heldFor-2)):0;
 counter.style.display=countdown?'flex':'none';
