@@ -138,8 +138,11 @@ function drawQueue(){const canvas=document.getElementById('nextCanvas'),c=canvas
  c.save();c.scale(3,3);queue.slice(0,3).forEach((k,i)=>sprite(c,k,38+66*i,28,20));c.restore()}
 
 const finalAtlas=new Image();let finalAtlasReady=false;
-finalAtlas.onload=()=>{finalAtlasReady=true;refreshViews()};
-finalAtlas.src='assets/squishy-assets-v5.webp';
+finalAtlas.onload=()=>{finalAtlasReady=true;refreshViews();if(queue.length)drawQueue()};
+// Cleaned individual sprite silhouettes, with a local fallback if loading is blocked.
+fetch('assets/squishy-atlas-clean.b64').then(r=>{if(!r.ok)throw new Error('Atlas fetch failed');return r.text()})
+ .then(data=>{finalAtlas.src='data:image/webp;base64,'+data.trim()})
+ .catch(()=>{finalAtlas.src='assets/squishy-assets-v5.webp'});
 const homeArt=new Image();let homeReady=false;
 homeArt.onload=()=>{homeReady=true;drawHome()};
 homeArt.src='assets/squishy-home-v5.webp';
@@ -198,38 +201,31 @@ function special(c,kind,r){
  else{const g=c.createRadialGradient(-r*.4,-r*.4,1,0,0,r);g.addColorStop(0,'#fff');g.addColorStop(1,'#a5d7ec77');c.fillStyle=g;c.beginPath();c.arc(0,0,r*.9,0,7);c.fill();}
 }
 
+
 function livingFace(c,kind,radius,b){
- // Facial animation shares the transformed coordinate system of the art:
- // eyes never float away when mochi rolls, bounces or merges.
- const id=b?.id??kind;
- const t=paintTime+id*.49;
- const eyeCycle=3.9+(id%5)*.28, eyePhase=t%eyeCycle;
- const mouthCycle=5.1+(id%4)*.27, mouthPhase=t%mouthCycle;
- const tone=kind===5?(skins[b?.skin??selected]?.[1]||'#d1edbe'):pastel[kind];
- // Brief blink: paint matching lids over the original eyes, then add a curved
- // closed-eye stroke in exactly the same space; no permanent extra eyes.
- if(eyePhase<.17){
-  const p=Math.sin(Math.PI*eyePhase/.17),ey=radius*.315,ex=radius*.345;
-  for(const sign of [-1,1]){
-   c.save();c.globalAlpha=.90*p;c.fillStyle=tone;
-   c.beginPath();c.ellipse(sign*ex,ey,radius*.18,radius*.155,0,0,Math.PI*2);c.fill();
-   c.globalAlpha=p;c.strokeStyle='#52354f';c.lineWidth=Math.max(.9,radius*.05);c.lineCap='round';
-   c.beginPath();c.moveTo(sign*ex-radius*.105,ey);
-   c.quadraticCurveTo(sign*ex,ey+radius*.065,sign*ex+radius*.105,ey);c.stroke();
-   c.restore();
-  }
+ // The original eyes and mouth already belong to the illustration.
+ // Animate only tiny highlights INSIDE them: no extra displaced eye or mouth.
+ const id=b.id||0,t=paintTime+id*.57;
+ const blinking=(t%(4.1+(id%4)*.42))<.15;
+ const anchors={
+  0:[], 1:[[-.31,.25]],2:[[-.30,.24],[.29,.24]],3:[],
+  4:[[-.28,.22],[.29,.22]],5:[[-.29,.23],[.29,.23]]
+ };
+ const eyes=anchors[kind]||[];
+ c.save();
+ // Narrow pearly glints shift on existing eyes, never painting new pupils.
+ for(const [ex,ey] of eyes){
+  c.fillStyle='rgba(255,255,255,.72)';
+  c.beginPath();
+  c.ellipse((ex-.055+Math.sin(t*.9)*.015)*radius,(ey-.09)*radius,
+    radius*.022,radius*.033,0,0,Math.PI*2);c.fill();
  }
- // Short change of smile expression every few seconds. It replaces the
- // printed mouth during the change rather than drawing a second mouth.
- if(mouthPhase<.18){
-  const p=Math.sin(Math.PI*mouthPhase/.18);
-  c.save();c.globalAlpha=.94*p;c.fillStyle=tone;
-  c.beginPath();c.ellipse(0,radius*.46,radius*.23,radius*.20,0,0,Math.PI*2);c.fill();
-  c.globalAlpha=p;c.strokeStyle='#874558';c.lineWidth=Math.max(1,radius*.046);c.lineCap='round';
-  c.beginPath();c.moveTo(-radius*.11,radius*.47);
-  c.quadraticCurveTo(0,radius*.58,radius*.11,radius*.47);c.stroke();
-  c.restore();
+ // A micro glint within the already-printed mouth reads as a lively smile.
+ if((kind!==3)&&!blinking){
+  c.fillStyle='rgba(255,205,220,.28)';
+  c.beginPath();c.ellipse(0,radius*.48,radius*.070,radius*.014,0,0,Math.PI*2);c.fill();
  }
+ c.restore();
 }
 function sprite(c,kind,x,y,radius,angle=0,impact=0,opacity=1,b=null){
  c.save();c.translate(x,y+(b?.held?Math.sin(paintTime*3+b.id)*.8:0));c.rotate(angle);
