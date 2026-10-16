@@ -38,7 +38,7 @@ button:active{transform:scale(.98)}#play{display:block;width:92px;height:92px;pa
 #nextRow span{font-size:12px;font-weight:900;color:#9982a6}
 #nextCanvas{width:200px;height:55px}
 
-.pepperCoin{display:inline-block;flex-shrink:0;width:26px;height:26px;vertical-align:middle;background-image:url("assets/squishy-assets.webp");background-repeat:no-repeat;background-size:500% 200%;background-position:100% 100%;filter:drop-shadow(0 2px 2px #d86a8b5c)}
+.pepperCoin{display:inline-block;flex-shrink:0;width:26px;height:26px;vertical-align:middle;background-image:url("assets/squishy-assets-v5.webp");background-repeat:no-repeat;background-size:500% 300%;background-position:100% 100%;filter:drop-shadow(0 2px 2px #d86a8b5c)}
 #status .pepperCoin{width:22px;height:22px}
 .wallet{gap:7px;font-size:17px;padding:8px 13px}
 .skinGrid{gap:9px;margin:12px auto}
@@ -65,13 +65,31 @@ main{position:relative;z-index:1}
 .menuBtns button{flex:1;width:auto;max-width:177px;min-width:0;height:78px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:14px;font-weight:900;padding:8px 10px}
 .menuBtns button span:first-child{font-size:27px;line-height:1.05}
 .menuBtns button span:last-child{font-size:13px;letter-spacing:.1px;line-height:1.2}
+
+/* Final pastel sakura interface, responsive and without duplicated text. */
+body{background:linear-gradient(165deg,#fff2fb 0%,#f8efff 43%,#e7f9ef 100%)}
+body:before{background-image:url("assets/squishy-home-v5.webp");opacity:.19;filter:blur(23px)}
+main{max-width:440px;padding:12px 12px 28px}
+#home{padding-top:7px}
+#hero{border-radius:30px;border:4px solid rgba(255,255,255,.95);box-shadow:0 15px 31px #ce93b83d}
+.menuBtns{gap:16px;max-width:395px}
+.menuBtns button{width:50%;max-width:170px;height:auto;min-height:125px;gap:2px;
+ padding:7px 10px 9px;background:linear-gradient(155deg,#fff8f6,#ffe9f3);
+ border:3px solid #fff;border-radius:27px;box-shadow:0 8px 22px #c68ba839;
+ color:#8e5c8a;font-size:14px}
+.menuBtns button .menuIcon{width:88px;height:88px;object-fit:contain;filter:drop-shadow(0 4px 5px #d2a2bc3b)}
+.menuBtns button span:last-child{font-size:15px;font-weight:900;line-height:1.15}
+#play{border-color:#fff8f4;box-shadow:0 8px 23px #8fccaa8a}
+#board{background:linear-gradient(155deg,#fffafa,#f3ecff 55%,#e5fff2)}
+#nextRow{border-radius:20px;background:#fff7f9bb;margin:3px 8px 11px;padding:4px;box-shadow:0 3px 10px #ae86ad1a}
+.skinCard{border-radius:22px}
 </style></head><body><main>
 
 <section id="home">
 <div class="topbar"><span class="wallet" id="walletMenu"><span class="pepperCoin"></span><span class="walletAmount">0</span></span></div>
 <canvas id="hero" width="780" height="780"></canvas>
 <button id="play" aria-label="Graj">▶</button>
-<div class="menuBtns"><button id="openCollection" aria-label="Kolekcja"><span aria-hidden="true">🌸</span><span>Kolekcja</span></button><button id="openShop" aria-label="Sklep"><span aria-hidden="true">🏪</span><span>Sklep</span></button></div>
+<div class="menuBtns"><button id="openCollection" aria-label="Kolekcja"><img class="menuIcon" src="assets/collection-v5.webp" alt=""><span>Kolekcja</span></button><button id="openShop" aria-label="Sklep"><img class="menuIcon" src="assets/shop-v5.webp" alt=""><span>Sklep</span></button></div>
 </section>
 <section id="game"><div id="status">⭐ 0　<span class="pepperCoin"></span> <span id="inGameCoins">0</span></div><div id="nextRow"><span>NASTĘPNE</span><canvas id="nextCanvas" width="600" height="165"></canvas></div>
 <div id="boardWrap"><canvas id="board" width="1080" height="1395"></canvas><div id="count"></div></div>
@@ -121,12 +139,12 @@ function drawQueue(){const canvas=document.getElementById('nextCanvas'),c=canvas
 
 const finalAtlas=new Image();let finalAtlasReady=false;
 finalAtlas.onload=()=>{finalAtlasReady=true;refreshViews()};
-finalAtlas.src='assets/squishy-assets.webp';
+finalAtlas.src='assets/squishy-assets-v5.webp';
 const homeArt=new Image();let homeReady=false;
 homeArt.onload=()=>{homeReady=true;drawHome()};
-homeArt.src='assets/squishy-home.webp';
+homeArt.src='assets/squishy-home-v5.webp';
 // Core game tiers use real cutouts from the same polished atlas as the shop.
-const GAME_ASSETS=[3,1,0,2,5];
+const GAME_ASSETS=[0,1,2,3,4];
 const R=[21,31,42,53,67,73],W=360,H=465,gravity=520,cap=345;const kindSprite={0:0,1:1,2:2,3:3,4:4,'-1':5,'-2':6,'-3':7};
 const cvs=document.querySelector('#board'),hero=document.querySelector('#hero'),ctx=cvs.getContext('2d'),hc=hero.getContext('2d');
 const status=document.querySelector('#status'),feedback=document.querySelector('#feedback'),count=document.querySelector('#count');
@@ -134,7 +152,7 @@ let bodies=[],puffs=[],petals=[],fusions=[],active=null,points=0,merges=0,pops=0
 const r=b=>b.kind===-3?11:b.kind<0?21:(R[b.kind]||73);
 function asset(c,index,x,y,size){
  if(!finalAtlasReady)return false;
- const cell=144,col=index%5,row=Math.floor(index/5);
+ const cell=192,col=index%5,row=Math.floor(index/5);
  c.drawImage(finalAtlas,col*cell,row*cell,cell,cell,x-size/2,y-size/2,size,size);
  return true;
 }
@@ -179,19 +197,54 @@ function special(c,kind,r){
  else if(kind===-1){let g=c.createConicGradient(paintTime,0,0);['#f3b1dc','#fff0a9','#b4f1d2','#b9d2ff','#d6bfff','#f3b1dc'].forEach((color,i)=>g.addColorStop(i/5,color));c.fillStyle=g;c.beginPath();c.arc(0,0,r*.9,0,7);c.fill();face(c,r,{id:3})}
  else{const g=c.createRadialGradient(-r*.4,-r*.4,1,0,0,r);g.addColorStop(0,'#fff');g.addColorStop(1,'#a5d7ec77');c.fillStyle=g;c.beginPath();c.arc(0,0,r*.9,0,7);c.fill();}
 }
+
+function livingFace(c,kind,radius,b){
+ // Facial animation shares the transformed coordinate system of the art:
+ // eyes never float away when mochi rolls, bounces or merges.
+ const id=b?.id??kind;
+ const t=paintTime+id*.49;
+ const eyeCycle=3.9+(id%5)*.28, eyePhase=t%eyeCycle;
+ const mouthCycle=5.1+(id%4)*.27, mouthPhase=t%mouthCycle;
+ const tone=kind===5?(skins[b?.skin??selected]?.[1]||'#d1edbe'):pastel[kind];
+ // Brief blink: paint matching lids over the original eyes, then add a curved
+ // closed-eye stroke in exactly the same space; no permanent extra eyes.
+ if(eyePhase<.17){
+  const p=Math.sin(Math.PI*eyePhase/.17),ey=radius*.315,ex=radius*.345;
+  for(const sign of [-1,1]){
+   c.save();c.globalAlpha=.90*p;c.fillStyle=tone;
+   c.beginPath();c.ellipse(sign*ex,ey,radius*.18,radius*.155,0,0,Math.PI*2);c.fill();
+   c.globalAlpha=p;c.strokeStyle='#52354f';c.lineWidth=Math.max(.9,radius*.05);c.lineCap='round';
+   c.beginPath();c.moveTo(sign*ex-radius*.105,ey);
+   c.quadraticCurveTo(sign*ex,ey+radius*.065,sign*ex+radius*.105,ey);c.stroke();
+   c.restore();
+  }
+ }
+ // Short change of smile expression every few seconds. It replaces the
+ // printed mouth during the change rather than drawing a second mouth.
+ if(mouthPhase<.18){
+  const p=Math.sin(Math.PI*mouthPhase/.18);
+  c.save();c.globalAlpha=.94*p;c.fillStyle=tone;
+  c.beginPath();c.ellipse(0,radius*.46,radius*.23,radius*.20,0,0,Math.PI*2);c.fill();
+  c.globalAlpha=p;c.strokeStyle='#874558';c.lineWidth=Math.max(1,radius*.046);c.lineCap='round';
+  c.beginPath();c.moveTo(-radius*.11,radius*.47);
+  c.quadraticCurveTo(0,radius*.58,radius*.11,radius*.47);c.stroke();
+  c.restore();
+ }
+}
 function sprite(c,kind,x,y,radius,angle=0,impact=0,opacity=1,b=null){
  c.save();c.translate(x,y+(b?.held?Math.sin(paintTime*3+b.id)*.8:0));c.rotate(angle);
- const w=b?.squish||0,m=b?.morph||0,scale=1-m*.28+Math.sin((1-m)*Math.PI)*m*.10;
+ const w=b?.squish||0,m=b?.morph||0;const breath=b?.held?Math.sin(paintTime*2+(b?.id||0))*.014:Math.sin(paintTime*1.8+(b?.id||0))*.007;const scale=1-m*.28+Math.sin((1-m)*Math.PI)*m*.10+breath;
  c.scale(scale*(1+w*.17+impact*.06),scale*(1-w*.12-impact*.10));c.globalAlpha=opacity;
  c.shadowColor='#7055814f';c.shadowBlur=radius*.22;c.shadowOffsetY=radius*.12;
- if(kind===-2){if(!asset(c,9,0,0,radius*2.20))special(c,kind,radius);c.restore();return;}
+ if(kind===-2){if(!asset(c,14,0,0,radius*2.20))special(c,kind,radius);c.restore();return;}
  if(kind<0){special(c,kind,radius);c.restore();return;}
  // Every mochi on the board, including the small/medium stages, uses the real
  // transparent 3D assets. The same artwork is used in the upcoming-piece tray.
  const spriteIndex=kind===5
-  ?(Number.isInteger(b?.skin)&&b.skin>=0&&b.skin<9?b.skin:0)
+  ?(Number.isInteger(b?.skin)&&b.skin>=0&&b.skin<9?b.skin+5:5)
   :GAME_ASSETS[kind];
  if(spriteIndex!==undefined&&asset(c,spriteIndex,0,0,radius*2.34)){
+  if(b)livingFace(c,kind,radius,b);
   c.restore();return;
  }
  const base=kind===5?(skins[b?.skin??selected]?.[1]||'#b7e8a5'):pastel[kind];
@@ -414,7 +467,7 @@ function renderCards(where){
    else if(shop&&coins>=50){coins-=50;unlocked.push(i);selected=i;save();refreshViews()}};
   card.appendChild(button);root.appendChild(card);
   const c=picture.getContext('2d');c.clearRect(0,0,240,240);
-  if(finalAtlasReady){asset(c,i,120,124,223)}else sprite(c,5,120,130,77,0,0,1,{id:i+16,skin:i});
+  if(finalAtlasReady){asset(c,i+5,120,124,223)}else sprite(c,5,120,130,77,0,0,1,{id:i+16,skin:i});
  });
 }
 function refreshViews(){refreshWallet();drawHome();renderCards('shop');renderCards('collection')}
