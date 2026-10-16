@@ -15,32 +15,27 @@ small,.subtitle{color:#9784ad} .subtitle{font-size:13px;margin:5px 0 13px}
 button{font-family:inherit;cursor:pointer;border:0;border-radius:19px;padding:15px 19px;font-size:16px;font-weight:850;transition:transform .1s;background:#9d86d8;color:white;box-shadow:0 6px 14px #9d86d843}
 button:active{transform:scale(.96)}.actionRow{display:flex;gap:12px;align-items:center;justify-content:center;margin-top:13px}.actionRow button{flex:1}
 #start{width:95%;max-width:330px;background:#8dceb9}#restart{background:#eadbf7;color:#685385;box-shadow:none}
-.speed{display:flex;gap:8px;max-width:340px;margin:12px auto 18px}.speed button{flex:1;background:#fff;color:#8169a7;border:1px solid #e1d2f0;box-shadow:none}
-.speed button.active{background:#cfbaf0;border:2px solid #a58bce}
 #message{font-weight:750;color:#9c70a9;font-size:13px;min-height:33px;margin:10px 0 4px}
 .legend{font-size:12px;line-height:1.6;color:#8c79a6;margin:13px auto;max-width:420px}
-.note{background:#ffffffa9;border:1px solid #e6d9ed;border-radius:12px;padding:10px;font-size:11px;color:#8e79a1}
+#arenaWrap{position:relative}
+#countdown{position:absolute;inset:0;display:none;align-items:flex-start;justify-content:center;padding-top:42px;font-size:clamp(64px,18vw,108px);font-weight:1000;color:#9273c6;pointer-events:none;text-shadow:0 5px 0 #ffffffaa,0 8px 25px #9a73b8a1;animation:pulse .45s ease-in-out}
+@keyframes pulse{0%{transform:scale(.75);opacity:.45}65%{transform:scale(1.15);opacity:1}100%{transform:scale(1)}}
+#message:empty{display:none}
+
 </style>
 </head>
 <body>
 <main>
 <section id="home">
 <h1>☁️ Pastel Blocks</h1>
-<p class="subtitle">Mięciutkie plastelinowe przytulaki. Bez kratek i szalonego wirowania.</p>
 <canvas id="hero" width="680" height="416" aria-label="Pastelowe plastelinowe kamyczki i poduszki"></canvas>
-<div class="legend">🪨 Trzy kamyczki tego samego koloru tworzą większą poduszkę.<br>🧸 Dwie duże poduszki łączą się w największą chmurkę ☁️, która pęka i zostawia mgiełkę. Rzadko spada od razu duża kulka.</div>
-<strong>Tempo rozgrywki</strong>
-<div class="speed"><button class="active" data-speed="1">×1</button><button data-speed="2">×2</button><button data-speed="4">×4</button></div>
-<button id="start">▶ GRAJ TERAZ</button>
-<p class="note">Interaktywny prototyp przeglądarkowy do oceny wyglądu i sterowania. Nie jest to jeszcze skompilowany build Flutter/Android. Nie uruchamia pipeline'u Androida.</p>
+<button id="start">▶ GRAJ</button>
 </section>
 <section id="gameScreen">
 <div class="hud" id="hud">⏱ 90s　⭐ 0</div>
-<div class="hint">Kliknij planszę, żeby zrzucić kulkę. Przeciągnij, żeby wycelować.</div>
-<canvas id="arena" width="720" height="930" aria-label="Interaktywna gra z miękkimi elementami"></canvas>
-<div id="message">Celuj palcem, zanim zrzucisz kamyczek!</div>
+<div id="arenaWrap"><canvas id="arena" width="720" height="930" aria-label="Interaktywna gra z miękkimi elementami"></canvas><div id="countdown" aria-live="off"></div></div>
+<div id="message"></div>
 <div class="actionRow"><button id="drop">⬇ ZRZUĆ</button><button id="restart">↻ OD NOWA</button></div>
-<div class="legend">3 małe kule → duża plastelinka. 2 duże → największa chmurka → PUF i mgła. Rzadko wypada duża od razu. Blokada góry kończy rundę.</div>
 <button id="back" style="background:transparent;box-shadow:none;color:#917ba7;font-size:12px">← WRÓĆ DO MENU</button>
 </section>
 </main>
@@ -88,9 +83,9 @@ const r=big?R2:R1;
 aim=Math.max(r,Math.min(W-r,aim));
 current={id:nextId++,x:aim,y:r+4,vx:0,vy:0,col:Math.floor(Math.random()*Math.min(5,3+Math.floor(merges/6))),big,a:0,spin:0,impact:0,held:true,isMoving:true,cool:.25};
 heldFor=0;items.push(current);
-if(big)message='🎁 RZADKA DUŻA KULKA! Kliknij, żeby ją zrzucić.';
+if(big)message='';
 }
-function reset(){items=[];puffs=[];aim=180;points=0;merges=0;time=90;accum=0;nextId=0;roundDrops=0;rainbow=false;locked=false;bigDrops=0;lastBigDrop=-100;heldFor=0;roofFor=0;playing=true;message='Kliknij planszę, żeby upuścić kulkę';newStone()}
+function reset(){items=[];puffs=[];aim=180;points=0;merges=0;time=90;accum=0;nextId=0;roundDrops=0;rainbow=false;locked=false;bigDrops=0;lastBigDrop=-100;heldFor=0;roofFor=0;playing=true;message='';newStone()}
 function toWorld(e){const rect=arena.getBoundingClientRect();return (e.clientX-rect.left)/rect.width*W}
 function target(e){const r=current?rad(current):R1;aim=Math.max(r,Math.min(W-r,toWorld(e)));if(current&&current.held){current.x=aim;current.vx=0;current.a=0}}
 let pointerDown=null;
@@ -113,12 +108,12 @@ function merge(){for(let tier of [true,false]){let used=new Set();for(const s of
 for(let j=0;j<group.length;j++){for(const n of items){if(!used.has(n.id)&&n.big===tier&&n.col===s.col&&n.cool<=0&&!n.held&&touching(group[j],n)){used.add(n.id);group.push(n)}}}
 const needed=tier?2:3;if(group.length<needed)continue;let selected=group.slice(0,needed);let x=selected.reduce((v,b)=>v+b.x,0)/needed,y=selected.reduce((v,b)=>v+b.y,0)/needed;
 let wasActive=selected.includes(current);items=items.filter(q=>!selected.includes(q));merges++;points+=tier?600:225;
-if(tier){puffs.push({x,y,col:s.col,age:0});message='☁️ PUF! Dwie poduchy połączyły się!';}
-else{let q={id:nextId++,x:Math.max(R2,Math.min(W-R2,x)),y:Math.max(R2,Math.min(H-R2,y)),vx:0,vy:0,col:s.col,big:true,a:0,spin:0,impact:.42,cool:.24};items.push(q);message='🧸 Trzy kamyczki → puchata poduszka!'}
+if(tier){puffs.push({x,y,col:s.col,age:0});message='☁️ PUF!';}
+else{let q={id:nextId++,x:Math.max(R2,Math.min(W-R2,x)),y:Math.max(R2,Math.min(H-R2,y)),vx:0,vy:0,col:s.col,big:true,a:0,spin:0,impact:.42,cool:.24};items.push(q);message=''}
 if(wasActive){current=null;roundDrops++;points+=5}return true}}return false}
 function simulate(dt){
 time-=dt;if(time<=0){time=0;playing=false;locked=true;message='Koniec rundy! Wynik: '+points;return}
-if(current&&current.held){heldFor+=dt;if(heldFor>3.6){drop();message='⏳ Automatyczny zrzut — bez czekania w nieskończoność.'}}
+if(current&&current.held){heldFor+=dt;if(heldFor>=5){drop();message=''}}
 const blocked=items.some(b=>!b.held&&b.y-rad(b)<78);
 roofFor=blocked?roofFor+dt:0;
 if(roofFor>1.0){playing=false;locked=true;message='⛔ Zablokowana góra — KONIEC GRY! Wynik: '+points;return}
@@ -143,11 +138,16 @@ const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba(255,255,255,'
 function paint(){ctx.clearRect(0,0,720,930);ctx.save();ctx.scale(2,2);
 for(const b of items)toy(ctx,b);
 for(const p of puffs)puffDraw(ctx,p);
-ctx.restore();document.getElementById('hud').textContent='⏱ '+Math.ceil(time)+'s　⭐ '+points+'　🧸 '+merges+'　×'+speed;
-document.getElementById('message').textContent=message;document.getElementById('drop').disabled=!playing||!current||!current.held}
+ctx.restore();document.getElementById('hud').textContent='⏱ '+Math.ceil(time)+'s　⭐ '+points+'　🧸 '+merges;
+const counter=document.getElementById('countdown');
+const countdown=playing&&current&&current.held&&heldFor>=2?Math.max(1,3-Math.floor(heldFor-2)):0;
+counter.style.display=countdown?'flex':'none';
+if(countdown&&counter.textContent!==String(countdown)){counter.textContent=String(countdown);counter.style.animation='none';void counter.offsetWidth;counter.style.animation='pulse .45s ease-in-out';}
+if(!countdown)counter.textContent='';
+document.getElementById('message').textContent=(!playing||message.includes('PUF')||message.includes('poduszka')||message.includes('zablok'))?message:'';
+document.getElementById('drop').disabled=!playing||!current||!current.held}
 function loop(ts){if(!last)last=ts;const dt=Math.min(.05,(ts-last)/1000);last=ts;if(playing){accum+=dt;let n=0;while(accum>=1/120&&n<8){simulate(1/120);accum-=1/120;n++}}paint();requestAnimationFrame(loop)}
 requestAnimationFrame(loop);
-document.querySelectorAll('[data-speed]').forEach(el=>{el.onclick=()=>{speed=Number(el.dataset.speed);document.querySelectorAll('[data-speed]').forEach(a=>a.classList.remove('active'));el.classList.add('active')}});
 document.getElementById('start').onclick=()=>{document.getElementById('home').style.display='none';document.getElementById('gameScreen').style.display='block';reset()};
 document.getElementById('restart').onclick=reset;
 document.getElementById('back').onclick=()=>{playing=false;document.getElementById('gameScreen').style.display='none';document.getElementById('home').style.display='block'};
