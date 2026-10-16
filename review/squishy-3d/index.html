@@ -264,8 +264,8 @@ function merge(){
 
  if(kind===4){
    // Two green mochi become the selected final collectible form.
-   // No more growing marbles; the special remains in the board as a strategic obstacle.
-   const big={id:id++,kind:5,skin:selected,x:Math.max(73,Math.min(W-73,x)),y:Math.max(73,Math.min(H-73,y)),
+   // Final forms continue merging two into one, with fixed radius and no pellets.
+   const big={id:id++,kind:5,skin:selected>=0?selected:0,x:Math.max(73,Math.min(W-73,x)),y:Math.max(73,Math.min(H-73,y)),
       vx:0,vy:-62,spin:0,angle:0,rollV:0,impact:.35,squish:.18,squishV:0,morph:1,
       held:false,cool:.54,rest:0,traceTimer:0};
    bodies.push(big);pops++;
