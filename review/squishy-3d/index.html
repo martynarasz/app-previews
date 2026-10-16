@@ -59,13 +59,19 @@ button:active{transform:scale(.98)}#play{display:block;width:92px;height:92px;pa
 .srOnly{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 body:before{content:"";position:fixed;inset:0;background:url("assets/squishy-home.webp") center / cover no-repeat;opacity:.13;filter:blur(12px);pointer-events:none}
 main{position:relative;z-index:1}
+
+/* Friendly menu labels under the collection and shop icons. */
+.menuBtns{gap:14px;max-width:390px;margin:14px auto}
+.menuBtns button{flex:1;width:auto;max-width:177px;min-width:0;height:78px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:14px;font-weight:900;padding:8px 10px}
+.menuBtns button span:first-child{font-size:27px;line-height:1.05}
+.menuBtns button span:last-child{font-size:13px;letter-spacing:.1px;line-height:1.2}
 </style></head><body><main>
 
 <section id="home">
 <div class="topbar"><span class="wallet" id="walletMenu"><span class="pepperCoin"></span><span class="walletAmount">0</span></span></div>
 <canvas id="hero" width="780" height="780"></canvas>
 <button id="play" aria-label="Graj">▶</button>
-<div class="menuBtns"><button id="openCollection" aria-label="Kolekcja">🌸</button><button id="openShop" aria-label="Sklep">🏪</button></div>
+<div class="menuBtns"><button id="openCollection" aria-label="Kolekcja"><span aria-hidden="true">🌸</span><span>Kolekcja</span></button><button id="openShop" aria-label="Sklep"><span aria-hidden="true">🏪</span><span>Sklep</span></button></div>
 </section>
 <section id="game"><div id="status">⭐ 0　<span class="pepperCoin"></span> <span id="inGameCoins">0</span></div><div id="nextRow"><span>NASTĘPNE</span><canvas id="nextCanvas" width="600" height="165"></canvas></div>
 <div id="boardWrap"><canvas id="board" width="1080" height="1395"></canvas><div id="count"></div></div>
@@ -86,9 +92,18 @@ const skins=[
 ];
 let coins=0,unlocked=[],selected=-1,highScore=0,paidBands=0,earned=0,queue=[],history=[],traces=[];
 const storageKey='squishy-merge-v3';
-function loadSave(){try{const x=JSON.parse(localStorage.getItem(storageKey)||'{}');coins=Math.max(0,Number(x.coins)||0);highScore=Number(x.highScore)||0;
-unlocked=Array.isArray(x.unlocked)?x.unlocked.filter(i=>Number.isInteger(i)&&i>=0&&i<9):[];
-selected=unlocked.includes(x.selected)?x.selected:-1;}catch(e){coins=0;unlocked=[];selected=-1}}
+function loadSave(){
+ // The leaf Squishy is free and always belongs to every player, including old saves.
+ unlocked=[0];selected=0;coins=0;highScore=0;
+ try{
+  const x=JSON.parse(localStorage.getItem(storageKey)||'{}');
+  coins=Math.max(0,Number(x.coins)||0);highScore=Math.max(0,Number(x.highScore)||0);
+  if(Array.isArray(x.unlocked)){
+   for(const skin of x.unlocked)if(Number.isInteger(skin)&&skin>=1&&skin<9&&!unlocked.includes(skin))unlocked.push(skin);
+  }
+  if(unlocked.includes(x.selected))selected=x.selected;
+ }catch(e){/* corrupted or blocked storage starts with the free skin */}
+}
 function save(){try{localStorage.setItem(storageKey,JSON.stringify({coins,unlocked,selected,highScore}))}catch(e){}}
 function refreshWallet(){for(const id of ['walletMenu','walletCollection','walletShop'])document.getElementById(id).querySelector('.walletAmount').textContent=coins;const gameAmount=document.getElementById('inGameCoins');if(gameAmount)gameAmount.textContent=coins}
 function award(){let n=Math.floor(points/10000);if(n<=paidBands)return;let gain=(n-paidBands)*5;
@@ -110,6 +125,8 @@ finalAtlas.src='assets/squishy-assets.webp';
 const homeArt=new Image();let homeReady=false;
 homeArt.onload=()=>{homeReady=true;drawHome()};
 homeArt.src='assets/squishy-home.webp';
+// Core game tiers use real cutouts from the same polished atlas as the shop.
+const GAME_ASSETS=[3,1,0,2,5];
 const R=[21,31,42,53,67,73],W=360,H=465,gravity=520,cap=345;const kindSprite={0:0,1:1,2:2,3:3,4:4,'-1':5,'-2':6,'-3':7};
 const cvs=document.querySelector('#board'),hero=document.querySelector('#hero'),ctx=cvs.getContext('2d'),hc=hero.getContext('2d');
 const status=document.querySelector('#status'),feedback=document.querySelector('#feedback'),count=document.querySelector('#count');
@@ -169,7 +186,14 @@ function sprite(c,kind,x,y,radius,angle=0,impact=0,opacity=1,b=null){
  c.shadowColor='#7055814f';c.shadowBlur=radius*.22;c.shadowOffsetY=radius*.12;
  if(kind===-2){if(!asset(c,9,0,0,radius*2.20))special(c,kind,radius);c.restore();return;}
  if(kind<0){special(c,kind,radius);c.restore();return;}
- if(kind===5&&Number.isInteger(b?.skin)&&b.skin>=0&&b.skin<9&&asset(c,b.skin,0,0,radius*2.26)){c.restore();return;}
+ // Every mochi on the board, including the small/medium stages, uses the real
+ // transparent 3D assets. The same artwork is used in the upcoming-piece tray.
+ const spriteIndex=kind===5
+  ?(Number.isInteger(b?.skin)&&b.skin>=0&&b.skin<9?b.skin:0)
+  :GAME_ASSETS[kind];
+ if(spriteIndex!==undefined&&asset(c,spriteIndex,0,0,radius*2.34)){
+  c.restore();return;
+ }
  const base=kind===5?(skins[b?.skin??selected]?.[1]||'#b7e8a5'):pastel[kind];
  function shade(f){return 'rgb('+[1,3,5].map(i=>{const a=parseInt(base.slice(i,i+2),16);return Math.round(a+(f>0?(255-a)*f:a*f))}).join(',')+')'}
  const grad=c.createRadialGradient(-radius*.41,-radius*.55,1,0,radius*.15,radius*1.37);
