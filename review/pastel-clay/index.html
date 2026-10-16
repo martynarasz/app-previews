@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pastel Blocks — Clay Preview</title>
+<style>
+:root{font-family:ui-rounded,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;color:#665281;background:#f8effa}
+*{box-sizing:border-box} body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 25% 5%,#fff1f6 0,#f6eefd 43%,#e8f6f4 100%);padding:18px 12px 30px}
+main{max-width:500px;margin:auto;text-align:center}
+h1{font-size:clamp(28px,7vw,39px);margin:4px 0 2px;letter-spacing:-1.2px;color:#6d568b}
+small,.subtitle{color:#9784ad} .subtitle{font-size:13px;margin:5px 0 13px}
+#hero{width:100%;max-width:425px;aspect-ratio:340/208;display:block;margin:3px auto 13px;border-radius:28px;filter:drop-shadow(0 13px 16px #9475ad23)}
+#gameScreen{display:none} .hud{font-size:18px;font-weight:850;margin:8px 0 4px}.hint{color:#9987ae;font-size:12px;margin-bottom:8px}
+#arena{width:100%;max-width:460px;aspect-ratio:360/465;display:block;border-radius:28px;background:linear-gradient(140deg,#fffafb,#f3eafc 52%,#e8f8f4);box-shadow:0 12px 30px #9075b53c;border:3px solid #fff;touch-action:none}
+button{font-family:inherit;cursor:pointer;border:0;border-radius:19px;padding:15px 19px;font-size:16px;font-weight:850;transition:transform .1s;background:#9d86d8;color:white;box-shadow:0 6px 14px #9d86d843}
+button:active{transform:scale(.96)}.actionRow{display:flex;gap:12px;align-items:center;justify-content:center;margin-top:13px}.actionRow button{flex:1}
+#start{width:95%;max-width:330px;background:#8dceb9}#restart{background:#eadbf7;color:#685385;box-shadow:none}
+.speed{display:flex;gap:8px;max-width:340px;margin:12px auto 18px}.speed button{flex:1;background:#fff;color:#8169a7;border:1px solid #e1d2f0;box-shadow:none}
+.speed button.active{background:#cfbaf0;border:2px solid #a58bce}
+#message{font-weight:750;color:#9c70a9;font-size:13px;min-height:33px;margin:10px 0 4px}
+.legend{font-size:12px;line-height:1.6;color:#8c79a6;margin:13px auto;max-width:420px}
+.note{background:#ffffffa9;border:1px solid #e6d9ed;border-radius:12px;padding:10px;font-size:11px;color:#8e79a1}
+</style>
+</head>
+<body>
+<main>
+<section id="home">
+<h1>☁️ Pastel Blocks</h1>
+<p class="subtitle">Mięciutkie plastelinowe przytulaki. Bez kratek i szalonego wirowania.</p>
+<canvas id="hero" width="680" height="416" aria-label="Pastelowe plastelinowe kamyczki i poduszki"></canvas>
+<div class="legend">🪨 Trzy kamyczki tego samego koloru tworzą większą poduszkę.<br>🧸 Dwie poduszki łączą się w wielką chmurkę. ☁️ PUF! — i zostaje mgiełka.</div>
+<strong>Tempo rozgrywki</strong>
+<div class="speed"><button class="active" data-speed="1">×1</button><button data-speed="2">×2</button><button data-speed="4">×4</button></div>
+<button id="start">▶ GRAJ TERAZ</button>
+<p class="note">Interaktywny prototyp przeglądarkowy do oceny wyglądu i sterowania. Nie jest to jeszcze skompilowany build Flutter/Android. Nie uruchamia pipeline'u Androida.</p>
+</section>
+<section id="gameScreen">
+<div class="hud" id="hud">⏱ 90s　⭐ 0</div>
+<div class="hint">Dotknij i ustaw kamyczek na górze, potem kliknij ZRZUĆ</div>
+<canvas id="arena" width="720" height="930" aria-label="Interaktywna gra z miękkimi elementami"></canvas>
+<div id="message">Celuj palcem, zanim zrzucisz kamyczek!</div>
+<div class="actionRow"><button id="drop">⬇ ZRZUĆ</button><button id="restart">↻ OD NOWA</button></div>
+<div class="legend">3 małe tego samego koloru → większa poducha • 2 poduchy → PUF z mgiełką. Wróć do menu, aby zmienić tempo.</div>
+<button id="back" style="background:transparent;box-shadow:none;color:#917ba7;font-size:12px">← WRÓĆ DO MENU</button>
+</section>
+</main>
+<script>
+(function(){
+'use strict';
+const palette=['#ffa7a5','#9d8bff','#66d3be','#ffce77','#78b6f8','#daa5ea'];
+const W=360,H=465,R1=25,R2=49,rad=(a)=>a.big?R2:R1;
+const hero=document.getElementById('hero'),arena=document.getElementById('arena');
+const h=hero.getContext('2d'),ctx=arena.getContext('2d');
+let speed=1,items=[],puffs=[],current=null,aim=180,points=0,merges=0,time=90,accum=0,frame=0,last=0,playing=false,locked=false;
+let nextId=0,roundDrops=0,rainbow=false,message='Celuj, a potem zrzucaj!';
+function hex(hex){return [1,3,5].map(i=>parseInt(hex.slice(i,i+2),16))}
+function tint(color,f){const rgb=hex(color),r=rgb.map(v=>Math.round(v+(255-v)*f));return 'rgb('+r.join(',')+')'}
+function darken(color,f){const rgb=hex(color),r=rgb.map(v=>Math.round(v*(1-f)));return 'rgb('+r.join(',')+')'}
+function clay(c,x,y,r,big,angle,impact,opacity){
+c.save();c.translate(x,y);c.rotate(angle||0);c.scale(1+(impact||0)*.06,1-(impact||0)*.10);c.globalAlpha=opacity===undefined?1:opacity;
+c.shadowColor='#60487255';c.shadowBlur=big?18:9;c.shadowOffsetY=big?8:4;
+const path=new Path2D();for(let i=0;i<=64;i++){const a=i*Math.PI*2/64-Math.PI/2;
+const ripple=1+(big?.025:.013)*Math.sin(a*(big?7:5));
+let px=Math.cos(a)*r*.94*ripple,py=Math.sin(a)*r*.94*ripple;
+i===0?path.moveTo(px,py):path.lineTo(px,py)}path.closePath();
+let grad=c.createRadialGradient(-r*.38,-r*.43,r*.07,0,0,r*1.45);
+grad.addColorStop(0,tint(palette[c._col||0],.67));grad.addColorStop(.37,tint(palette[c._col||0],.39));grad.addColorStop(.72,palette[c._col||0]);grad.addColorStop(1,darken(palette[c._col||0],.20));
+c.fillStyle=grad;c.fill(path);c.shadowBlur=0;c.shadowOffsetY=0;c.strokeStyle='#ffffff55';c.lineWidth=big?2.1:1.6;c.stroke(path);
+c.fillStyle='#ffffff56';c.beginPath();c.ellipse(-r*.32,-r*.45,r*.31,r*.105,-.12,0,Math.PI*2);c.fill();
+if(big){c.strokeStyle='#ffffff60';c.lineWidth=1.7;c.beginPath();c.ellipse(0,0,r*.77,r*.75,0,.2,Math.PI*.80);c.stroke()}
+c.fillStyle='#554366';for(const k of [-.26,.26]){
+c.beginPath();c.ellipse(k*r,.015*r,r*.075,r*.104,0,0,Math.PI*2);c.fill();
+c.fillStyle='#fff';c.beginPath();c.arc(k*r-r*.019,-.038*r,r*.035,0,Math.PI*2);c.fill();c.fillStyle='#554366';
+c.fillStyle='#ee86aa99';c.beginPath();c.ellipse(k*r*1.9,r*.23,r*.13,r*.073,0,0,Math.PI*2);c.fill();c.fillStyle='#554366'}
+c.strokeStyle='#554366';c.lineWidth=r*.085;c.lineCap='round';c.beginPath();c.moveTo(-r*.14,r*.24);c.quadraticCurveTo(0,r*.42,r*.14,r*.24);c.stroke();c.restore()}
+function toy(c,item,opacity){c._col=item.col;clay(c,item.x,item.y,rad(item),item.big,item.a||0,item.impact||0,opacity)}
+function heroDraw(){h.save();h.scale(2,2);let g=h.createLinearGradient(0,0,340,208);g.addColorStop(0,'#fffaf7');g.addColorStop(.55,'#f4eafb');g.addColorStop(1,'#e7f9f2');h.fillStyle=g;h.fillRect(0,0,340,208);
+[{x:104,y:147,big:true,col:1,a:-.08},{x:230,y:150,big:true,col:0,a:.07},{x:62,y:61,col:2,a:-.12},{x:173,y:59,col:3,a:.1},{x:280,y:73,col:4,a:.04}].forEach(obj=>{h._col=obj.col;clay(h,obj.x,obj.y,obj.big?55:29,!!obj.big,obj.a,0)});h.restore()}heroDraw();
+function newStone(){if(!playing)return;if(items.some(p=>p.y-rad(p)<48&&!p.isMoving)){playing=false;locked=true;message='Stos dotarł do góry. Spróbuj ponownie!';return}current={id:nextId++,x:aim,y:R1+4,vx:0,vy:0,col:Math.floor(Math.random()*Math.min(5,3+Math.floor(merges/6))),big:false,a:0,spin:0,impact:0,held:true,isMoving:true,cool:.16};items.push(current)}
+function reset(){items=[];puffs=[];aim=180;points=0;merges=0;time=90;accum=0;nextId=0;roundDrops=0;rainbow=false;locked=false;playing=true;message='Przesuń kamyczek palcem, potem ZRZUĆ';newStone()}
+function toWorld(e){const rect=arena.getBoundingClientRect();return (e.clientX-rect.left)/rect.width*W}
+function target(e){aim=Math.max(R1,Math.min(W-R1,toWorld(e)));if(current&&current.held){current.x=aim;current.vx=0;current.a=0}}
+let startTouchY=null;
+arena.addEventListener('pointerdown',e=>{target(e);startTouchY=e.clientY;arena.setPointerCapture(e.pointerId)});
+arena.addEventListener('pointermove',e=>{if(e.buttons===1)target(e)});
+arena.addEventListener('pointerup',e=>{if(startTouchY!==null&&e.clientY-startTouchY>52)drop();startTouchY=null});
+document.getElementById('drop').onclick=drop;
+function drop(){if(!playing||!current)return;current.held=false;current.vy=Math.max(current.vy,115);current.isMoving=true}
+function collide(a,b){const dx=b.x-a.x,dy=b.y-a.y;let d=Math.hypot(dx,dy);const min=rad(a)+rad(b);if(d>=min)return;const nx=d>.01?dx/d:1,ny=d>.01?dy/d:.08;d=Math.max(.1,d);
+const ia=a.big?.22:1,ib=b.big?.22:1,weight=ia+ib,overlap=Math.max(0,min-d)*.8;
+a.x-=nx*overlap*ia/weight;a.y-=ny*overlap*ia/weight;b.x+=nx*overlap*ib/weight;b.y+=ny*overlap*ib/weight;
+const v=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;if(v<0){const impulse=-v*1.03/weight;a.vx-=nx*impulse*ia;a.vy-=ny*impulse*ia;b.vx+=nx*impulse*ib;b.vy+=ny*impulse*ib;
+a.spin=Math.max(-.3,Math.min(.3,a.spin+v*.00006));b.spin=Math.max(-.3,Math.min(.3,b.spin-v*.00006));}}
+function bounds(b){const r=rad(b);if(b.x<r){b.x=r;b.vx=Math.max(0,b.vx)*.1}else if(b.x>W-r){b.x=W-r;b.vx=Math.min(0,b.vx)*.1}
+if(b.y>H-r){b.y=H-r;if(b.vy>75){b.impact=Math.min(.45,b.vy/1100);b.vy*= -.08}else b.vy=0;b.vx*=.74}
+if(b.y<r){b.y=r;b.vy=Math.max(0,b.vy)}}
+function touching(a,b){return Math.hypot(a.x-b.x,a.y-b.y)<=rad(a)+rad(b)+3}
+function merge(){for(let tier of [true,false]){let used=new Set();for(const s of items){if(s.big!==tier||s.cool>0||used.has(s.id)||s.held)continue;let group=[s];used.add(s.id);
+for(let j=0;j<group.length;j++){for(const n of items){if(!used.has(n.id)&&n.big===tier&&n.col===s.col&&n.cool<=0&&!n.held&&touching(group[j],n)){used.add(n.id);group.push(n)}}}
+const needed=tier?2:3;if(group.length<needed)continue;let selected=group.slice(0,needed);let x=selected.reduce((v,b)=>v+b.x,0)/needed,y=selected.reduce((v,b)=>v+b.y,0)/needed;
+let wasActive=selected.includes(current);items=items.filter(q=>!selected.includes(q));merges++;points+=tier?600:225;
+if(tier){puffs.push({x,y,col:s.col,age:0});message='☁️ PUF! Dwie poduchy połączyły się!';}
+else{let q={id:nextId++,x:Math.max(R2,Math.min(W-R2,x)),y:Math.max(R2,Math.min(H-R2,y)),vx:0,vy:0,col:s.col,big:true,a:0,spin:0,impact:.42,cool:.24};items.push(q);message='🧸 Trzy kamyczki → puchata poduszka!'}
+if(wasActive){current=null;roundDrops++;points+=5}return true}}return false}
+function simulate(dt){
+time-=dt;if(time<=0){time=0;playing=false;locked=true;message='Koniec rundy! Wynik: '+points;return}
+for(const p of puffs)p.age+=dt;puffs=puffs.filter(p=>p.age<1.45);
+for(const b of items){b.cool=Math.max(0,b.cool-dt);b.impact=Math.max(0,b.impact-dt*2.5);
+if(b.held){b.x=aim;b.y=rad(b)+4;b.vx=b.vy=b.spin=b.a=0;continue}
+if(b===current){b.vx+=Math.max(-650,Math.min(650,(aim-b.x)*14-b.vx*8))*dt}
+b.vy=Math.min(340*(1+(speed-1)*.34),b.vy+520*(1+(speed-1)*.34)*dt);
+b.vx=Math.max(-185,Math.min(185,b.vx*Math.exp(-2*dt)));b.spin=Math.max(-.42,Math.min(.42,b.spin*Math.exp(-4*dt)));
+b.x+=b.vx*dt;b.y+=b.vy*dt;b.a=Math.max(-.24,Math.min(.24,b.a+b.spin*dt));bounds(b)}
+for(let j=0;j<4;j++){for(let i=0;i<items.length;i++)for(let k=i+1;k<items.length;k++){if(!items[i].held&&!items[k].held)collide(items[i],items[k])}
+items.forEach(b=>{if(!b.held)bounds(b)})}
+for(let i=0;i<4;i++){if(!merge())break}
+if(current&&!current.held){const b=current;let supported=b.y>=H-rad(b)-.7||items.some(q=>q!==b&&q.y>b.y&&touching(q,b));
+if(supported&&Math.abs(b.vy)<70)b.rest=(b.rest||0)+dt;else b.rest=0;if(b.rest>.18){current=null;roundDrops++;points+=5;newStone()}}
+if(!current&&playing)newStone()
+}
+function puffDraw(c,p){const t=p.age/1.45;c.save();c.translate(p.x,p.y);if(t<.42){let grow=Math.min(1,t/.33),alpha=t<.33?1:Math.max(0,(.42-t)/.09);c._col=p.col;clay(c,0,0,48+grow*19,true,0,0,alpha)}
+if(t>=.29){let st=Math.max(0,(t-.29)/.71),alpha=Math.pow(1-st,1.35);
+for(let i=0;i<11;i++){const a=i*Math.PI*2/11,d=12+st*(39+i%3*4),x=Math.cos(a)*d,y=Math.sin(a)*d-st*14,r=14+(i%3)*3+st*8;
+const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba(255,255,255,'+(alpha*.7)+')');g.addColorStop(.55,'rgba(233,215,240,'+(alpha*.38)+')');g.addColorStop(1,'rgba(233,215,240,0)');c.fillStyle=g;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill()}}c.restore()}
+function paint(){ctx.clearRect(0,0,720,930);ctx.save();ctx.scale(2,2);
+for(const b of items)toy(ctx,b);
+for(const p of puffs)puffDraw(ctx,p);
+ctx.restore();document.getElementById('hud').textContent='⏱ '+Math.ceil(time)+'s　⭐ '+points+'　🧸 '+merges+'　×'+speed;
+document.getElementById('message').textContent=message;document.getElementById('drop').disabled=!playing}
+function loop(ts){if(!last)last=ts;const dt=Math.min(.05,(ts-last)/1000);last=ts;if(playing){accum+=dt;let n=0;while(accum>=1/120&&n<8){simulate(1/120);accum-=1/120;n++}}paint();requestAnimationFrame(loop)}
+requestAnimationFrame(loop);
+document.querySelectorAll('[data-speed]').forEach(el=>{el.onclick=()=>{speed=Number(el.dataset.speed);document.querySelectorAll('[data-speed]').forEach(a=>a.classList.remove('active'));el.classList.add('active')}});
+document.getElementById('start').onclick=()=>{document.getElementById('home').style.display='none';document.getElementById('gameScreen').style.display='block';reset()};
+document.getElementById('restart').onclick=reset;
+document.getElementById('back').onclick=()=>{playing=false;document.getElementById('gameScreen').style.display='none';document.getElementById('home').style.display='block'};
+})();
+</script>
+</body>
+</html>
