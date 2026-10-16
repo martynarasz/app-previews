@@ -162,27 +162,26 @@ function availableLane(kind,preferred=aim){
  }
  return candidate;
 }
-function spawn(){if(!playing)return;
- let v=Math.random()*100,kind=v<58?0:v<91?1:v<98?2:v<99.7?3:4;
- // Rare candy and rainbow (once) are intentionally not common drops.
- if(drops>=30&&!issuedRainbow&&Math.random()<1/300)kind=-1;
- else if(drops>=12&&Math.random()<1/100)kind=-2;
- let lane=availableLane(kind);
- // A high stack in one column is not a game over. Use empty side lanes;
- // if the large mochi doesn't fit, allow a small mochi to keep playing.
- if(lane===null&&kind!==0){kind=0;lane=availableLane(kind)}
+
+function spawn(){
+ if(!playing||active)return;
+ fillQueue();let kind=queue[0],lane=availableLane(kind);
  if(lane===null){
-  blockedFor+=1/120;
-  if(blockedFor>=2.2)finish();
-  return;
- }
- blockedFor=0;
- if(kind===-1)issuedRainbow=true;
+  let index=queue.findIndex(k=>availableLane(k)!==null);
+  if(index>0){kind=queue.splice(index,1)[0];lane=availableLane(kind)}
+  else if(availableLane(0)!==null){kind=0;lane=availableLane(0)}
+  else{blockedFor+=1/120;if(blockedFor>2.2)finish();return;}
+ }else queue.shift();
+ blockedFor=0;if(kind===-1)issuedRainbow=true;
  const radius=kind<0?21:R[kind];aim=lane;
  active={id:id++,kind,x:lane,y:radius+6,vx:0,vy:0,spin:0,angle:0,rollV:0,impact:0,squish:0,squishV:0,morph:0,held:true,cool:.23,rest:0};
- bodies.push(active);heldFor=0;
+ bodies.push(active);heldFor=0;fillQueue();drawQueue();
 }
-function reset(){bodies=[];puffs=[];petals=[];fusions=[];active=null;points=0;merges=0;pops=0;spills=0;drops=0;aim=180;heldFor=0;blockedFor=0;issuedRainbow=false;playing=true;petalTime=0;message='';msgAge=0;id=0;spawn();}
+function reset(){
+ bodies=[];puffs=[];petals=[];fusions=[];traces=[];active=null;points=0;merges=0;pops=0;spills=0;drops=0;aim=180;
+ heldFor=0;blockedFor=0;issuedRainbow=false;playing=true;petalTime=0;message='';msgAge=0;id=0;
+ earned=0;paidBands=0;queue=[];history=[];fillQueue();spawn();
+}
 function drop(){if(!playing||!active||!active.held)return;active.held=false;active.vy=Math.max(active.vy,120);heldFor=0;}
 function aimAt(e){const rect=cvs.getBoundingClientRect();const radius=active?r(active):21;aim=Math.max(radius+2,Math.min(W-radius-2,(e.clientX-rect.left)/rect.width*W));if(active?.held)active.x=aim;}
 let touchStart=null;cvs.addEventListener('pointerdown',e=>{pointer={x:e.clientX,y:e.clientY,dragged:false};touchStart=e.clientY;aimAt(e);cvs.setPointerCapture(e.pointerId)});
@@ -210,28 +209,28 @@ function merge(){for(let kind=4;kind>=0;kind--){const seen=new Set();for(const s
  const group=[seed];seen.add(seed.id);for(let cur=0;cur<group.length;cur++)for(const q of bodies){if(q.kind===kind&&!q.held&&q.cool<=0&&!seen.has(q.id)&&touch(group[cur],q)){group.push(q);seen.add(q.id)}}
  const amount=kind===0?3:2;if(group.length<amount)continue;
  const found=group.slice(0,amount),x=found.reduce((s,b)=>s+b.x,0)/amount,y=found.reduce((s,b)=>s+b.y,0)/amount;
- let isActive=found.includes(active);fusions.push({parts:found.map(b=>({kind:b.kind,x:b.x,y:b.y,radius:r(b),angle:b.angle})),x,y,age:0});bodies=bodies.filter(b=>!found.includes(b));merges++;points+=kind===4?950:(kind+2)*90;
+ let isActive=found.includes(active);fusions.push({parts:found.map(b=>({kind:b.kind,x:b.x,y:b.y,radius:r(b),angle:b.angle})),x,y,age:0});bodies=bodies.filter(b=>!found.includes(b));merges++;points+=[45,85,155,260,460][kind];award();
+
  if(kind===4){
-   // Board-wide green burst only removes existing mochi and specials,
-   // but glass marbles stay and new ones accumulate across explosions.
-   const oldGlass=bodies.filter(b=>b.kind===-3);
-   bodies=oldGlass; if(active&&active.kind!==-3)active=null;blockedFor=0;
-   puff(x,y,4);
-   for(let i=0;i<8;i++){const a=i*Math.PI/4;
-     bodies.push({id:id++,kind:-3,x:Math.max(12,Math.min(W-12,x+Math.cos(a)*18)),y:Math.max(12,Math.min(H-12,y+Math.sin(a)*19)),vx:Math.cos(a)*110,vy:-50+Math.sin(a)*50,spin:0,angle:0,rollV:0,impact:0,squish:0,squishV:0,morph:0,held:false,cool:.55,rest:0});}
-   spills+=8;message='💚 PUF! Szklane kuleczki!';msgAge=0;pops++;
+   // Two green mochi become the selected final collectible form.
+   // No more growing marbles; the special remains in the board as a strategic obstacle.
+   const big={id:id++,kind:5,skin:selected,x:Math.max(73,Math.min(W-73,x)),y:Math.max(73,Math.min(H-73,y)),
+      vx:0,vy:-62,spin:0,angle:0,rollV:0,impact:.35,squish:.18,squishV:0,morph:1,
+      held:false,cool:.54,rest:0,traceTimer:0};
+   bodies.push(big);puff(x,y,4);pops++;
+   message='🌸 Końcowa forma!';msgAge=0;
  }else{const next=kind+1,RN=R[next];const bigger={id:id++,kind:next,x:Math.max(RN,Math.min(W-RN,x)),y:Math.max(RN,Math.min(H-RN,y)),vx:0,vy:0,spin:0,angle:0,rollV:0,impact:.4,squish:.15,squishV:0,morph:1,held:false,cool:.32,rest:0};bodies.push(bigger);
    for(let k=0;k<9;k++){for(const q of bodies)if(q!==bigger&&!q.held)collision(q,bigger);bodies.forEach(b=>{if(!b.held)border(b)})}
    message='✨ '+names[next]+'!';msgAge=0;}
  if(isActive){active=null;drops++;points+=5;}return true;
  }}return false}
-function finish(){playing=false;active=null;message='GAME OVER! Wynik: '+points;msgAge=0;}
+function finish(){playing=false;active=null;highScore=Math.max(points,highScore);award();save();refreshWallet();message='KONIEC GRY! '+points+' pkt • 🍬 +'+earned+' • rekord '+highScore;msgAge=0;}
 function simulate(dt){if(!playing)return;msgAge+=dt;heldFor+=active?.held?dt:0;
  if(active?.held&&heldFor>=5)drop();
  petalTime+=dt;if(petalTime>.5&&petals.length<30){petalTime=0;petals.push({x:rr(0,W),y:-10,size:rr(3.5,7),age:0,speed:rr(20,38),phase:rr(0,7),settled:false})}
  for(const p of petals){p.age+=dt;if(!p.settled){p.y+=p.speed*dt;p.x+=Math.sin(p.phase+p.age*1.65)*13*dt;if(p.y>=H-5){p.y=H-rr(3,10);p.settled=true}}}
  petals=petals.filter(p=>p.age<(p.settled?19:29));
- puffs.forEach(p=>p.age+=dt);puffs=puffs.filter(p=>p.age<1.4);fusions.forEach(f=>f.age+=dt);fusions=fusions.filter(f=>f.age<.32);
+ puffs.forEach(p=>p.age+=dt);puffs=puffs.filter(p=>p.age<1.4);fusions.forEach(f=>f.age+=dt);fusions=fusions.filter(f=>f.age<.32);traces.forEach(t=>t.age+=dt);traces=traces.filter(t=>t.age<7);
 
  for(const b of bodies){
    b.cool=Math.max(0,b.cool-dt);b.impact=Math.max(0,b.impact-dt*2.4);
@@ -244,6 +243,7 @@ function simulate(dt){if(!playing)return;msgAge+=dt;heldFor+=active?.held?dt:0;
    b.vx=Math.max(-188,Math.min(188,b.vx*Math.exp(-1.5*dt)));
    b.spin=Math.max(-.55,Math.min(.55,b.spin*Math.exp(-3*dt)));
    b.x+=b.vx*dt;b.y+=b.vy*dt;
+   if(b.kind===5){b.traceTimer=(b.traceTimer||0)+dt;if(b.traceTimer>.45&&traces.length<22){b.traceTimer=0;traces.push({x:b.x+rr(-12,12),y:b.y+rr(-7,7),skin:b.skin,age:0})}}
    // Rolling follows lateral movement, then gently returns upright like soft mochi.
    const desired=Math.max(-.36,Math.min(.36,b.vx/Math.max(110,r(b)*4.2)*.5+b.spin*.3));
    b.rollV=(b.rollV||0)+(desired-(b.angle||0))*25*dt;
@@ -258,12 +258,12 @@ function simulate(dt){if(!playing)return;msgAge+=dt;heldFor+=active?.held?dt:0;
  // spawn in any genuinely empty lane, including on the opposite side.
  if(active&&!active.held){const b=active;const supported=b.y>=H-r(b)-.7||bodies.some(q=>q!==b&&q.y>b.y&&touch(q,b));
    if(supported&&Math.abs(b.vy)<72)b.rest=(b.rest||0)+dt;else b.rest=0;
-   if(b.rest>.18){active=null;drops++;points+=5;
-     if(b.kind===-1){bodies=[];puffs=[];blockedFor=0;points+=250;puff(b.x,b.y,5);message='🌈 TĘCZOWY CLEAR!';msgAge=0}
+   if(b.rest>.18){active=null;drops++;points+=3;award();
+     if(b.kind===-1){bodies=[];puffs=[];blockedFor=0;points+=140;award();puff(b.x,b.y,5);message='🌈 TĘCZOWY CLEAR!';msgAge=0}
      if(b.kind===-2){const cx=b.x,cy=b.y;let cleared=0;
        bodies=bodies.filter(other=>{if(other===b)return false;if(other.kind===-1||other.kind===-2)return true;
          const nearby=Math.hypot(other.x-cx,other.y-cy)<116+r(other)*.15;if(nearby)cleared++;return !nearby});
-       blockedFor=0;points+=75+cleared*45;puff(cx,cy,6);message='🍬 PUF! '+cleared;msgAge=0}
+       blockedFor=0;points+=45+cleared*12;award();puff(cx,cy,6);message='🍬 PUF! '+cleared;msgAge=0}
      }}
  if(!active&&playing)spawn();
 }
@@ -276,6 +276,7 @@ function cloud(c,p){const t=p.age/1.4;let fade=Math.max(0,1-t);
 function paint(){
  ctx.clearRect(0,0,cvs.width,cvs.height);ctx.save();ctx.scale(3,3);
  for(const p of petals.filter(p=>p.settled))drawPetal(ctx,p.x,p.y,p.size,-.3,.45);
+ for(const tr of traces){ctx.save();ctx.globalAlpha=.24*(1-tr.age/7);ctx.fillStyle=skins[tr.skin]?.[1]||'#aedebb';ctx.beginPath();ctx.arc(tr.x,tr.y,3+Math.sin(tr.age)*1.4,0,7);ctx.fill();ctx.restore();}
  for(const b of bodies)sprite(ctx,b.kind,b.x,b.y,r(b),b.angle,b.impact,1,b);
  for(const f of fusions){
   const t=Math.min(1,f.age/.32),e=1-(1-t)*(1-t);
@@ -283,14 +284,45 @@ function paint(){
  }
  for(const p of puffs)cloud(ctx,p);
  for(const p of petals.filter(p=>!p.settled))drawPetal(ctx,p.x,p.y,p.size,.5+Math.sin(p.age*2)*.8,.7);
- ctx.restore();status.textContent='⭐ '+points+'　🍡 '+merges;
+ ctx.restore();status.textContent='⭐ '+points+'　🍬 '+coins+'　🍡 '+merges;
  const n=playing&&active?.held&&heldFor>=2?Math.max(1,3-Math.floor(heldFor-2)):0;
  count.textContent=n||'';count.style.display=n?'block':'none';
  feedback.textContent=(!playing||msgAge<1.5)?message:'';
 }
 function loop(ts){paintTime=ts/1000;if(!last)last=ts;const dt=Math.min(.06,(ts-last)/1000);last=ts;if(playing){acc+=dt;let n=0;while(acc>=1/120&&n<8){simulate(1/120);acc-=1/120;n++}}paint();requestAnimationFrame(loop)}requestAnimationFrame(loop);
-document.querySelector('#play').onclick=()=>{document.querySelector('#home').style.display='none';document.querySelector('#game').style.display='block';reset()};
+
+function renderCards(where){
+ const shop=where==='shop',root=document.getElementById(shop?'shopCards':'collectionCards');
+ root.textContent='';
+ skins.forEach((sk,i)=>{
+  const owned=unlocked.includes(i),chosen=selected===i,card=document.createElement('div');
+  card.className='skinCard'+(chosen?' selected':'');
+  const picture=document.createElement('canvas');picture.width=240;picture.height=240;card.appendChild(picture);
+  const title=document.createElement('strong');title.textContent=sk[0];card.appendChild(title);
+  const info=document.createElement('small');info.textContent=chosen?'✓ Wybrana':owned?'Odblokowana':'🔒 50 🍬';card.appendChild(info);
+  const button=document.createElement('button');button.textContent=chosen?'Wybrana':owned?'Wybierz':shop?'Kup • 50 🍬':'W sklepie';
+  button.disabled=chosen||(!shop&&!owned)||(shop&&!owned&&coins<50);
+  button.onclick=()=>{if(owned){selected=i;save();refreshViews()}
+   else if(shop&&coins>=50){coins-=50;unlocked.push(i);selected=i;save();refreshViews()}};
+  card.appendChild(button);root.appendChild(card);
+  const c=picture.getContext('2d');c.clearRect(0,0,240,240);
+  sprite(c,5,120,130,77,0,0,1,{id:i+16,skin:i});
+ });
+}
+function refreshViews(){refreshWallet();drawHome();renderCards('shop');renderCards('collection')}
+function showPage(page){
+ for(const [id,key] of [['home','home'],['game','game'],['collectionScreen','collection'],['shopScreen','shop']])
+  document.getElementById(id).style.display=key===page?'block':'none';
+ if(page!=='game')playing=false;
+ if(page==='shop'||page==='collection')refreshViews();
+}
+document.querySelector('#play').onclick=()=>{showPage('game');reset()};
 document.querySelector('#restart').onclick=reset;
-document.querySelector('#back').onclick=()=>{playing=false;document.querySelector('#game').style.display='none';document.querySelector('#home').style.display='block'};
+document.querySelector('#back').onclick=()=>showPage('home');
+document.querySelector('#openCollection').onclick=()=>showPage('collection');
+document.querySelector('#openShop').onclick=()=>showPage('shop');
+document.querySelector('#collectionBack').onclick=()=>showPage('home');
+document.querySelector('#shopBack').onclick=()=>showPage('home');
+loadSave();refreshViews();
 })();
 </script></body></html>
