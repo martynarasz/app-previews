@@ -108,7 +108,7 @@ const skins=[
  ['Kropeczki','#b2e1e8','dots'],['Kocie uszy','#ffdbab','cat'],['Trzy włoski','#ebc3b0','hair'],
  ['Płomyk','#ffc5a6','flame'],['Fontanna','#bde2fa','fountain'],['Pluszak','#d2c6f2','plush']
 ];
-let coins=0,unlocked=[],selected=-1,highScore=0,paidBands=0,earned=0,queue=[],history=[],traces=[];
+let coins=0,unlocked=[],selected=-1,highScore=0,paidBands=0,earned=0,queue=[],history=[],traces=[],savedRun=null;
 const storageKey='squishy-merge-v3';
 const language=(navigator.language||'pl').toLowerCase().startsWith('pl')?'pl':'en';
 const tr={pl:{next:'NASTĘPNE',collection:'Kolekcja',shop:'Sklep',menu:'MENU',restart:'OD NOWA',owned:'Odblokowany',buy:'Kup',candy:'cukierków',end:'KONIEC GRY!',final:'Końcowa forma!',flower:'Kwiatek',crown:'Korona'},en:{next:'NEXT',collection:'Collection',shop:'Shop',menu:'MENU',restart:'RESTART',owned:'Unlocked',buy:'Buy',candy:'candies',end:'GAME OVER!',final:'Final form!',flower:'Flower',crown:'Crown'}}[language];
@@ -128,22 +128,72 @@ function loadSave(){
   const x=JSON.parse(localStorage.getItem(storageKey)||'{}');
   coins=Math.max(0,Number(x.coins)||0);highScore=Math.max(0,Number(x.highScore)||0);
   if(Array.isArray(x.unlocked)){
-   for(const skin of x.unlocked)if(Number.isInteger(skin)&&skin>=3&&skin<9&&!unlocked.includes(skin))unlocked.push(skin);
+   for(const skin of x.unlocked)if(Number.isInteger(skin)&&skin>=1&&skin<9&&!unlocked.includes(skin))unlocked.push(skin);
   }
   if(unlocked.includes(x.selected))selected=x.selected;
+  if(x.run&&Array.isArray(x.run.bodies)&&x.run.bodies.length<=150)savedRun=x.run;
  }catch(e){/* corrupted or blocked storage starts with the free skin */}
 }
-function save(){try{localStorage.setItem(storageKey,JSON.stringify({coins,unlocked,selected,highScore}))}catch(e){}}
+
+function save(){
+ try{
+  if(playing){
+   savedRun={points,merges,drops,paidBands,earned,issuedRainbow,id,aim,queue:[...queue],history:[...history],
+    activeId:active?.id??null,bodies:bodies.map(b=>({...b}))};
+  }else if(document.getElementById('game').style.display==='block'&&!active){
+   savedRun=null; // completed round, not simply paused in menu
+  }
+  localStorage.setItem(storageKey,JSON.stringify({coins,unlocked,selected,highScore,run:savedRun}));
+ }catch(e){/* storage may be disabled in private browsing */}
+}
+function resumeRun(){
+ const s=savedRun;
+ if(!s||!Array.isArray(s.bodies)||s.bodies.length>150)return false;
+ try{
+  points=Math.max(0,Number(s.points)||0);merges=Math.max(0,Number(s.merges)||0);
+  drops=Math.max(0,Number(s.drops)||0);paidBands=Math.max(0,Number(s.paidBands)||0);
+  earned=Math.max(0,Number(s.earned)||0);issuedRainbow=!!s.issuedRainbow;
+  id=Math.max(1,Number(s.id)||1);aim=Math.max(20,Math.min(W-20,Number(s.aim)||W/2));
+  queue=Array.isArray(s.queue)?s.queue.filter(n=>Number.isInteger(n)&&n>=-2&&n<=4).slice(0,4):[];
+  history=Array.isArray(s.history)?s.history.filter(n=>Number.isInteger(n)&&n>=-2&&n<=4).slice(-6):[];
+  bodies=s.bodies.filter(b=>Number.isInteger(b.kind)&&b.kind>=-3&&b.kind<=7&&
+    Number.isFinite(b.x)&&Number.isFinite(b.y)).map(b=>({
+     ...b,x:Math.max(0,Math.min(W,b.x)),y:Math.max(0,Math.min(H,b.y)),
+     vx:Number(b.vx)||0,vy:Number(b.vy)||0,angle:Number(b.angle)||0,
+     spin:Number(b.spin)||0,cool:.12,held:!!b.held,rest:0
+    }));
+  active=bodies.find(b=>b.id===s.activeId)||null;
+  if(active&&!active.held)active=null;
+  playing=true;heldFor=0;blockedFor=0;acc=0;last=0;
+  fillQueue();if(!active)spawn();drawQueue();
+  return true;
+ }catch(e){savedRun=null;return false}
+}
+
 function refreshWallet(){for(const id of ['walletMenu','walletCollection','walletShop'])document.getElementById(id).querySelector('.walletAmount').textContent=coins;const gameAmount=document.getElementById('inGameCoins');if(gameAmount)gameAmount.textContent=coins}
 function award(){let n=Math.floor(points/10000);if(n<=paidBands)return;let gain=(n-paidBands)*5;
- coins+=gain;earned+=gain;paidBands=n;message='+'+gain+' cukierków!';msgAge=0;save();refreshWallet()}
+ coins+=gain;earned+=gain;paidBands=n;message='+'+gain+' '+tr.candy+'!';msgAge=0;save();refreshWallet()}
 function pickKind(){const weights=[34,30,24,10,2],recent=history.slice(-5);
  const allowed=weights.map((w,k)=>({k,w})).filter(o=>!(recent.at(-1)===o.k&&recent.at(-2)===o.k)
  && !(o.k===0&&recent.filter(v=>v===0).length>=2));
  let x=Math.random()*allowed.reduce((s,v)=>s+v.w,0);
  for(const a of allowed){x-=a.w;if(x<=0)return a.k}return allowed.at(-1).k;
 }
-function fillQueue(){while(queue.length<4){let k=pickKind();if(drops>=30&&!issuedRainbow&&!queue.includes(-1)&&Math.random()<.0025)k=-1;
+function rainbowAllowed(){
+ const stable=bodies.filter(b=>!b.held&&b.kind>=0);
+ if(stable.length<8)return false;
+ if(stable.some(b=>b.kind>=3))return false;
+ return stable.filter(b=>b.kind<=2).length>=8;
+}
+function removeInvalidRainbows(){
+ if(rainbowAllowed())return;
+ queue=queue.map(k=>k===-1?0:k);
+ if(active?.kind===-1){
+  active.kind=0;active.y=Math.max(r(active)+6,active.y);
+  issuedRainbow=false;
+ }
+}
+function fillQueue(){while(queue.length<4){let k=pickKind();if(drops>=30&&rainbowAllowed()&&!issuedRainbow&&!queue.includes(-1)&&Math.random()<.0025)k=-1;
  else if(drops>=15&&Math.random()<.009)k=-2;queue.push(k);history.push(k);if(history.length>6)history.shift();}}
 function drawQueue(){const canvas=document.getElementById('nextCanvas'),c=canvas.getContext('2d');c.clearRect(0,0,600,165);
  c.save();c.scale(3,3);queue.slice(0,3).forEach((k,i)=>sprite(c,k,38+66*i,28,20));c.restore()}
@@ -151,9 +201,19 @@ function drawQueue(){const canvas=document.getElementById('nextCanvas'),c=canvas
 const finalAtlas=new Image();let finalAtlasReady=false;
 finalAtlas.onload=()=>{finalAtlasReady=true;refreshViews();if(queue.length)drawQueue()};
 // Cleaned individual sprite silhouettes, with a local fallback if loading is blocked.
-fetch('assets/squishy-atlas-clean.b64').then(r=>{if(!r.ok)throw new Error('Atlas fetch failed');return r.text()})
+fetch('assets/squishy-atlas-internal.b64').then(r=>{if(!r.ok)throw new Error('Atlas fetch failed');return r.text()})
  .then(data=>{finalAtlas.src='data:image/webp;base64,'+data.trim()})
  .catch(()=>{finalAtlas.src='assets/squishy-assets-v5.webp'});
+finalAtlas.onerror=()=>{if(!finalAtlasReady&&finalAtlas.src.indexOf('squishy-assets-v5.webp')===-1){finalAtlas.src='assets/squishy-assets-v5.webp'}};
+function useMenuArt(id,file){
+ const element=document.querySelector(id+' .menuIcon');
+ if(!element)return;
+ fetch('assets/'+file).then(r=>{if(!r.ok)throw new Error('Missing UI art');return r.text()})
+ .then(b64=>{element.src='data:image/webp;base64,'+b64.trim()})
+ .catch(()=>{ /* keep previous icon if offline */ });
+}
+useMenuArt('#openCollection','squishy-collection-internal.b64');
+useMenuArt('#openShop','squishy-shop-internal.b64');
 const homeArt=new Image();let homeReady=false;
 homeArt.onload=()=>{homeReady=true;drawHome()};
 homeArt.src='assets/squishy-home-v5.webp';
@@ -284,7 +344,7 @@ function availableLane(kind,preferred=aim){
 
 function spawn(){
  if(!playing||active)return;
- fillQueue();let kind=queue[0],lane=availableLane(kind);
+ removeInvalidRainbows();fillQueue();let kind=queue[0],lane=availableLane(kind);
  if(lane===null){
   let index=queue.findIndex(k=>availableLane(k)!==null);
   if(index>0){kind=queue.splice(index,1)[0];lane=availableLane(kind)}
@@ -297,11 +357,11 @@ function spawn(){
  bodies.push(active);heldFor=0;fillQueue();drawQueue();
 }
 function reset(){
- bodies=[];puffs=[];petals=[];fusions=[];traces=[];active=null;points=0;merges=0;pops=0;spills=0;drops=0;aim=180;
+ savedRun=null;bodies=[];puffs=[];petals=[];fusions=[];traces=[];active=null;points=0;merges=0;pops=0;spills=0;drops=0;aim=180;
  heldFor=0;blockedFor=0;issuedRainbow=false;playing=true;petalTime=0;message='';msgAge=0;id=0;
- earned=0;paidBands=0;queue=[];history=[];fillQueue();spawn();
+ earned=0;paidBands=0;queue=[];history=[];fillQueue();spawn();save();
 }
-function drop(){if(!playing||!active||!active.held)return;active.held=false;active.vy=Math.max(active.vy,120);heldFor=0;}
+function drop(){if(!playing||!active||!active.held)return;removeInvalidRainbows();active.held=false;active.vy=Math.max(active.vy,120);heldFor=0;save();}
 function aimAt(e){const rect=cvs.getBoundingClientRect();const radius=active?r(active):21;aim=Math.max(radius+2,Math.min(W-radius-2,(e.clientX-rect.left)/rect.width*W));if(active?.held)active.x=aim;}
 let touchStart=null;cvs.addEventListener('pointerdown',e=>{pointer={x:e.clientX,y:e.clientY,dragged:false};touchStart=e.clientY;aimAt(e);cvs.setPointerCapture(e.pointerId)});
 cvs.addEventListener('pointermove',e=>{if(!pointer)return;aimAt(e);if(Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y)>12)pointer.dragged=true});
@@ -337,7 +397,7 @@ function merge(){
   bodies.push({id:id++,kind:7,skin:keepSkin,x,y,vx:(a.vx+b.vx)*.2,vy:0,
     spin:0,angle:0,rollV:0,impact:.2,squish:.15,squishV:0,morph:.6,
     held:false,cool:.6,rest:0});
-  merges++;points+=180;award();message='✨ Merge!';msgAge=0;
+  merges++;points+=180;award();message='✨ Merge!';msgAge=0;save();
   return true;
  }
  for(let kind=6;kind>=0;kind--){const seen=new Set();for(const seed of bodies){if(seed.kind!==kind||seed.held||seed.cool>0||seen.has(seed.id))continue;
@@ -357,10 +417,10 @@ function merge(){
  }else{const next=kind+1,RN=R[next];const bigger={id:id++,kind:next,x:Math.max(RN,Math.min(W-RN,x)),y:Math.max(RN,Math.min(H-RN,y)),vx:0,vy:0,spin:0,angle:0,rollV:0,impact:.4,squish:.15,squishV:0,morph:1,held:false,cool:.32,rest:0};bodies.push(bigger);
    for(let k=0;k<9;k++){for(const q of bodies)if(q!==bigger&&!q.held)collision(q,bigger);bodies.forEach(b=>{if(!b.held)border(b)})}
    message='✨ '+(next===5?tr.flower:next===6?tr.crown:names[next])+'!';msgAge=0;}
- if(isActive){active=null;drops++;points+=5;}return true;
+ if(isActive){active=null;drops++;points+=5;}save();return true;
  }}return false}
 function finish(){playing=false;active=null;highScore=Math.max(points,highScore);award();save();refreshWallet();message=tr.end+' '+points+' • +'+earned+' 🍬 • '+highScore;msgAge=0;}
-function simulate(dt){if(!playing)return;msgAge+=dt;heldFor+=active?.held?dt:0;
+function simulate(dt){if(!playing)return;removeInvalidRainbows();msgAge+=dt;heldFor+=active?.held?dt:0;
  if(active?.held&&heldFor>=5)drop();
  petalTime+=dt;if(petalTime>.5&&petals.length<30){petalTime=0;petals.push({x:rr(0,W),y:-10,size:rr(3.5,7),age:0,speed:rr(20,38),phase:rr(0,7),settled:false})}
  for(const p of petals){p.age+=dt;if(!p.settled){p.y+=p.speed*dt;p.x+=Math.sin(p.phase+p.age*1.65)*13*dt;if(p.y>=H-5){p.y=H-rr(3,10);p.settled=true}}}
@@ -453,7 +513,7 @@ function paint(){
  feedback.textContent=(!playing||msgAge<1.5)?message:'';
 }
 let lastHomeDraw=0;
-function loop(ts){paintTime=ts/1000;if(!last)last=ts;
+function loop(ts){paintTime=ts/1000;if(playing&&ts-lastSavedAt>1900){save();lastSavedAt=ts;}if(!last)last=ts;
 if(ts-lastHomeDraw>=85&&document.getElementById('home').style.display!=='none'){drawHome();lastHomeDraw=ts;}const dt=Math.min(.06,(ts-last)/1000);last=ts;if(playing){acc+=dt;let n=0;while(acc>=1/120&&n<8){simulate(1/120);acc-=1/120;n++}}paint();requestAnimationFrame(loop)}requestAnimationFrame(loop);
 
 function renderCards(where){
@@ -474,23 +534,27 @@ function renderCards(where){
    else if(shop&&coins>=50){coins-=50;unlocked.push(i);selected=i;save();refreshViews()}};
   card.appendChild(button);root.appendChild(card);
   const c=picture.getContext('2d');c.clearRect(0,0,240,240);
-  if(finalAtlasReady){asset(c,i+5,120,124,223)}else sprite(c,5,120,130,77,0,0,1,{id:i+16,skin:i});
+  if(finalAtlasReady){asset(c,i+5,120,124,196)}else sprite(c,7,120,130,77,0,0,1,{id:i+16,skin:i});
  });
 }
 function refreshViews(){refreshWallet();drawHome();renderCards('shop');renderCards('collection')}
 function showPage(page){
  for(const [id,key] of [['home','home'],['game','game'],['collectionScreen','collection'],['shopScreen','shop']])
   document.getElementById(id).style.display=key===page?'block':'none';
- if(page!=='game')playing=false;
+ if(page!=='game'){if(playing)save();playing=false;}
  if(page==='shop'||page==='collection')refreshViews();
 }
-document.querySelector('#play').onclick=()=>{showPage('game');reset()};
+document.querySelector('#play').onclick=()=>{showPage('game');if(!resumeRun())reset()};
 document.querySelector('#restart').onclick=reset;
 document.querySelector('#back').onclick=()=>showPage('home');
 document.querySelector('#openCollection').onclick=()=>showPage('collection');
 document.querySelector('#openShop').onclick=()=>showPage('shop');
 document.querySelector('#collectionBack').onclick=()=>showPage('home');
 document.querySelector('#shopBack').onclick=()=>showPage('home');
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&playing)save()});
+window.addEventListener('pagehide',()=>{if(playing)save()});
+let lastSavedAt=0;
+const originalLoop=loop; // periodic autosave is handled in game paint callback below
 loadSave();applyLanguage();refreshViews();
 })();
 </script></body></html>
