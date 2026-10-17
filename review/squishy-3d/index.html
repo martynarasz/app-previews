@@ -101,7 +101,7 @@ main{max-width:440px;padding:12px 12px 28px}
 </main><script>
 (()=>{'use strict';
 
-const names=['Lawendowy','Truskawkowy','Brzoskwiniowy','Toffi','Miętowy'];
+const names=['Lawendowy','Truskawkowy','Brzoskwiniowy','Toffi','Miętowy','Kwiatek','Korona','Finał'];
 const pastel=['#c7adf5','#ffb6c9','#ffc79d','#dfb79c','#c3e5ad'];
 const skins=[
  ['Listek','#b7e8a5','leaf'],['Kwiatek','#ffc2df','flower'],['Korona','#dcc7ff','crown'],
@@ -110,6 +110,17 @@ const skins=[
 ];
 let coins=0,unlocked=[],selected=-1,highScore=0,paidBands=0,earned=0,queue=[],history=[],traces=[];
 const storageKey='squishy-merge-v3';
+const language=(navigator.language||'pl').toLowerCase().startsWith('pl')?'pl':'en';
+const tr={pl:{next:'NASTĘPNE',collection:'Kolekcja',shop:'Sklep',menu:'MENU',restart:'OD NOWA',owned:'Odblokowany',buy:'Kup',candy:'cukierków',end:'KONIEC GRY!',final:'Końcowa forma!',flower:'Kwiatek',crown:'Korona'},en:{next:'NEXT',collection:'Collection',shop:'Shop',menu:'MENU',restart:'RESTART',owned:'Unlocked',buy:'Buy',candy:'candies',end:'GAME OVER!',final:'Final form!',flower:'Flower',crown:'Crown'}}[language];
+function applyLanguage(){
+ document.documentElement.lang=language;
+ for(const [selector,label] of [['#openCollection span',tr.collection],['#openShop span',tr.shop],['#nextRow span',tr.next],['#restart','↻ '+tr.restart],['#back','← '+tr.menu],['#collectionBack','← '+tr.menu],['#shopBack','← '+tr.menu]]){
+  const n=document.querySelector(selector);if(n)n.textContent=label;
+ }
+ document.querySelector('#openCollection').setAttribute('aria-label',tr.collection);
+ document.querySelector('#openShop').setAttribute('aria-label',tr.shop);
+}
+
 function loadSave(){
  // The leaf Squishy is free and always belongs to every player, including old saves.
  unlocked=[0];selected=0;coins=0;highScore=0;
@@ -117,7 +128,7 @@ function loadSave(){
   const x=JSON.parse(localStorage.getItem(storageKey)||'{}');
   coins=Math.max(0,Number(x.coins)||0);highScore=Math.max(0,Number(x.highScore)||0);
   if(Array.isArray(x.unlocked)){
-   for(const skin of x.unlocked)if(Number.isInteger(skin)&&skin>=1&&skin<9&&!unlocked.includes(skin))unlocked.push(skin);
+   for(const skin of x.unlocked)if(Number.isInteger(skin)&&skin>=3&&skin<9&&!unlocked.includes(skin))unlocked.push(skin);
   }
   if(unlocked.includes(x.selected))selected=x.selected;
  }catch(e){/* corrupted or blocked storage starts with the free skin */}
@@ -147,12 +158,12 @@ const homeArt=new Image();let homeReady=false;
 homeArt.onload=()=>{homeReady=true;drawHome()};
 homeArt.src='assets/squishy-home-v5.webp';
 // Core game tiers use real cutouts from the same polished atlas as the shop.
-const GAME_ASSETS=[0,1,2,3,4];
-const R=[21,31,42,53,67,73],W=360,H=465,gravity=520,cap=345;const kindSprite={0:0,1:1,2:2,3:3,4:4,'-1':5,'-2':6,'-3':7};
+const GAME_ASSETS=[0,1,2,3,4,6,7];
+const R=[20,27,34,42,49,57,65,72],W=360,H=465,gravity=520,cap=345;const kindSprite={0:0,1:1,2:2,3:3,4:4,'-1':5,'-2':6,'-3':7};
 const cvs=document.querySelector('#board'),hero=document.querySelector('#hero'),ctx=cvs.getContext('2d'),hc=hero.getContext('2d');
 const status=document.querySelector('#status'),feedback=document.querySelector('#feedback'),count=document.querySelector('#count');
 let bodies=[],puffs=[],petals=[],fusions=[],active=null,points=0,merges=0,pops=0,spills=0,drops=0,aim=180,heldFor=0,blockedFor=0,last=0,acc=0,playing=false,id=0,issuedRainbow=false,message='',msgAge=0,petalTime=0,pointer=null,paintTime=0;
-const r=b=>b.kind===-3?11:b.kind<0?21:(R[b.kind]||73);
+const r=b=>b.kind===-3?11:b.kind<0?21:(R[b.kind]||72);
 function asset(c,index,x,y,size){
  if(!finalAtlasReady)return false;
  const cell=192,col=index%5,row=Math.floor(index/5);
@@ -236,11 +247,11 @@ function sprite(c,kind,x,y,radius,angle=0,impact=0,opacity=1,b=null){
  if(kind<0){special(c,kind,radius);c.restore();return;}
  // Every mochi on the board, including the small/medium stages, uses the real
  // transparent 3D assets. The same artwork is used in the upcoming-piece tray.
- const spriteIndex=kind===5
-  ?(Number.isInteger(b?.skin)&&b.skin>=0&&b.skin<9?b.skin+5:5)
+ const spriteIndex=kind===7
+  ?(Number.isInteger(b?.skin)&&b.skin>=3&&b.skin<9?b.skin+5:5)
   :GAME_ASSETS[kind];
  if(spriteIndex!==undefined&&asset(c,spriteIndex,0,0,radius*2.34)){
-  if(b)livingFace(c,kind,radius,b);
+  if(b&&kind<=1)livingFace(c,kind,radius,b);
   c.restore();return;
  }
  const base=kind===5?(skins[b?.skin??selected]?.[1]||'#b7e8a5'):pastel[kind];
@@ -316,39 +327,39 @@ function collect(kind){for(const b of bodies)if(b.kind===kind)return true;return
 function merge(){
  // The last two forms become one final form of the same size,
  // so they never grow and never release pellets.
- const ready=bodies.filter(b=>b.kind===5&&!b.held&&b.cool<=0);
+ const ready=bodies.filter(b=>b.kind===7&&!b.held&&b.cool<=0);
  for(let i=0;i<ready.length;i++)for(let j=i+1;j<ready.length;j++){
   const a=ready[i],b=ready[j];if(!touch(a,b))continue;
   const keepSkin=a.skin>=0?a.skin:b.skin;
-  const radius=R[5],x=Math.max(radius,Math.min(W-radius,(a.x+b.x)/2)),
+  const radius=R[7],x=Math.max(radius,Math.min(W-radius,(a.x+b.x)/2)),
     y=Math.max(radius,Math.min(H-radius,(a.y+b.y)/2));
   bodies=bodies.filter(q=>q!==a&&q!==b);
-  bodies.push({id:id++,kind:5,skin:keepSkin,x,y,vx:(a.vx+b.vx)*.2,vy:0,
+  bodies.push({id:id++,kind:7,skin:keepSkin,x,y,vx:(a.vx+b.vx)*.2,vy:0,
     spin:0,angle:0,rollV:0,impact:.2,squish:.15,squishV:0,morph:.6,
     held:false,cool:.6,rest:0});
   merges++;points+=180;award();message='✨ Merge!';msgAge=0;
   return true;
  }
- for(let kind=4;kind>=0;kind--){const seen=new Set();for(const seed of bodies){if(seed.kind!==kind||seed.held||seed.cool>0||seen.has(seed.id))continue;
+ for(let kind=6;kind>=0;kind--){const seen=new Set();for(const seed of bodies){if(seed.kind!==kind||seed.held||seed.cool>0||seen.has(seed.id))continue;
  const group=[seed];seen.add(seed.id);for(let cur=0;cur<group.length;cur++)for(const q of bodies){if(q.kind===kind&&!q.held&&q.cool<=0&&!seen.has(q.id)&&touch(group[cur],q)){group.push(q);seen.add(q.id)}}
  const amount=kind===0?3:2;if(group.length<amount)continue;
  const found=group.slice(0,amount),x=found.reduce((s,b)=>s+b.x,0)/amount,y=found.reduce((s,b)=>s+b.y,0)/amount;
- let isActive=found.includes(active);fusions.push({parts:found.map(b=>({kind:b.kind,x:b.x,y:b.y,radius:r(b),angle:b.angle})),x,y,age:0});bodies=bodies.filter(b=>!found.includes(b));merges++;points+=[45,85,155,260,460][kind];award();
+ let isActive=found.includes(active);fusions.push({parts:found.map(b=>({kind:b.kind,x:b.x,y:b.y,radius:r(b),angle:b.angle})),x,y,age:0});bodies=bodies.filter(b=>!found.includes(b));merges++;points+=[45,85,155,260,460,700,1050][kind];award();
 
- if(kind===4){
+ if(kind===6){
    // Two green mochi become the selected final collectible form.
    // Final forms continue merging two into one, with fixed radius and no pellets.
-   const big={id:id++,kind:5,skin:selected>=0?selected:0,x:Math.max(73,Math.min(W-73,x)),y:Math.max(73,Math.min(H-73,y)),
+   const big={id:id++,kind:7,skin:selected>=0?selected:0,x:Math.max(R[7],Math.min(W-R[7],x)),y:Math.max(R[7],Math.min(H-R[7],y)),
       vx:0,vy:-62,spin:0,angle:0,rollV:0,impact:.35,squish:.18,squishV:0,morph:1,
       held:false,cool:.54,rest:0,traceTimer:0};
    bodies.push(big);pops++;
-   message='🌸 Końcowa forma!';msgAge=0;
+   message='🌸 '+tr.final;msgAge=0;
  }else{const next=kind+1,RN=R[next];const bigger={id:id++,kind:next,x:Math.max(RN,Math.min(W-RN,x)),y:Math.max(RN,Math.min(H-RN,y)),vx:0,vy:0,spin:0,angle:0,rollV:0,impact:.4,squish:.15,squishV:0,morph:1,held:false,cool:.32,rest:0};bodies.push(bigger);
    for(let k=0;k<9;k++){for(const q of bodies)if(q!==bigger&&!q.held)collision(q,bigger);bodies.forEach(b=>{if(!b.held)border(b)})}
-   message='✨ '+names[next]+'!';msgAge=0;}
+   message='✨ '+(next===5?tr.flower:next===6?tr.crown:names[next])+'!';msgAge=0;}
  if(isActive){active=null;drops++;points+=5;}return true;
  }}return false}
-function finish(){playing=false;active=null;highScore=Math.max(points,highScore);award();save();refreshWallet();message='KONIEC GRY! '+points+' pkt • cukierki +'+earned+' • rekord '+highScore;msgAge=0;}
+function finish(){playing=false;active=null;highScore=Math.max(points,highScore);award();save();refreshWallet();message=tr.end+' '+points+' • +'+earned+' 🍬 • '+highScore;msgAge=0;}
 function simulate(dt){if(!playing)return;msgAge+=dt;heldFor+=active?.held?dt:0;
  if(active?.held&&heldFor>=5)drop();
  petalTime+=dt;if(petalTime>.5&&petals.length<30){petalTime=0;petals.push({x:rr(0,W),y:-10,size:rr(3.5,7),age:0,speed:rr(20,38),phase:rr(0,7),settled:false})}
@@ -449,7 +460,7 @@ function renderCards(where){
  const shop=where==='shop',root=document.getElementById(shop?'shopCards':'collectionCards');
  root.textContent='';
  skins.forEach((sk,i)=>{
-  if(!shop&&!unlocked.includes(i))return;
+  if(shop&&i<3)return;if(!shop&&!unlocked.includes(i))return;
   const owned=unlocked.includes(i),chosen=selected===i,card=document.createElement('div');
   card.className='skinCard'+(chosen?' selected':'')+(owned?'':' locked');
   const picture=document.createElement('canvas');picture.width=240;picture.height=240;card.appendChild(picture);
@@ -457,7 +468,7 @@ function renderCards(where){
   if(owned){button.textContent=chosen?'✓':'✓';button.className='owned'+(chosen?' selected':'')}
   else {const coin=document.createElement('span');coin.className='pepperCoin';button.appendChild(coin);
    const value=document.createElement('span');value.textContent='50';button.appendChild(value)}
-  button.setAttribute('aria-label',owned?'Odblokowany '+sk[0]:'Kup '+sk[0]+' za 50 cukierków');
+  button.setAttribute('aria-label',owned?tr.owned+' '+sk[0]:tr.buy+' '+sk[0]+' 50 '+tr.candy);
   button.disabled=chosen||(!shop&&!owned)||(shop&&!owned&&coins<50);
   button.onclick=()=>{if(owned){selected=i;save();refreshViews()}
    else if(shop&&coins>=50){coins-=50;unlocked.push(i);selected=i;save();refreshViews()}};
@@ -480,6 +491,6 @@ document.querySelector('#openCollection').onclick=()=>showPage('collection');
 document.querySelector('#openShop').onclick=()=>showPage('shop');
 document.querySelector('#collectionBack').onclick=()=>showPage('home');
 document.querySelector('#shopBack').onclick=()=>showPage('home');
-loadSave();refreshViews();
+loadSave();applyLanguage();refreshViews();
 })();
 </script></body></html>
