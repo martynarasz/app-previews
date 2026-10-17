@@ -38,7 +38,7 @@ button:active{transform:scale(.98)}#play{display:block;width:92px;height:92px;pa
 #nextRow span{font-size:12px;font-weight:900;color:#9982a6}
 #nextCanvas{width:200px;height:55px}
 
-.pepperCoin{display:inline-block;flex-shrink:0;width:26px;height:26px;vertical-align:middle;background-image:url("assets/squishy-assets-v5.webp");background-repeat:no-repeat;background-size:500% 300%;background-position:100% 100%;filter:drop-shadow(0 2px 2px #d86a8b5c)}
+.pepperCoin{display:inline-block;flex-shrink:0;width:26px;height:26px;vertical-align:middle;background-image:var(--squishy-candy,url("assets/squishy-assets-v5.webp"));background-repeat:no-repeat;background-size:500% 300%;background-position:75% 100%;filter:drop-shadow(0 2px 2px #d86a8b5c)}
 #status .pepperCoin{width:22px;height:22px}
 .wallet{gap:7px;font-size:17px;padding:8px 13px}
 .skinGrid{gap:9px;margin:12px auto}
@@ -199,9 +199,9 @@ function drawQueue(){const canvas=document.getElementById('nextCanvas'),c=canvas
  c.save();c.scale(3,3);queue.slice(0,3).forEach((k,i)=>sprite(c,k,38+66*i,28,20));c.restore()}
 
 const finalAtlas=new Image();let finalAtlasReady=false;
-finalAtlas.onload=()=>{finalAtlasReady=true;refreshViews();if(queue.length)drawQueue()};
+finalAtlas.onload=()=>{finalAtlasReady=true;document.documentElement.style.setProperty('--squishy-candy','url("'+finalAtlas.src+'")');refreshViews();if(queue.length)drawQueue()};
 // Cleaned individual sprite silhouettes, with a local fallback if loading is blocked.
-fetch('assets/squishy-atlas-internal.b64').then(r=>{if(!r.ok)throw new Error('Atlas fetch failed');return r.text()})
+fetch('assets/squishy-final-precise.b64').then(r=>{if(!r.ok)throw new Error('Atlas fetch failed');return r.text()})
  .then(data=>{finalAtlas.src='data:image/webp;base64,'+data.trim()})
  .catch(()=>{finalAtlas.src='assets/squishy-assets-v5.webp'});
 finalAtlas.onerror=()=>{if(!finalAtlasReady&&finalAtlas.src.indexOf('squishy-assets-v5.webp')===-1){finalAtlas.src='assets/squishy-assets-v5.webp'}};
@@ -218,7 +218,7 @@ const homeArt=new Image();let homeReady=false;
 homeArt.onload=()=>{homeReady=true;drawHome()};
 homeArt.src='assets/squishy-home-v5.webp';
 // Core game tiers use real cutouts from the same polished atlas as the shop.
-const GAME_ASSETS=[0,1,2,3,4,6,7];
+const GAME_ASSETS=[0,1,2,3,4,5,6];
 const R=[20,27,34,42,49,57,65,72],W=360,H=465,gravity=520,cap=345;const kindSprite={0:0,1:1,2:2,3:3,4:4,'-1':5,'-2':6,'-3':7};
 const cvs=document.querySelector('#board'),hero=document.querySelector('#hero'),ctx=cvs.getContext('2d'),hc=hero.getContext('2d');
 const status=document.querySelector('#status'),feedback=document.querySelector('#feedback'),count=document.querySelector('#count');
@@ -303,12 +303,12 @@ function sprite(c,kind,x,y,radius,angle=0,impact=0,opacity=1,b=null){
  const w=b?.squish||0,m=b?.morph||0;const breath=b?.held?Math.sin(paintTime*2+(b?.id||0))*.014:Math.sin(paintTime*1.8+(b?.id||0))*.007;const scale=1-m*.28+Math.sin((1-m)*Math.PI)*m*.10+breath;
  c.scale(scale*(1+w*.17+impact*.06),scale*(1-w*.12-impact*.10));c.globalAlpha=opacity;
  c.shadowColor='#7055814f';c.shadowBlur=radius*.22;c.shadowOffsetY=radius*.12;
- if(kind===-2){if(!asset(c,14,0,0,radius*2.20))special(c,kind,radius);c.restore();return;}
+ if(kind===-2){if(!asset(c,13,0,0,radius*2.20))special(c,kind,radius);c.restore();return;}
  if(kind<0){special(c,kind,radius);c.restore();return;}
  // Every mochi on the board, including the small/medium stages, uses the real
  // transparent 3D assets. The same artwork is used in the upcoming-piece tray.
  const spriteIndex=kind===7
-  ?(Number.isInteger(b?.skin)&&b.skin>=3&&b.skin<9?b.skin+5:5)
+  ?(Number.isInteger(b?.skin)&&b.skin>=3&&b.skin<9?b.skin+4:4)
   :GAME_ASSETS[kind];
  if(spriteIndex!==undefined&&asset(c,spriteIndex,0,0,radius*2.34)){
   if(b&&kind<=1)livingFace(c,kind,radius,b);
@@ -323,7 +323,7 @@ function sprite(c,kind,x,y,radius,angle=0,impact=0,opacity=1,b=null){
  c.strokeStyle='#ffffff7f';c.lineWidth=radius*.048;c.lineCap='round';
  for(const j of [-2,-1,1,2]){c.beginPath();c.moveTo(j*radius*.055,-radius*.96);c.quadraticCurveTo(j*radius*.20,-radius*.66,j*radius*.22,-radius*.52);c.stroke();}
  c.fillStyle='#ffffff96';c.beginPath();c.ellipse(-radius*.39,-radius*.4,radius*.24,radius*.078,-.4,0,7);c.fill();
- if(kind===5)decoration(c,b?.skin??selected,radius);
+ if(kind===7)decoration(c,b?.skin??selected,radius);
  face(c,radius,b);c.restore();
 }
 function drawHome(){hc.clearRect(0,0,780,780);if(homeReady){hc.drawImage(homeArt,0,0,780,780);return;}hc.save();hc.scale(2,2);
@@ -536,7 +536,7 @@ function renderCards(where){
    else if(shop&&coins>=50){coins-=50;unlocked.push(i);selected=i;save();refreshViews()}};
   card.appendChild(button);root.appendChild(card);
   const c=picture.getContext('2d');c.clearRect(0,0,240,240);
-  if(finalAtlasReady){asset(c,i+5,120,124,196)}else sprite(c,7,120,130,77,0,0,1,{id:i+16,skin:i});
+  if(finalAtlasReady){asset(c,i===0?4:(i<=2?i+4:i+4),120,124,196)}else sprite(c,7,120,130,77,0,0,1,{id:i+16,skin:i});
  });
 }
 function refreshViews(){refreshWallet();drawHome();renderCards('shop');renderCards('collection')}
