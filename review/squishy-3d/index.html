@@ -454,12 +454,14 @@ function simulate(dt){if(!playing)return;removeInvalidRainbows();msgAge+=dt;held
  if(active&&!active.held){const b=active;const supported=b.y>=H-r(b)-.7||bodies.some(q=>q!==b&&q.y>b.y&&touch(q,b));
    if(supported&&Math.abs(b.vy)<72)b.rest=(b.rest||0)+dt;else b.rest=0;
    if(b.rest>.18){active=null;drops++;points+=3;award();
+     // Check right at impact, even if a large merge happened this very frame.
+     if(b.kind===-1&&!rainbowAllowed()){b.kind=0;issuedRainbow=false;}
      if(b.kind===-1){bodies=[];puffs=[];blockedFor=0;points+=140;award();puff(b.x,b.y,5);message='🌈 TĘCZOWY CLEAR!';msgAge=0}
      if(b.kind===-2){const cx=b.x,cy=b.y;let cleared=0;
        bodies=bodies.filter(other=>{if(other===b)return false;if(other.kind===-1||other.kind===-2)return true;
          const nearby=Math.hypot(other.x-cx,other.y-cy)<116+r(other)*.15;if(nearby)cleared++;return !nearby});
        blockedFor=0;points+=45+cleared*12;award();puff(cx,cy,6);message='PUF! '+cleared;msgAge=0}
-     }}
+     save();}}
  if(!active&&playing)spawn();
 }
 function drawPetal(c,x,y,s,a,alpha){c.save();c.translate(x,y);c.rotate(a);c.globalAlpha=alpha;c.fillStyle='#f7adcf';c.strokeStyle='#e39cbb';c.lineWidth=.6;c.beginPath();c.moveTo(0,s*.43);c.bezierCurveTo(-s*.87,s*.04,-s*.55,-s*.95,0,-s*.86);c.bezierCurveTo(s*.53,-s*.98,s*.85,s*.02,0,s*.43);c.fill();c.stroke();c.restore()}
