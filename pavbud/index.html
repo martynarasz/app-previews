@@ -5,6 +5,7 @@
 <meta name="theme-color" content="#172821"><meta name="description" content="PAVBUD – Pavlo Kvartiuk. Malowanie, płytkowanie, montaż paneli i listew. Bielsko-Biała i powiat bielski. Krótkie terminy.">
 <meta property="og:title" content="PAVBUD | Pavlo Kvartiuk – Remonty i wykończenia"><meta property="og:description" content="Dobre wnętrza zaczynają się od dobrego fachowca. Sprawdź usługi PAVBUD.">
 <title>PAVBUD — Pavlo Kvartiuk | Remonty i wykończenia</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -23,6 +24,71 @@ header{position:sticky;top:0;background:#fffefaee;backdrop-filter:blur(16px);-we
 @media(max-width:900px){.nav{height:70px}.links{gap:14px}.links a{font-size:11px}.hero-grid{gap:20px}.visual{min-height:480px}.floating{left:-10px}.about{gap:35px}.services{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:720px){.container{padding:0 20px}.nav .btn{display:none}.hamburger{display:block}.links{display:none;position:absolute;top:70px;left:0;right:0;background:#fffefa;flex-direction:column;align-items:stretch;gap:0;padding:12px 25px 24px;border-bottom:1px solid var(--line);box-shadow:0 20px 30px #14271f18}.links.open{display:flex}.links a{padding:12px 0;font-size:14px}.hero{padding:25px 0 65px}.hero-grid{grid-template-columns:1fr;gap:15px}.hero h1{font-size:clamp(44px,12vw,70px)}.hero-copy{padding:15px 0 0}.lead{font-size:15px}.hero-actions{margin:20px 0 25px}.highlights{gap:15px}.highlight{font-size:11px}.visual{min-height:360px;margin:0 0 18px 12px}.hero-photo{bottom:24px;border-radius:75px 12px 12px 12px}.floating{left:-10px;padding:13px;bottom:0}.section{padding:72px 0}.section-head{display:block;margin-bottom:25px}.section-head p{margin-top:18px}.services{grid-template-columns:1fr 1fr;gap:10px}.service{padding:18px;min-height:210px;border-radius:15px}.service .service-icon{margin-bottom:18px;width:43px;height:43px;font-size:23px}.service h3{font-size:16px}.service p{font-size:11px}.darkflex,.cta-inner,.footer-inner{flex-direction:column;align-items:start}.darkflex .btn{width:100%}.about{grid-template-columns:1fr;gap:26px}.about-art{min-height:270px}.about-art:before{font-size:420px;top:-50%}.price-wrap{grid-template-columns:1fr}.coverage{min-height:320px}.projects{grid-template-columns:1fr}.project{min-height:245px}.cta-section{padding:65px 0}.cta-section:after{bottom:-20px}.contact-block{width:100%;min-width:0}.contact-block a{width:100%}}
 @media(max-width:380px){.hero-actions .btn{width:100%}.services{grid-template-columns:1fr}.service{min-height:0}.highlights{gap:8px}.highlight{width:100%}}
+
+
+/* PAVBUD · efekty inspirowane malowaniem i układaniem płytek */
+:root{--forest:#274639;--gold:#cba06b;--cream:#f8f6ef;--paper:#fffefa}
+body{background:radial-gradient(ellipse at 9% 16%,#e9efe8 0,transparent 34%),radial-gradient(ellipse at 92% 48%,#f1e8da 0,transparent 32%),#f8f6ef}
+.hero{position:relative;background:radial-gradient(circle at 4% 17%,#eaf1e8,transparent 34%),radial-gradient(circle at 82% 74%,#f4e8d8,transparent 37%)}
+.hero:before{content:"";pointer-events:none;position:absolute;inset:0;opacity:.1;background-image:linear-gradient(90deg,#829985 1px,transparent 1px),linear-gradient(#829985 1px,transparent 1px);background-size:88px 88px;mask-image:linear-gradient(to right,#000,transparent 80%)}
+.hero-grid{position:relative;z-index:1}
+.hero h1 span{position:relative;isolation:isolate}
+.hero h1 span:after{content:"";position:absolute;z-index:-1;left:0;right:0;bottom:.04em;height:.19em;border-radius:3px;background:#d7c4a3;transform-origin:left;animation:brushUnderline 1.25s ease-out .65s both}
+@keyframes brushUnderline{from{transform:scaleX(0);opacity:.3}to{transform:scaleX(1);opacity:.8}}
+.hero-photo img{animation:paintReveal 1.7s cubic-bezier(.16,.9,.25,1) both;will-change:clip-path}
+@keyframes paintReveal{0%{clip-path:inset(0 100% 0 0)}45%{clip-path:inset(0 42% 0 0)}100%{clip-path:inset(0 0 0 0)}}
+.paint-roller{pointer-events:none;position:absolute;z-index:3;width:65px;height:85px;top:26%;filter:drop-shadow(0 8px 8px #1d2b2233);animation:rollerTravel 1.75s cubic-bezier(.24,.64,.28,1) .02s forwards}
+.paint-roller svg{display:block}
+@keyframes rollerTravel{0%{left:-10%;opacity:0;transform:rotate(-9deg) translateY(7px)}9%{opacity:1}87%{opacity:1}100%{left:110%;opacity:0;transform:rotate(8deg) translateY(-7px)}}
+.hero-photo:after{content:"";position:absolute;inset:0;background:linear-gradient(102deg,transparent 0%,#eee5d51c 51%,transparent 70%);pointer-events:none}
+.section-head{position:relative}
+.services{position:relative}
+.service{position:relative;overflow:hidden;box-shadow:0 3px 16px #24382b05;background:linear-gradient(150deg,#fffefa,#fdfcf8)}
+.service:before{content:"";position:absolute;top:0;right:0;width:42px;height:42px;border-top:1px solid #d7dace;border-right:1px solid #d7dace;border-radius:0 20px 0 0;opacity:.7;pointer-events:none}
+.service .service-icon{transition:transform .45s cubic-bezier(.2,.8,.2,1),background .3s}
+.service:hover .service-icon{transform:rotate(-6deg) scale(1.1);background:#e6e9db}
+.about-art{background:radial-gradient(circle at 75% 15%,#eaf0e4 0,#e3e9dc 43%,#d9e3d6 100%);box-shadow:0 25px 60px #17342611}
+.about-corner{position:absolute;top:24px;left:28px;font-size:10px;letter-spacing:.18em;font-weight:800;color:#829580;z-index:1}
+.about-card{backdrop-filter:blur(12px);background:#fffefaed;border:1px solid #fff;box-shadow:0 20px 55px #24432d15}
+.accent-dot{color:#ad8b5a}
+.about-copy p strong{color:#274639}
+.btn-primary,.btn-dark,.btn-gold{box-shadow:0 9px 18px #243a2916}
+.btn:hover{box-shadow:0 15px 27px #243a2922}
+.price-wrap .pricing,.price-wrap .coverage{box-shadow:0 7px 35px #2635290c}
+.area-map-block{margin-top:34px;border:1px solid #e0e7dd;background:#f8faf6;border-radius:25px;padding:28px;box-shadow:0 10px 40px #1735270b}
+.map-top{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:17px}
+.map-top h3{font-size:clamp(24px,3.2vw,35px);margin:10px 0}
+.map-top p{font-size:13px;color:#68776c;max-width:550px;margin:0}
+.map-legend{font-size:11px;font-weight:700;color:#5d806a;white-space:nowrap}
+.map-legend-dot{display:inline-block;width:11px;height:11px;border-radius:50%;background:#648d74;margin-right:7px;vertical-align:middle;box-shadow:0 0 0 4px #648d7428}
+.map-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.map-chip{padding:8px 15px;border:1px solid #d9e1d8;border-radius:50px;background:white;color:#294839;font-size:12px;font-weight:800;cursor:pointer;transition:background .2s,transform .2s,border-color .2s}
+.map-chip:hover,.map-chip.active{background:#294839;color:white;border-color:#294839;transform:translateY(-1px)}
+.map-frame{position:relative;overflow:hidden;border:1px solid #d8e2d6;border-radius:18px;background:#e2eae0}
+#service-map{width:100%;height:390px}
+.map-fallback{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:18px;color:#284739;background:linear-gradient(130deg,#dfe8dc,#f6f1e6);padding:25px}
+.map-fallback span{font-size:33px}
+.map-fallback strong{font:800 18px/1.5 Manrope,sans-serif}
+.map-fallback a{font-size:13px;text-decoration:underline}
+.map-stamp{position:absolute;z-index:400;right:15px;top:15px;border-radius:10px;background:#fffefaee;box-shadow:0 4px 12px #163c2826;padding:8px 11px;font:800 11px Manrope;color:#284638;pointer-events:none}
+.map-stamp span{color:#b58b54}
+.map-bottom{display:flex;gap:15px;justify-content:space-between;align-items:center;padding-top:16px;font-size:11px;color:#687b6c}
+.map-bottom a{color:#294839;font-weight:800;white-space:nowrap}
+.map-pin{width:15px;height:15px;background:#2c5c43;border:3px solid #fffefa;border-radius:50%;box-shadow:0 2px 12px #163e295b,0 0 0 4px #508b6e77}
+.map-pin-main{width:17px;height:17px;background:#b78752;box-shadow:0 2px 12px #6249225b,0 0 0 4px #b7875277}
+.leaflet-container{font:12px 'DM Sans',sans-serif;color:#203a2e}
+.leaflet-popup-content-wrapper{border-radius:12px;box-shadow:0 9px 23px #14302126}
+.leaflet-popup-content{font-size:13px;line-height:1.5}
+.leaflet-control-attribution{font-size:10px!important}
+body.motion-on .service.tile-reveal,body.motion-on .project.tile-reveal{opacity:0;transform:translate3d(0,45px,0) rotate(-2.5deg) scale(.94)}
+body.motion-on .service.tile-reveal.visible,body.motion-on .project.tile-reveal.visible{opacity:1;transform:translate3d(0,0,0) rotate(0deg) scale(1)}
+body.motion-on .tile-reveal{transition:opacity .7s cubic-bezier(.18,.8,.3,1),transform .75s cubic-bezier(.18,.8,.3,1);transition-delay:calc(var(--tile-order,0)*85ms)}
+body.motion-on .section-head.soft-reveal,body.motion-on .about-copy.soft-reveal,body.motion-on .about-card.soft-reveal,body.motion-on .area-map-block.soft-reveal{opacity:0;transform:translateY(20px)}
+body.motion-on .soft-reveal.visible{opacity:1;transform:translateY(0)}
+body.motion-on .soft-reveal{transition:opacity .75s ease,transform .75s cubic-bezier(.18,.8,.3,1)}
+@media(max-width:720px){.area-map-block{padding:15px;margin-top:22px;border-radius:18px}.map-top{display:block}.map-top h3{font-size:26px}.map-legend{margin:14px 0 0}.map-frame{border-radius:13px}#service-map{height:300px}.map-bottom{display:block}.map-bottom a{display:block;margin-top:6px}.map-stamp{top:9px;right:9px}.paint-roller{width:46px;height:61px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}body.motion-on .tile-reveal,body.motion-on .soft-reveal{opacity:1!important;transform:none!important}.paint-roller{display:none}}
+
 </style>
 </head>
 <body>
@@ -36,7 +102,7 @@ header{position:sticky;top:0;background:#fffefaee;backdrop-filter:blur(16px);-we
 <section class="hero" id="start"><div class="container hero-grid"><div class="hero-copy"><span class="pill"><span class="dot"></span>Krótkie terminy · Bielsko-Biała i okolice</span><div style="height:25px"></div><div class="eyebrow">Remonty i wykończenia wnętrz</div><h1>Twój remont.<br><span>Dobrze zrobiony.</span></h1><p class="lead">Malowanie, płytki, panele i perfekcyjnie dopracowane detale. PAVBUD to solidne podejście do prac wykończeniowych — od pierwszego pomiaru po ostatnią listwę.</p>
 <div class="hero-actions"><a href="tel:+48512414770" class="btn btn-primary">Zamów wycenę ↗</a><a href="#uslugi" class="btn btn-light">Poznaj usługi ↓</a></div>
 <div class="highlights"><span class="highlight"><i>▧</i>Dokładność<br>wykonania</span><span class="highlight"><i>⌂</i>Prace od A do Z</span><span class="highlight"><i>↗</i>Lokalnie<br>i sprawnie</span></div></div>
-<div class="visual"><div class="hero-photo"><img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&amp;fit=crop&amp;w=1100&amp;q=85" alt="Jasne, nowoczesne wnętrze – fotografia ilustracyjna" loading="eager"><span class="photo-note">Fotografia poglądowa</span></div><div class="floating"><span class="star">✦</span><div><b>Estetyka tkwi w detalach.</b><small>Piękne wykończenie robi różnicę.</small></div></div></div></div></section>
+<div class="visual"><div class="hero-photo"><img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&amp;fit=crop&amp;w=1100&amp;q=85" alt="Jasne, nowoczesne wnętrze – fotografia ilustracyjna" loading="eager"><span class="paint-roller" aria-hidden="true"><svg viewBox="0 0 88 108" fill="none"><rect x="8" y="8" width="64" height="26" rx="8" fill="#f0dbb7" stroke="#274639" stroke-width="3"/><path d="M11 18h58M11 25h58" stroke="#c5a371" stroke-width="2" opacity=".7"/><path d="M72 21h10v30c0 6-4 10-10 10H45v18" stroke="#274639" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><rect x="39" y="77" width="12" height="27" rx="4" fill="#c99d65" stroke="#274639" stroke-width="2"/></svg></span><span class="photo-note">Fotografia poglądowa</span></div><div class="floating"><span class="star">✦</span><div><b>Estetyka tkwi w detalach.</b><small>Piękne wykończenie robi różnicę.</small></div></div></div></div></section>
 <section id="uslugi" class="section white"><div class="container"><div class="section-head"><div><div class="eyebrow">W czym pomogę</div><h2>Usługi PAVBUD</h2></div><p>Od odświeżenia jednego pokoju po kompleksowe prace wykończeniowe.</p></div><div class="services">
 <article class="service"><div class="service-icon">🖌️</div><h3>Malowanie ścian</h3><p>Malowanie ścian i sufitów, estetyczne wykończenie i staranne zabezpieczenie powierzchni.</p></article>
 <article class="service"><div class="service-icon">▦</div><h3>Układanie płytek</h3><p>Płytki w łazienkach, kuchniach i innych pomieszczeniach. Precyzja i równe linie.</p></article>
@@ -46,12 +112,62 @@ header{position:sticky;top:0;background:#fffefaee;backdrop-filter:blur(16px);-we
 <article class="service"><div class="service-icon">🔧</div><h3>Prace wykończeniowe</h3><p>Poprawki, montaż i drobne prace remontowe. Zapytaj o konkretny zakres.</p></article>
 </div></div></section>
 <div class="darkband"><div class="container darkflex"><div><h3>Masz remont w planach? Działajmy.</h3><p>Krótkie terminy — skontaktuj się i zapytaj o dostępność.</p></div><a class="btn btn-gold" href="tel:+48512414770">📞 512 414 770</a></div></div>
-<section id="o-mnie" class="section"><div class="container about"><div class="about-art"><div class="about-card"><div class="eyebrow">Za marką stoi człowiek</div><div class="big">Pavlo Kvartiuk</div><p>Praktyczne podejście do remontów, dbałość o jakość i dobre wykończenie.</p></div></div><div class="about-copy"><div class="eyebrow">Poznaj wykonawcę</div><h2>Od własnego mieszkania do PAVBUD.</h2><p>Za PAVBUD stoi Pavlo — pasjonat prac remontowych, który samodzielnie wykończył własne mieszkanie, od łazienki po salon. Teraz ten warsztat i zamiłowanie do estetycznych detali mogą pomagać kolejnym osobom.</p><p>Bez zbędnego komplikowania: rozmowa o potrzebach, ustalenie zakresu i solidne wykonanie.</p><ul class="checks"><li>Bezpośredni kontakt z wykonawcą</li><li>Ustalenie zakresu przed rozpoczęciem prac</li><li>Uwaga poświęcona detalom</li></ul><a href="mailto:pavlokvaritiuk@gmail.com?subject=Zapytanie%20o%20remont%20PAVBUD" class="btn btn-outline">Zapytaj o realizację ↗</a></div></div></section>
-<section id="cennik" class="section white"><div class="container"><div class="section-head"><div><div class="eyebrow">Przejrzysta oferta</div><h2>Cennik i obszar działania</h2></div><p>Każdy remont jest inny. Ostateczna cena zależy od metrażu, stanu podłoża i szczegółów zlecenia.</p></div><div class="price-wrap"><div class="pricing"><h3>Zakres prac</h3><div class="price-row"><span>Malowanie ścian i sufitów</span><b>Wycena indywidualna</b></div><div class="price-row"><span>Układanie płytek</span><b>Wycena indywidualna</b></div><div class="price-row"><span>Układanie paneli</span><b>Wycena indywidualna</b></div><div class="price-row"><span>Docinka i montaż listew</span><b>Wycena indywidualna</b></div><div class="price-row"><span>Gładzie i prace wykończeniowe</span><b>Wycena indywidualna</b></div><p class="pricing-note">Ceny uzupełnimy po ustaleniu stawek PAVBUD. Na etapie projektu nie publikujemy przypadkowych kwot.</p><a class="btn btn-primary" style="margin-top:12px" href="mailto:pavlokvaritiuk@gmail.com?subject=Pro%C5%9Bba%20o%20wycen%C4%99%20PAVBUD">Poproś o wycenę ↗</a></div><div class="coverage"><div><div class="eyebrow">Działamy lokalnie</div><h3>Bielsko-Biała<br>i powiat bielski</h3><p>Dojazd i zakres prac ustalane podczas kontaktu. Zapytaj o termin w swojej miejscowości.</p></div><div class="location">📍 Bielsko-Biała · Czechowice-Dziedzice · Szczyrk · okolice</div></div></div></div></section>
+<section id="o-mnie" class="section"><div class="container about"><div class="about-art"><span class="about-corner" aria-hidden="true">01 / RZEMIOSŁO</span><div class="about-card"><div class="eyebrow">Za marką stoi człowiek</div><div class="big">Pavlo Kvartiuk</div><p>Wieloletnie doświadczenie. Praktyka w realizacjach komercyjnych i we własnym mieszkaniu.</p></div></div><div class="about-copy"><div class="eyebrow">Poznaj wykonawcę</div><h2>Doświadczenie widać w detalach<span class="accent-dot">.</span></h2><p><strong>PAVBUD to marka Pavlo Kvartiuka — fachowca z wieloletnim doświadczeniem w pracach remontowo-wykończeniowych.</strong> Swoje umiejętności zdobywał i rozwijał zarówno przy realizacjach komercyjnych, jak i podczas kompleksowych prac wykonywanych we własnym mieszkaniu — od łazienki po salon.</p><p>Specjalizuje się w pracach wymagających dokładności i estetyki: malowaniu, płytkowaniu, montażu paneli i precyzyjnym wykańczaniu detali. Każde zlecenie traktuje indywidualnie, z naciskiem na solidność, porządek i efekt, który cieszy przez lata.</p><ul class="checks"><li>Wieloletnie doświadczenie w remontach</li><li>Praktyka komercyjna i prywatna</li><li>Dokładność, estetyka i solidne wykończenie</li></ul><a href="mailto:pavlokvaritiuk@gmail.com?subject=Zapytanie%20o%20remont%20PAVBUD" class="btn btn-outline">Zapytaj o realizację ↗</a></div></div></section>
+<section id="cennik" class="section white"><div class="container"><div class="section-head"><div><div class="eyebrow">Przejrzysta oferta</div><h2>Cennik i obszar działania</h2></div><p>Każdy remont jest inny. Ostateczna cena zależy od metrażu, stanu podłoża i szczegółów zlecenia.</p></div><div class="price-wrap"><div class="pricing"><h3>Zakres prac</h3><div class="price-row"><span>Malowanie ścian i sufitów</span><b>Wycena indywidualna</b></div><div class="price-row"><span>Układanie płytek</span><b>Wycena indywidualna</b></div><div class="price-row"><span>Układanie paneli</span><b>Wycena indywidualna</b></div><div class="price-row"><span>Docinka i montaż listew</span><b>Wycena indywidualna</b></div><div class="price-row"><span>Gładzie i prace wykończeniowe</span><b>Wycena indywidualna</b></div><p class="pricing-note">Ceny uzupełnimy po ustaleniu stawek PAVBUD. Na etapie projektu nie publikujemy przypadkowych kwot.</p><a class="btn btn-primary" style="margin-top:12px" href="mailto:pavlokvaritiuk@gmail.com?subject=Pro%C5%9Bba%20o%20wycen%C4%99%20PAVBUD">Poproś o wycenę ↗</a></div><div class="coverage"><div><div class="eyebrow">Działamy lokalnie</div><h3>Bielsko-Biała<br>i okolice Skoczowa</h3><p>Dojazd i zakres prac ustalane podczas kontaktu. Zapytaj o termin w swojej miejscowości.</p></div><div class="location">📍 Grodziec · Jasienica · Jaworze · Pogórze · Skoczów</div></div></div>
+<div class="area-map-block" id="obszar"><div class="map-top"><div><div class="eyebrow">Sprawdź obszar usług</div><h3>Jesteśmy blisko Ciebie.</h3><p>Grodziec, Jasienica, Jaworze, Pogórze, Skoczów oraz Bielsko-Biała i okolice. Wybierz miejscowość, żeby zobaczyć ją na mapie.</p></div><div class="map-legend"><span class="map-legend-dot"></span> Orientacyjny rejon dojazdu</div></div>
+<div class="map-chips" aria-label="Miejscowości obsługiwane przez PAVBUD"><button type="button" class="map-chip" data-place="Grodziec">Grodziec</button><button type="button" class="map-chip" data-place="Jasienica">Jasienica</button><button type="button" class="map-chip" data-place="Jaworze">Jaworze</button><button type="button" class="map-chip" data-place="Pogórze">Pogórze</button><button type="button" class="map-chip" data-place="Skoczów">Skoczów</button><button type="button" class="map-chip" data-place="Bielsko-Biała">Bielsko-Biała</button></div>
+<div class="map-frame"><div id="service-map" role="region" aria-label="Interaktywna mapa rejonu działania PAVBUD"><div class="map-fallback"><span>📍</span><strong>Grodziec · Jasienica · Jaworze<br>Pogórze · Skoczów · Bielsko-Biała</strong><a href="https://www.openstreetmap.org/#map=11/49.802/18.914" target="_blank" rel="noopener noreferrer">Otwórz mapę regionu ↗</a></div></div><div class="map-stamp">PAVBUD <span>·</span> blisko Ciebie</div></div>
+<div class="map-bottom"><span>Obszar ma charakter orientacyjny — dojazd i termin potwierdzamy indywidualnie.</span><a href="tel:+48512414770">Zapytaj o termin ↗</a></div></div></div></section>
 <section id="realizacje" class="section"><div class="container"><div class="section-head"><div><div class="eyebrow">Efekty mówią same za siebie</div><h2>Nasze realizacje</h2></div><p>Tu pokażemy prawdziwe zdjęcia wykonanych prac — na początek Waszego mieszkania.</p></div><div class="projects"><div class="project"><div class="label">DO UZUPEŁNIENIA</div><h3>Łazienka</h3><p>Miejsce na zdjęcia wykonanych prac</p></div><div class="project"><div class="label">DO UZUPEŁNIENIA</div><h3>Salon</h3><p>Miejsce na zdjęcia wykonanego wnętrza</p></div><div class="project"><div class="label">DO UZUPEŁNIENIA</div><h3>Detale i wykończenia</h3><p>Miejsce na panele, listwy, narożniki i płytki</p></div></div><p class="gallery-hint">Wersja pokazowa: nie publikujemy fikcyjnych realizacji ani opinii. Galerię zastąpimy autentycznymi zdjęciami PAVBUD.</p></div></section>
 <section class="cta-section" id="kontakt"><div class="container cta-inner"><div><div class="eyebrow" style="color:#d9af76">Nie odkładaj remontu na później</div><h2>Krótkie terminy.<br>Zamów już dziś.</h2><p>Masz pytanie o malowanie, płytkowanie czy montaż paneli? Zadzwoń lub napisz — porozmawiajmy o Twoim remoncie.</p><div class="cta-actions"><a class="btn btn-gold" href="tel:+48512414770">Zadzwoń po wycenę ↗</a><a class="btn btn-light" href="mailto:pavlokvaritiuk@gmail.com?subject=Zapytanie%20do%20PAVBUD">Napisz wiadomość ✉</a></div></div><div class="contact-block"><a href="tel:+48512414770">📞 &nbsp; 512 414 770</a><a href="mailto:pavlokvaritiuk@gmail.com">✉ &nbsp; pavlokvaritiuk@gmail.com</a><a href="#cennik">⌖ &nbsp; Bielsko-Biała i powiat bielski</a></div></div></section>
 </main>
 <footer><div class="container footer-inner"><div><b>PAVBUD</b><br><small>Pavlo Kvartiuk · Usługi remontowo-wykończeniowe</small></div><div><small>© 2026 PAVBUD · Projekt podglądowy</small><br><small>Bielsko-Biała i okolice</small></div></div><div class="container"><div class="disclaimer">To demonstracyjny projekt strony przygotowany do omówienia. Wizualizacja wnętrza jest ilustracyjna; zdjęcia realizacji i szczegóły oferty zostaną uzupełnione przed oficjalnym uruchomieniem.</div></div></footer>
 <script>
 const toggle=document.getElementById('menu'),nav=document.getElementById('navlinks');toggle.addEventListener('click',()=>{const open=nav.classList.toggle('open');toggle.setAttribute('aria-expanded',String(open));toggle.textContent=open?'✕':'☰'});nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');toggle.setAttribute('aria-expanded','false');toggle.textContent='☰'}));
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" defer></script>
+<script>
+window.addEventListener('DOMContentLoaded',function(){
+  var canMove = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(canMove && 'IntersectionObserver' in window){
+    var targets=Array.from(document.querySelectorAll('.service,.project,.section-head,.about-copy,.about-card,.area-map-block'));
+    var observer=new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){if(entry.isIntersecting){entry.target.classList.add('visible');observer.unobserve(entry.target)}})
+    },{threshold:.08,rootMargin:'0px 0px -28px 0px'});
+    targets.forEach(function(el,i){el.classList.add(el.matches('.service,.project')?'tile-reveal':'soft-reveal');if(el.matches('.service,.project'))el.style.setProperty('--tile-order',String(i%3));observer.observe(el)});
+    document.body.classList.add('motion-on');
+  }
+});
+window.addEventListener('load',function(){
+  if(!window.L){return}
+  var places=[
+    {name:'Grodziec',lat:49.80064,lng:18.86948},
+    {name:'Jasienica',lat:49.81312,lng:18.92155},
+    {name:'Jaworze',lat:49.79351,lng:18.94790},
+    {name:'Pogórze',lat:49.79941,lng:18.83826},
+    {name:'Skoczów',lat:49.7999,lng:18.78776},
+    {name:'Bielsko-Biała',lat:49.8221,lng:19.0449}
+  ];
+  try {
+    var map=L.map('service-map',{scrollWheelZoom:false,tap:false,zoomControl:true}).setView([49.808,18.918],11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:17,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors'}).addTo(map);
+    var pins={};
+    places.forEach(function(p){
+      var isMain=p.name==='Bielsko-Biała';
+      var marker=L.marker([p.lat,p.lng],{icon:L.divIcon({className:'',html:'<div class="map-pin'+(isMain?' map-pin-main':'')+'"></div>',iconSize:[22,22],iconAnchor:[11,11]})}).addTo(map);
+      marker.bindPopup('<strong>'+p.name+'</strong><br>PAVBUD · orientacyjny rejon usług');
+      pins[p.name]=marker;
+    });
+    var bounds=L.latLngBounds(places.map(function(p){return [p.lat,p.lng]})); map.fitBounds(bounds.pad(.24),{maxZoom:11});
+    document.querySelectorAll('.map-chip').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        document.querySelectorAll('.map-chip').forEach(function(b){b.classList.remove('active')});
+        btn.classList.add('active');
+        var p=places.find(function(item){return item.name===btn.getAttribute('data-place')});
+        if(p){map.flyTo([p.lat,p.lng],12,{animate:!window.matchMedia('(prefers-reduced-motion: reduce)').matches,duration:.65});pins[p.name].openPopup()}
+      });
+    });
+    setTimeout(function(){map.invalidateSize()},250);
+  } catch(e){document.getElementById('service-map').innerHTML='<div class="map-fallback"><strong>Grodziec · Jasienica · Jaworze · Pogórze · Skoczów · Bielsko-Biała</strong><a href="https://www.openstreetmap.org/#map=11/49.802/18.914" target="_blank" rel="noopener noreferrer">Otwórz mapę regionu ↗</a></div>';}
+});
 </script></body></html>
