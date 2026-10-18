@@ -1,248 +1,471 @@
 <!doctype html>
 <html lang="pl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#17332b">
-<meta name="description" content="PAVBUD — remonty i wykończenia wnętrz. Malowanie, płytkowanie, panele, gładzie i montaż listew. Bielsko-Biała, Grodziec, Jasienica, Jaworze, Pogórze, Skoczów.">
-<meta property="og:title" content="PAVBUD | Twój remont. Dobrze zrobiony.">
-<meta property="og:description" content="Estetyczne wnętrza, solidne wykonanie i dbałość o każdy detal. Poznaj ofertę usług remontowo-wykończeniowych PAVBUD.">
-<meta property="og:type" content="website">
-<title>PAVBUD — Remonty i wykończenia wnętrz | Bielsko-Biała i okolice</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<style>
-:root{--ink:#10291f;--green:#14362b;--green2:#23473a;--gold:#b98e5f;--gold-soft:#d7bb96;--cream:#f5f1e9;--paper:#fffdf8;--muted:#5f6762;--line:#e3ddd3;--serif:"Cormorant Garamond",Georgia,serif;--sans:"DM Sans",Arial,sans-serif}
-*,*:before,*:after{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:91px}
-body{margin:0;font:14px/1.65 var(--sans);background:var(--cream);color:var(--ink);-webkit-font-smoothing:antialiased}
-a{color:inherit;text-decoration:none}
-img{display:block;width:100%;height:100%;object-fit:cover}
-button{font:inherit;cursor:pointer}
-a:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
-.container{width:min(1300px,calc(100% - 96px));margin:0 auto}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
-h1,h2,h3,p{margin-top:0}
-h1,h2,h3{font-family:var(--serif);letter-spacing:-.035em;font-weight:600;line-height:.99}
-h1{font-size:clamp(60px,7.1vw,112px);margin-bottom:18px}
-h2{font-size:clamp(44px,5vw,76px);margin-bottom:17px}
-h3{font-size:27px;line-height:1.05}
-.eyebrow{display:block;font:700 11px/1.45 var(--sans);letter-spacing:.24em;text-transform:uppercase;color:#99734c;margin-bottom:14px}
-.btn{display:inline-flex;justify-content:center;align-items:center;gap:15px;min-height:51px;border:1px solid transparent;border-radius:999px;padding:14px 27px;font:700 13px/1.3 var(--sans);transition:background .25s ease,color .25s ease,box-shadow .25s ease}
-.btn-dark{background:var(--green);color:white;box-shadow:0 10px 26px #14362b16}
-.btn-dark:hover{background:#23503c;box-shadow:0 14px 32px #14362b26}
-.btn-line{background:#ffffff75;border-color:#b69b79;color:#20342c}
-.btn-line:hover{background:white}
-.btn-light{background:var(--paper);color:var(--green)}
-header{position:sticky;top:0;z-index:800;background:#f8f5efe9;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid #e8e0d668}
-.nav{height:83px;display:flex;align-items:center;justify-content:space-between;gap:26px}
-.logo{font:500 42px/1 var(--serif);letter-spacing:-.065em;white-space:nowrap;display:inline-block}
-.logo em{font-style:normal;color:#b88c59}
-.logo small{font:600 9px/1.2 var(--sans);letter-spacing:.15em;color:#806d58;display:block;text-transform:uppercase;margin-top:4px}
-.nav-links{display:flex;align-items:center;gap:25px}
-.nav-links a{font-size:12px;font-weight:700;white-space:nowrap}
-.nav-links a:hover{color:#ac8353}
-.header-call{white-space:nowrap;font-size:12px;padding-inline:20px;min-height:44px}
-.menu{display:none;border:1px solid #d5cdc2;border-radius:50%;width:42px;height:42px;background:#fff9;color:var(--green);font-size:22px}
-.hero{min-height:630px;position:relative;isolation:isolate;display:flex;align-items:center;background:#d8cabb;overflow:hidden}
-.hero-photo{position:absolute;inset:0;z-index:-3;background:#c7b39c url("https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=2200&q=85") center 52%/cover no-repeat}
-.hero:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(250,247,241,.98) 0%,rgba(250,247,241,.95) 26%,rgba(250,247,241,.79) 41%,rgba(250,247,241,.35) 57%,transparent 76%);z-index:-2}
-.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(15,33,26,.10),transparent 45%);z-index:-1}
-.hero-content{width:min(690px,62%);padding:96px 0 96px}
-.hero h1{max-width:780px;color:#101c17}
-.hero h1 .gold{color:#b48b5a;white-space:nowrap}
-.hero-lead{font-size:17px;line-height:1.62;max-width:490px;color:#35483e;margin:0 0 23px}
-.hero-benefits{display:flex;align-items:center;gap:23px;flex-wrap:wrap;margin-bottom:34px}
-.hero-benefits span{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600}
-.hero-benefits svg{width:21px;height:21px;stroke:#a78051;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.hero-actions{display:flex;flex-wrap:wrap;gap:12px}
-.hero-note{position:absolute;right:18px;bottom:12px;color:#f9f6f0;background:#142a217d;border-radius:5px;padding:5px 10px;font-size:10px}
-.section{padding:88px 0}
-.section-white{background:var(--paper)}
-.section-heading{display:flex;align-items:end;justify-content:space-between;gap:25px;margin-bottom:32px}
-.section-heading h2{margin-bottom:0}
-.section-heading p{max-width:350px;font-size:14px;color:#555f59;margin:0 0 5px}
-.service-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
-.service-card{background:#fff;border:1px solid #f1ece4;border-radius:15px;overflow:hidden;box-shadow:0 6px 25px #3b332415;display:flex;flex-direction:column;min-width:0}
-.service-photo{height:185px;position:relative;overflow:hidden;background:#d5c8b8}
-.service-photo img{transition:transform .55s ease}
-.service-card:hover img{transform:scale(1.035)}
-.service-symbol{position:absolute;bottom:-1px;left:14px;width:44px;height:44px;background:#f8f1e8;border-radius:50%;display:grid;place-items:center;border:4px solid #fff;font:500 22px var(--serif);color:#b78b56}
-.service-body{padding:23px 16px 16px;display:flex;flex-direction:column;flex:1}
-.service-body h3{font-size:22px;letter-spacing:-.025em;font-family:var(--serif);margin:0 0 7px;color:#1e3027}
-.service-body p{font-size:12px;line-height:1.62;color:#586158;margin:0 0 14px;flex:1}
-.service-arrow{width:30px;height:30px;display:grid;place-items:center;border:1px solid #b9966d;border-radius:50%;font-size:17px;color:#a7804f;align-self:flex-start}
-.service-arrow:hover{background:var(--green);color:white;border-color:var(--green)}
-.portfolio{display:grid;grid-template-columns:.9fr 1.6fr;min-height:315px;background:#eae1d6;position:relative;overflow:hidden}
-.portfolio-intro{padding:42px max(35px,calc((100vw - 1300px)/2));padding-right:30px;position:relative;isolation:isolate;background:linear-gradient(90deg,#eee6dc 5%,#eee6dcca)}
-.portfolio-intro h2{font-size:clamp(40px,4.7vw,65px)}
-.portfolio-intro p{font-size:13px;max-width:340px;color:#4b584f;margin-bottom:20px}
-.portfolio-photos{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;min-height:330px}
-.portfolio-photos figure{position:relative;margin:0;overflow:hidden;background:#d3bfa6}
-.portfolio-photos img{transition:transform .5s ease}
-.portfolio-photos figure:hover img{transform:scale(1.03)}
-.portfolio-photos figcaption{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(transparent,#12271ecc);color:#fff;padding:32px 12px 10px;font-size:11px;font-weight:700}
-.portfolio-note{display:block;font-size:10px;color:#746c61;margin-top:14px;max-width:375px}
-.process{background:#f8f5ef}
-.steps{display:grid;grid-template-columns:1.15fr repeat(4,1fr);gap:20px;align-items:start}
-.steps-intro h2{font-size:43px;margin-bottom:0}
-.step{position:relative;min-width:0;padding-top:7px}
-.step-top{display:flex;align-items:center;gap:13px;margin-bottom:10px}
-.step-num{font:500 36px/1 var(--serif);color:#b28e63}
-.step-icon{color:#18342a;font-size:28px;line-height:1}
-.step h3{font:700 13px/1.4 var(--sans);letter-spacing:0;margin-bottom:7px}
-.step p{font-size:11px;color:#5b655e;margin:0;max-width:180px}
-.step:not(:last-child):after{content:"→";position:absolute;top:30px;right:-9px;color:#b58e60;font-size:21px}
-.area{display:grid;grid-template-columns:360px minmax(0,1fr);min-height:340px}
-.area-copy{background:#18372c;color:white;padding:42px 42px 35px max(32px,calc((100vw - 1300px)/2));position:relative}
-.area-copy:after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 90% 95%,#4c72532d,transparent 47%);pointer-events:none}
-.area-copy>*{position:relative;z-index:1}
-.area-copy .eyebrow{color:#cb9f6b}
-.area-copy h2{font-size:54px}
-.area-copy p{font-size:13px;color:#dce6dc;max-width:290px}
-.towns{display:flex;flex-wrap:wrap;gap:6px;margin-top:22px}
-.town{background:#ffffff12;border:1px solid #e5f0e338;border-radius:100px;color:white;font-size:11px;padding:7px 10px}
-.town:hover,.town.active{background:#e8d1ae;color:#143429}
-.area-map{position:relative;background:#e6e9de;min-height:340px}
-#map{width:100%;height:100%;min-height:340px;z-index:1}
-.map-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:28px;font-size:15px;color:#375143;background:#e2e7dc}
-.map-key{position:absolute;right:18px;top:18px;z-index:500;background:#fffefaec;padding:10px 13px;box-shadow:0 6px 18px #17312622;font-size:11px}
-.map-pin{width:16px;height:16px;border-radius:50%;background:#ad8155;border:3px solid white;box-shadow:0 0 0 3px #ad81553b}
-.contact{position:relative;isolation:isolate;min-height:260px;background:#ded1c2;display:flex;align-items:center}
-.contact:before{content:"";position:absolute;inset:0;z-index:-2;background:url("https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1700&q=82") center 48%/cover no-repeat;filter:blur(4px);transform:scale(1.025)}
-.contact:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(243,236,225,.97),rgba(243,236,225,.75) 54%,rgba(243,236,225,.55))}
-.contact-grid{display:grid;grid-template-columns:1fr auto;align-items:center;gap:40px;padding:34px 0}
-.contact h2{font-size:47px;margin-bottom:12px}
-.contact p{font-size:12px;color:#344a3d;margin-bottom:0}
-.contact-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:end}
-.contact-link{display:flex;align-items:center;gap:13px;border-radius:9px;background:#173a2e;color:#fff;padding:16px 18px;font-weight:700;font-size:12px;min-height:62px}
-.contact-link svg{width:19px;height:19px;stroke:white;fill:none;stroke-width:1.6}
-.contact-link:hover{background:#285c42}
-.contact-link.light{background:#fffaf1;color:var(--green)}
-.privacy-note{font-size:10px;color:#536358;margin-top:10px}
-footer{background:#16362a;color:#cbd8cc;padding:22px 0}
-.footer{display:flex;justify-content:space-between;gap:18px;align-items:center;flex-wrap:wrap;font-size:11px}
-.footer strong{font:600 26px/1 var(--serif);color:white}
-.footer strong em{font-style:normal;color:#d3a571}
-.footer small{display:block;font-size:10px;color:#c0cdc2;margin-top:4px}
-.leaflet-control-attribution{font-size:9px!important}
-.leaflet-popup-content-wrapper{border-radius:9px}
-.js .fade-up{opacity:0;transform:translateY(18px)}
-.js .fade-up.visible{opacity:1;transform:none;transition:opacity .65s ease,transform .65s ease}
-@media(max-width:1180px){.container{width:min(100% - 58px,1300px)}.nav-links{gap:13px}.service-grid{grid-template-columns:repeat(3,1fr)}.service-photo{height:200px}.portfolio-intro{padding-left:30px}.area-copy{padding-left:30px}.steps{gap:15px}}
-@media(max-width:860px){.nav{height:74px}.nav-links{display:none;position:absolute;top:74px;left:0;right:0;background:#fdfbf7;padding:24px 30px;flex-direction:column;align-items:start;border-bottom:1px solid var(--line);box-shadow:0 20px 30px #16261b18}.nav-links.open{display:flex}.header-call{display:none}.menu{display:block}.hero{min-height:580px}.hero-content{width:75%}.hero:before{background:linear-gradient(90deg,#fbf8f4ef,#fbf8f4d1 55%,#fbf8f463)}.portfolio{grid-template-columns:1fr}.portfolio-intro{padding:30px}.portfolio-photos{min-height:300px}.steps{grid-template-columns:repeat(2,1fr)}.steps-intro{grid-column:1/-1}.step:not(:last-child):after{display:none}.area{grid-template-columns:1fr}.area-copy{padding:40px 30px}.area-copy h2{font-size:44px}.area-map,#map{min-height:340px}.contact-grid{grid-template-columns:1fr}.contact-actions{justify-content:flex-start}}
-@media(max-width:550px){.container{width:calc(100% - 36px)}header .logo{font-size:34px}.hero{min-height:650px;align-items:flex-start}.hero-photo{background-position:63% center}.hero:before{background:linear-gradient(180deg,#f8f5f1f5 5%,#f8f5f1dd 60%,#f8f5f13d)}.hero-content{width:100%;padding:50px 0 190px}.hero h1{font-size:clamp(53px,14vw,75px)}.hero h1 .gold{white-space:normal}.hero-lead{font-size:15px}.hero-benefits{gap:9px 16px}.hero-benefits span{font-size:11px}.hero-actions .btn{flex:1}.section{padding:62px 0}.section-heading{display:block}.section-heading p{margin-top:15px}.service-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.service-photo{height:140px}.service-body{padding:20px 11px 12px}.service-body h3{font-size:20px}.service-body p{font-size:11px}.portfolio-photos{grid-template-columns:repeat(2,1fr);min-height:430px}.portfolio-intro h2{font-size:46px}.steps{grid-template-columns:repeat(2,1fr);gap:23px}.steps-intro h2{font-size:44px}.contact h2{font-size:43px}.contact-actions{display:grid;grid-template-columns:1fr;width:100%}.contact-link{min-height:56px}.footer{align-items:flex-start}}
-@media(max-width:360px){.service-grid{grid-template-columns:1fr}.service-photo{height:175px}.steps{grid-template-columns:1fr}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.js .fade-up{opacity:1!important;transform:none!important;transition:none!important}*{animation:none!important}}
-</style>
-<script>document.documentElement.classList.add('js')</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17352b">
+  <meta name="description" content="PAVBUD — remonty i wykończenia wnętrz. Malowanie, płytkowanie, panele podłogowe, gładzie i wykończenia. Bielsko-Biała i okolice.">
+  <meta property="og:title" content="PAVBUD | Twój remont. Dobrze zrobiony.">
+  <meta property="og:description" content="Estetyczne wnętrza, solidne wykonanie i dbałość o każdy detal.">
+  <meta property="og:type" content="website">
+  <title>PAVBUD — Remonty i wykończenia wnętrz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    :root{
+      --bg:#f6f2eb;
+      --paper:#fffdf8;
+      --ink:#12231c;
+      --muted:#5e6863;
+      --green:#17352b;
+      --green-2:#23463a;
+      --gold:#b28a59;
+      --gold-soft:#d9c1a0;
+      --line:#e8e0d4;
+      --shadow:0 18px 40px rgba(24,34,29,.09);
+      --serif:"Cormorant Garamond", Georgia, serif;
+      --sans:"DM Sans", system-ui, sans-serif;
+      --radius:22px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;scroll-padding-top:90px}
+    body{margin:0;background:linear-gradient(180deg,#faf7f2 0%, var(--bg) 100%);color:var(--ink);font:15px/1.68 var(--sans);-webkit-font-smoothing:antialiased}
+    a{text-decoration:none;color:inherit}
+    img{display:block;max-width:100%;height:auto}
+    button{font:inherit;cursor:pointer}
+    h1,h2,h3,p{margin-top:0}
+    h1,h2,h3{font-family:var(--serif);letter-spacing:-.04em;line-height:1}
+    h1{font-size:clamp(56px,7vw,106px);font-weight:600;margin-bottom:20px}
+    h2{font-size:clamp(42px,5.1vw,78px);font-weight:600;margin-bottom:14px}
+    h3{font-size:27px;font-weight:600;margin-bottom:8px}
+    .wrap{width:min(1280px, calc(100% - 64px));margin:0 auto}
+    .eyebrow{display:block;margin-bottom:14px;font-size:11px;letter-spacing:.26em;text-transform:uppercase;font-weight:700;color:#9a7750}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:54px;padding:15px 27px;border-radius:999px;border:1px solid transparent;font-size:13px;font-weight:700;transition:.25s ease}
+    .btn-primary{background:var(--green);color:#fff;box-shadow:0 12px 26px rgba(23,53,43,.18)}
+    .btn-primary:hover{background:var(--green-2);transform:translateY(-1px)}
+    .btn-outline{background:rgba(255,255,255,.62);border-color:#c3ad8f;color:var(--green);backdrop-filter:blur(8px)}
+    .btn-outline:hover{background:#fff}
+    .topline{background:#17352b;color:#e9efea;font-size:11px;letter-spacing:.08em}
+    .topline .wrap{min-height:38px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+    .topline strong{color:#ddbc8e}
+    header{position:sticky;top:0;z-index:100;background:rgba(249,246,240,.78);backdrop-filter:blur(18px);border-bottom:1px solid rgba(56,68,60,.08)}
+    .nav{height:84px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+    .logo{display:flex;flex-direction:column;line-height:1;white-space:nowrap}
+    .logo-main{font:600 52px/1 var(--serif);letter-spacing:-.06em}
+    .logo-main .gold{color:var(--gold)}
+    .logo-sub{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#7d6d59;margin-top:4px}
+    .navlinks{display:flex;gap:24px;align-items:center}
+    .navlinks a{font-size:13px;font-weight:700;color:#35453d;position:relative}
+    .navlinks a::after{content:"";position:absolute;left:0;right:0;bottom:-7px;height:1px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:.25s ease}
+    .navlinks a:hover::after{transform:scaleX(1)}
+    .phone-pill{min-height:46px;padding:0 22px;background:var(--green);color:#fff;border-radius:999px;display:inline-flex;align-items:center;gap:10px;font-size:13px;font-weight:700;box-shadow:0 14px 28px rgba(23,53,43,.17)}
+    .menu{display:none;width:44px;height:44px;border:1px solid #d8cfc2;border-radius:14px;background:#fff9;color:var(--green);font-size:24px}
+
+    .hero{position:relative;isolation:isolate;overflow:hidden;background:#e6d7c4}
+    .hero::before{content:"";position:absolute;inset:0;background:
+      linear-gradient(90deg, rgba(248,245,239,.98) 0%, rgba(248,245,239,.94) 26%, rgba(248,245,239,.82) 42%, rgba(248,245,239,.48) 60%, rgba(248,245,239,.14) 74%, transparent 100%),
+      url('assets/hero.jpg') center/cover no-repeat;
+      filter:blur(7px) saturate(.88);transform:scale(1.05);z-index:-2}
+    .hero::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 72% 30%, rgba(255,255,255,.20), transparent 25%),linear-gradient(0deg, rgba(22,39,32,.06), transparent 46%);z-index:-1}
+    .hero-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:26px;align-items:center;min-height:700px;padding:28px 0}
+    .hero-copy{padding:62px 0 54px}
+    .hero-copy p{font-size:18px;color:#44544c;max-width:510px}
+    .hero-copy .lead-strong{display:block;font-size:18px;color:#2f4138;margin-top:5px}
+    .hero-copy h1 .gold{color:var(--gold)}
+    .hero-points{display:flex;flex-wrap:wrap;gap:18px 26px;margin:26px 0 34px}
+    .hero-points span{display:inline-flex;align-items:center;gap:10px;font-size:13px;font-weight:700;color:#2e3f37}
+    .hero-points svg{width:22px;height:22px;stroke:#a78355;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+    .hero-visual{position:relative;min-height:560px}
+    .hero-card{position:absolute;inset:30px 0 30px 18px;border-radius:34px;overflow:hidden;box-shadow:0 34px 74px rgba(27,40,34,.16);background:#d9d0c3}
+    .hero-card img{width:100%;height:100%;object-fit:cover}
+    .hero-card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(18,30,24,.08))}
+    .glass{position:absolute;background:rgba(255,253,248,.86);border:1px solid rgba(255,255,255,.8);backdrop-filter:blur(12px);border-radius:24px;padding:18px 20px;box-shadow:var(--shadow)}
+    .glass strong{display:block;font-size:16px;margin-bottom:6px}
+    .glass span{display:block;font-size:12px;color:#67756e;max-width:210px}
+    .glass.one{top:4px;right:12px}
+    .glass.two{left:0;bottom:0}
+    .hero-note{position:absolute;right:18px;bottom:14px;background:rgba(20,32,26,.55);color:#fff;padding:6px 10px;border-radius:10px;font-size:10px;z-index:2}
+
+    .section{padding:96px 0}
+    .section-head{display:flex;justify-content:space-between;gap:26px;align-items:end;margin-bottom:38px}
+    .section-head p{max-width:370px;color:var(--muted);margin:0 0 7px}
+
+    .services{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
+    .service{background:var(--paper);border:1px solid #efe8dc;border-radius:20px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;min-width:0}
+    .service-media{height:152px;position:relative;overflow:hidden;background:#d8cabb}
+    .service-media img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
+    .service:hover .service-media img{transform:scale(1.03)}
+    .service-icon{position:absolute;left:14px;bottom:-1px;transform:translateY(50%);width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#f8f1e7;border:4px solid #fff;color:#b28a57;font:600 22px/1 var(--serif)}
+    .service-body{padding:30px 16px 18px;display:flex;flex-direction:column;flex:1}
+    .service-body h3{font-size:22px;margin-bottom:8px}
+    .service-body p{font-size:13px;line-height:1.55;color:#5d6863;margin:0 0 16px;flex:1}
+    .service-link{width:32px;height:32px;border-radius:50%;border:1px solid #c6aa84;display:grid;place-items:center;color:#aa8150;transition:.2s ease}
+    .service-link:hover{background:var(--green);color:#fff;border-color:var(--green)}
+
+    .realisations{background:linear-gradient(180deg,#f6f2eb 0%, #f0ebe2 100%);padding:0}
+    .realisations-grid{display:grid;grid-template-columns:.92fr 1.08fr;align-items:stretch;min-height:350px}
+    .realisations-copy{padding:54px 34px 54px max(32px, calc((100vw - 1280px)/2));background:linear-gradient(90deg,#f3eee6 0%, rgba(243,238,230,.95) 72%, rgba(243,238,230,.72) 100%)}
+    .realisations-copy p{max-width:340px;color:#4d5b54;margin-bottom:24px}
+    .realisations-note{display:block;font-size:11px;color:#7b7368;max-width:370px;margin-top:18px}
+    .real-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:8px 8px 8px 0}
+    .real-card{position:relative;overflow:hidden;border-radius:0;background:#d7cab9}
+    .real-card img{width:100%;height:100%;object-fit:cover;transition:transform .45s ease}
+    .real-card:hover img{transform:scale(1.03)}
+    .real-card span{position:absolute;left:0;right:0;bottom:0;padding:28px 12px 11px;background:linear-gradient(180deg, transparent, rgba(13,25,20,.75));font-size:11px;font-weight:700;color:#fff}
+
+    .process{padding-top:84px}
+    .process-grid{display:grid;grid-template-columns:1.1fr repeat(4,1fr);gap:22px;align-items:start}
+    .process-intro h2{font-size:48px;margin-bottom:0}
+    .step{position:relative;padding-top:4px;min-width:0}
+    .step-top{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+    .step-no{font:600 38px/1 var(--serif);color:#b28a57}
+    .step-ico{font-size:28px;line-height:1;color:#18352b}
+    .step h3{font:700 14px/1.4 var(--sans);margin-bottom:7px;letter-spacing:0}
+    .step p{margin:0;font-size:12px;color:#59645f;max-width:190px}
+    .step:not(:last-child)::after{content:'→';position:absolute;top:28px;right:-11px;color:#bb9563;font-size:22px}
+
+    .area{background:#e9eee6}
+    .area-grid{display:grid;grid-template-columns:360px 1fr;min-height:360px}
+    .area-copy{background:linear-gradient(160deg,#17352b,#1e3f33);color:#fff;padding:48px 40px 36px max(30px, calc((100vw - 1280px)/2));position:relative;overflow:hidden}
+    .area-copy::after{content:"";position:absolute;inset:auto -80px -60px auto;width:220px;height:220px;background:radial-gradient(circle, rgba(182,145,97,.18), transparent 68%)}
+    .area-copy .eyebrow{color:#d1aa78}
+    .area-copy h2{font-size:54px}
+    .area-copy p{color:#dde6de;max-width:285px}
+    .towns{display:flex;flex-wrap:wrap;gap:7px;margin-top:22px}
+    .town{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:#fff;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;transition:.22s ease}
+    .town:hover,.town.active{background:#e5d0b2;color:#17352b;border-color:#e5d0b2}
+    .map-shell{position:relative;min-height:360px;background:#dde6da}
+    #map{width:100%;height:360px}
+    .map-badge{position:absolute;right:18px;top:18px;z-index:500;background:rgba(255,253,249,.95);padding:10px 12px;font-size:11px;border-radius:14px;box-shadow:var(--shadow)}
+    .pin{width:18px;height:18px;border-radius:50%;background:#b08655;border:3px solid #fff;box-shadow:0 0 0 4px rgba(176,134,85,.22)}
+
+    .contact{position:relative;isolation:isolate;overflow:hidden}
+    .contact::before{content:"";position:absolute;inset:0;background:
+      linear-gradient(90deg, rgba(244,238,228,.95), rgba(244,238,228,.8) 44%, rgba(244,238,228,.58) 70%),
+      url('assets/hero.jpg') center/cover no-repeat;filter:blur(7px) saturate(.84);transform:scale(1.04);z-index:-1}
+    .contact-grid{display:grid;grid-template-columns:1fr auto;align-items:center;gap:28px;padding:54px 0}
+    .contact-copy h2{font-size:54px;margin-bottom:12px}
+    .contact-copy p{max-width:470px;color:#44534c;font-size:14px}
+    .contact-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .contact-link{display:flex;align-items:center;gap:12px;min-height:62px;padding:16px 20px;border-radius:12px;background:var(--green);color:#fff;font-weight:700;box-shadow:0 14px 28px rgba(23,53,43,.16)}
+    .contact-link.light{background:#fffdf8;color:var(--green)}
+    .contact-link:hover{background:var(--green-2)}
+    .contact-link.light:hover{background:#fff}
+
+    footer{background:#17352b;color:#d5dfd7;padding:24px 0}
+    .footer{display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap;font-size:12px}
+    .footer-brand{font:600 34px/1 var(--serif);letter-spacing:-.06em;color:#fff}
+    .footer-brand .gold{color:var(--gold)}
+    .footer small{display:block;margin-top:4px;color:#c1cec4;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+
+    .fade{opacity:0;transform:translateY(22px)}
+    .fade.visible{opacity:1;transform:none;transition:opacity .75s ease, transform .75s ease}
+
+    @media (max-width: 1220px){
+      .services{grid-template-columns:repeat(3,1fr)}
+      .process-grid{grid-template-columns:1fr 1fr 1fr;row-gap:28px}
+      .process-intro{grid-column:1 / -1}
+      .step:nth-child(5)::after,.step:last-child::after{display:none}
+    }
+    @media (max-width: 920px){
+      .wrap{width:min(100% - 44px, 1280px)}
+      .navlinks{display:none;position:absolute;top:84px;left:0;right:0;background:rgba(249,246,240,.98);padding:20px 22px 24px;border-bottom:1px solid rgba(56,68,60,.08);flex-direction:column;align-items:flex-start}
+      .navlinks.open{display:flex}
+      .phone-pill{display:none}
+      .menu{display:block}
+      .hero-grid,.realisations-grid,.area-grid,.contact-grid{grid-template-columns:1fr}
+      .hero-grid{min-height:0;padding:26px 0 34px}
+      .hero-copy{padding:38px 0 12px}
+      .hero-visual{min-height:360px}
+      .hero-card{inset:10px 0 10px 0}
+      .hero-note{right:14px;bottom:8px}
+      .section-head{display:block}.section-head p{margin-top:18px}
+      .real-grid{padding:0 0 8px 0}
+      .realisations-copy{padding:44px 24px}
+      .contact-grid{padding:44px 0}
+      .contact-actions{justify-content:flex-start}
+    }
+    @media (max-width: 640px){
+      .wrap{width:calc(100% - 28px)}
+      .topline .wrap{justify-content:center;text-align:center}
+      .hero-copy h1{font-size:clamp(50px,15vw,80px)}
+      .hero-copy p{font-size:16px}
+      .hero-actions{display:grid;grid-template-columns:1fr}.hero-actions .btn{width:100%}
+      .services{grid-template-columns:1fr}
+      .real-grid{grid-template-columns:1fr 1fr}
+      .process-grid{grid-template-columns:1fr}
+      .step::after{display:none}
+      .area-copy{padding:36px 24px}
+      .contact-copy h2{font-size:42px}
+      .contact-actions{display:grid;grid-template-columns:1fr}.contact-link{width:100%}
+      #map,.map-shell{min-height:320px;height:320px}
+    }
+    @media (prefers-reduced-motion: reduce){
+      html{scroll-behavior:auto}
+      *{transition:none!important;animation:none!important}
+      .fade{opacity:1!important;transform:none!important}
+    }
+  </style>
 </head>
 <body>
-<header>
- <div class="container nav">
-  <a class="logo" href="#start" aria-label="PAVBUD — strona główna">PAV<em>BUD</em><small>Remonty i wykończenia wnętrz</small></a>
-  <nav class="nav-links" id="nav" aria-label="Menu główne">
-   <a href="#start">Strona główna</a><a href="#uslugi">Usługi</a><a href="#inspiracje">Realizacje</a><a href="#proces">Jak pracujemy</a><a href="#rejon">Obszar działania</a><a href="#kontakt">Kontakt</a>
-  </nav>
-  <a class="btn btn-dark header-call" href="tel:+48512414770" aria-label="Zadzwoń pod numer 512 414 770">☎ &nbsp;512 414 770</a>
-  <button class="menu" id="menu" type="button" aria-expanded="false" aria-controls="nav" aria-label="Otwórz menu">☰</button>
- </div>
-</header>
-<main>
- <section class="hero" id="start">
-  <div class="hero-photo" role="img" aria-label="Przytulny nowoczesny salon w jasnych odcieniach"></div>
-  <div class="container">
-   <div class="hero-content fade-up">
-    <span class="eyebrow">Remonty i wykończenia wnętrz</span>
-    <h1>Twój remont.<br>Dobrze <span class="gold">zrobiony.</span></h1>
-    <p class="hero-lead">Estetyczne wnętrza, solidne wykonanie<br>i dbałość o każdy detal.</p>
-    <div class="hero-benefits">
-     <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 9 4-6h8l4 6-8 12zM4 9h16M8 3l4 18 4-18"/></svg>Dokładność</span>
-     <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v7c0 5 4 8 8 10 4-2 8-5 8-10V5zM9 12l2 2 4-4"/></svg>Terminowość</span>
-     <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8M5 10v11h14V10M9 21v-8h6v8"/></svg>Dbałość o detale</span>
+  <div class="topline">
+    <div class="wrap">
+      <span><strong>PAVBUD</strong> · remonty i wykończenia wnętrz</span>
+      <span>Bielsko-Biała · Grodziec · Jasienica · Jaworze · Pogórze · Skoczów</span>
     </div>
-    <div class="hero-actions"><a class="btn btn-dark" href="mailto:pavlokvaritiuk@gmail.com?subject=Pro%C5%9Bba%20o%20wycen%C4%99%20PAVBUD">Zamów wycenę <span aria-hidden="true">→</span></a><a class="btn btn-line" href="tel:+48512414770">☎ &nbsp;Zadzwoń 512 414 770</a></div>
-   </div>
   </div>
-  <span class="hero-note">Zdjęcie wnętrza: materiał ilustracyjny</span>
- </section>
- <section class="section section-white" id="uslugi">
-  <div class="container">
-   <div class="section-heading fade-up"><div><span class="eyebrow">Nasze usługi</span><h2>Kompleksowe <span style="color:var(--gold)">wykończenia wnętrz</span></h2></div><p>Od przygotowania ścian, przez płytkowanie i panele, aż po finalne detale. Zadbamy o każdy etap Twojego remontu.</p></div>
-   <div class="service-grid">
-    <article class="service-card fade-up"><div class="service-photo"><img loading="lazy" src="https://images.unsplash.com/photo-1562259949-e8e7689d7828?auto=format&amp;fit=crop&amp;w=540&amp;q=80" alt="Malowanie ścian" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&amp;fit=crop&amp;w=540&amp;q=80'"><span class="service-symbol" aria-hidden="true">✧</span></div><div class="service-body"><h3>Malowanie</h3><p>Precyzyjne i estetyczne malowanie ścian i sufitów.</p><a class="service-arrow" href="mailto:pavlokvaritiuk@gmail.com?subject=Malowanie%20-%20wycena%20PAVBUD" aria-label="Zapytaj o malowanie">→</a></div></article>
-    <article class="service-card fade-up"><div class="service-photo"><img loading="lazy" src="https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?auto=format&amp;fit=crop&amp;w=540&amp;q=80" alt="Płytki ceramiczne i wykończenie łazienki"><span class="service-symbol" aria-hidden="true">▦</span></div><div class="service-body"><h3>Płytkowanie</h3><p>Łazienki, kuchnie, posadzki, ściany.</p><a class="service-arrow" href="mailto:pavlokvaritiuk@gmail.com?subject=P%C5%82ytkowanie%20-%20wycena%20PAVBUD" aria-label="Zapytaj o płytkowanie">→</a></div></article>
-    <article class="service-card fade-up"><div class="service-photo"><img loading="lazy" src="https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&amp;fit=crop&amp;w=540&amp;q=80" alt="Ciepłe drewniane wykończenia podłogowe"><span class="service-symbol" aria-hidden="true">⌁</span></div><div class="service-body"><h3>Panele podłogowe</h3><p>Montaż paneli i listew przypodłogowych.</p><a class="service-arrow" href="mailto:pavlokvaritiuk@gmail.com?subject=Panele%20-%20wycena%20PAVBUD" aria-label="Zapytaj o panele">→</a></div></article>
-    <article class="service-card fade-up"><div class="service-photo"><img loading="lazy" src="https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&amp;fit=crop&amp;w=540&amp;q=80" alt="Gładka ściana z jasnym wykończeniem"><span class="service-symbol" aria-hidden="true">✳</span></div><div class="service-body"><h3>Gładzie</h3><p>Idealnie gładkie powierzchnie pod wykończenie.</p><a class="service-arrow" href="mailto:pavlokvaritiuk@gmail.com?subject=G%C5%82adzie%20-%20wycena%20PAVBUD" aria-label="Zapytaj o gładzie">→</a></div></article>
-    <article class="service-card fade-up"><div class="service-photo"><img loading="lazy" src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&amp;fit=crop&amp;w=540&amp;q=80" alt="Estetycznie wykończone wnętrze"><span class="service-symbol" aria-hidden="true">✤</span></div><div class="service-body"><h3>Zabudowy i sufity</h3><p>Płyty G-K, zabudowy i sufity podwieszane.</p><a class="service-arrow" href="mailto:pavlokvaritiuk@gmail.com?subject=Zabudowy%20-%20zapytanie%20PAVBUD" aria-label="Zapytaj o zabudowy">→</a></div></article>
-    <article class="service-card fade-up"><div class="service-photo"><img loading="lazy" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&amp;fit=crop&amp;w=540&amp;q=80" alt="Dopracowane detale nowoczesnego wnętrza"><span class="service-symbol" aria-hidden="true">◇</span></div><div class="service-body"><h3>Wykończenia</h3><p>Dopasowanie detali, montaż akcesoriów.</p><a class="service-arrow" href="mailto:pavlokvaritiuk@gmail.com?subject=Wyko%C5%84czenia%20-%20zapytanie%20PAVBUD" aria-label="Zapytaj o wykończenia">→</a></div></article>
-   </div>
-  </div>
- </section>
- <section class="portfolio" id="inspiracje">
-  <div class="portfolio-intro fade-up"><span class="eyebrow">Realizacje</span><h2>Wnętrza,<br>które cieszą na lata</h2><p>Każda realizacja to połączenie funkcjonalności, estetyki i solidnego wykonania.</p><a class="btn btn-dark" href="mailto:pavlokvaritiuk@gmail.com?subject=Zapytanie%20o%20realizacje%20PAVBUD">Porozmawiaj o remoncie <span aria-hidden="true">→</span></a><small class="portfolio-note">Zdjęcia pokazują inspiracje aranżacyjne, nie wykonane realizacje PAVBUD. Galerię uzupełnimy prawdziwymi zdjęciami prac.</small></div>
-  <div class="portfolio-photos">
-   <figure><img loading="lazy" src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&amp;fit=crop&amp;w=700&amp;q=83" alt="Inspiracja: jasna łazienka"><figcaption>Łazienki · inspiracja</figcaption></figure>
-   <figure><img loading="lazy" src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&amp;fit=crop&amp;w=700&amp;q=83" alt="Inspiracja: nowoczesny salon"><figcaption>Salony · inspiracja</figcaption></figure>
-   <figure><img loading="lazy" src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&amp;fit=crop&amp;w=700&amp;q=83" alt="Inspiracja: drewniane zabudowy i wykończenia"><figcaption>Wykończenia · inspiracja</figcaption></figure>
-   <figure><img loading="lazy" src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&amp;fit=crop&amp;w=700&amp;q=83" alt="Inspiracja: jasne wnętrze"><figcaption>Detale · inspiracja</figcaption></figure>
-  </div>
- </section>
- <section class="section process" id="proces">
-  <div class="container steps">
-   <div class="steps-intro"><span class="eyebrow">Jak pracujemy</span><h2>Prosty proces<br>– świetny efekt</h2></div>
-   <div class="step"><div class="step-top"><span class="step-num">01</span><span class="step-icon" aria-hidden="true">☏</span></div><h3>Rozmowa i wycena</h3><p>Poznajemy Twoje potrzeby i przygotowujemy wycenę.</p></div>
-   <div class="step"><div class="step-top"><span class="step-num">02</span><span class="step-icon" aria-hidden="true">▦</span></div><h3>Ustalenie terminu</h3><p>Dopasowujemy termin realizacji.</p></div>
-   <div class="step"><div class="step-top"><span class="step-num">03</span><span class="step-icon" aria-hidden="true">⚒</span></div><h3>Realizacja prac</h3><p>Solidnie, czysto i zgodnie z ustaleniami.</p></div>
-   <div class="step"><div class="step-top"><span class="step-num">04</span><span class="step-icon" aria-hidden="true">✓</span></div><h3>Gotowe wnętrze</h3><p>Efekt, który cieszy każdego dnia.</p></div>
-  </div>
- </section>
- <section class="area" id="rejon">
-  <div class="area-copy"><span class="eyebrow">Obszar działania</span><h2>Bielsko-Biała<br>i okolice</h2><p>Działamy na terenie Bielska-Białej i pobliskich miejscowości.</p>
-   <div class="towns"><button class="town" data-name="Bielsko-Biała">Bielsko-Biała</button><button class="town" data-name="Grodziec">Grodziec</button><button class="town" data-name="Jasienica">Jasienica</button><button class="town" data-name="Jaworze">Jaworze</button><button class="town" data-name="Pogórze">Pogórze</button><button class="town" data-name="Skoczów">Skoczów</button></div>
-   <p style="font-size:11px;color:#d5ddd2">Dojazd i termin potwierdzamy indywidualnie. Rejon jest orientacyjny.</p>
-  </div>
-  <div class="area-map"><div id="map"><div class="map-fallback">Grodziec · Jasienica · Jaworze · Pogórze · Skoczów · Bielsko-Biała</div></div><div class="map-key">● &nbsp; Orientacyjny obszar usług</div></div>
- </section>
- <section class="contact" id="kontakt">
-  <div class="container contact-grid">
-   <div><span class="eyebrow">Kontakt</span><h2>Masz pytania?<br>Skontaktuj się z nami.</h2><p>Chętnie doradzimy i przygotujemy indywidualną wycenę.</p></div>
-   <div><div class="contact-actions">
-    <a class="contact-link" href="tel:+48512414770"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 2.1 4.18 2 2 0 0 1 4.09 2h3a2 2 0 0 1 2 1.72l.55 3a2 2 0 0 1-.56 1.78L7.09 10.5a16 16 0 0 0 6.41 6.41l2.02-2.02a2 2 0 0 1 1.78-.56l3 .55A2 2 0 0 1 22 16.9z"/></svg>512 414 770</a>
-    <a class="contact-link" href="mailto:pavlokvaritiuk@gmail.com?subject=Zapytanie%20do%20PAVBUD"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3zM3 7l9 7 9-7"/></svg>pavlokvaritiuk@gmail.com</a>
-    <a class="contact-link light" href="mailto:pavlokvaritiuk@gmail.com?subject=Pro%C5%9Bba%20o%20wycen%C4%99%20PAVBUD&amp;body=Dzie%C5%84%20dobry%2C%0A%0AMiejscowo%C5%9B%C4%87%3A%0AZakres%20prac%3A%0AOrientacyjny%20termin%3A%0A">Zamów wycenę <span aria-hidden="true">→</span></a>
-   </div></div>
-  </div>
- </section>
-</main>
-<footer><div class="container footer"><div><strong>PAV<em>BUD</em></strong><small>Usługi remontowo-wykończeniowe · Pavlo Kvartiuk</small></div><div>© 2026 PAVBUD &nbsp; · &nbsp; Bielsko-Biała i okolice</div></div></footer>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
-<script>
-(function(){
- var menu=document.getElementById("menu"),nav=document.getElementById("nav");
- menu.addEventListener("click",function(){var yes=nav.classList.toggle("open");menu.setAttribute("aria-expanded",String(yes));menu.textContent=yes?"×":"☰";});
- nav.querySelectorAll("a").forEach(function(a){a.addEventListener("click",function(){nav.classList.remove("open");menu.setAttribute("aria-expanded","false");menu.textContent="☰";});});
- if("IntersectionObserver" in window && !matchMedia("(prefers-reduced-motion: reduce)").matches){
-  var observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){entry.target.classList.add("visible");observer.unobserve(entry.target);}});},{threshold:.06,rootMargin:"0px 0px -20px 0px"});
-  document.querySelectorAll(".fade-up").forEach(function(el){observer.observe(el);});
-  document.querySelectorAll(".service-card").forEach(function(el,i){el.style.transitionDelay=String((i%6)*60)+"ms";});
- }else{document.querySelectorAll(".fade-up").forEach(function(el){el.classList.add("visible");});}
- window.addEventListener("load",function(){
-  if(!window.L)return;
-  var places=[{n:"Bielsko-Biała",lat:49.8221,lon:19.0449},{n:"Grodziec",lat:49.80064,lon:18.86948},{n:"Jasienica",lat:49.81312,lon:18.92155},{n:"Jaworze",lat:49.79351,lon:18.94790},{n:"Pogórze",lat:49.79941,lon:18.83826},{n:"Skoczów",lat:49.7999,lon:18.78776}];
-  try{
-   var map=L.map("map",{scrollWheelZoom:false,zoomControl:true}).setView([49.807,18.909],11);
-   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:17,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>'}).addTo(map);
-   var pins={};
-   places.forEach(function(p){var marker=L.marker([p.lat,p.lon],{icon:L.divIcon({className:"",html:'<div class="map-pin"></div>',iconSize:[22,22],iconAnchor:[11,11]})}).addTo(map);marker.bindPopup("<strong>"+p.n+"</strong><br>PAVBUD · rejon usług");pins[p.n]=marker;});
-   var bounds=L.latLngBounds(places.map(function(p){return [p.lat,p.lon]}));map.fitBounds(bounds.pad(.22),{maxZoom:11});
-   document.querySelectorAll(".town").forEach(function(b){b.addEventListener("click",function(){var p=places.find(function(t){return t.n===b.dataset.name;});if(!p)return;document.querySelectorAll(".town").forEach(function(x){x.classList.remove("active")});b.classList.add("active");map.setView([p.lat,p.lon],12,{animate:false});pins[p.n].openPopup();});});
-   setTimeout(function(){map.invalidateSize();},200);
-  }catch(e){document.getElementById("map").innerHTML='<div class="map-fallback">Grodziec · Jasienica · Jaworze · Pogórze · Skoczów · Bielsko-Biała</div>';}
- });
-})();
-</script>
+
+  <header>
+    <div class="wrap nav">
+      <a class="logo" href="#start" aria-label="PAVBUD — strona główna">
+        <span class="logo-main">PAV<span class="gold">BUD</span></span>
+        <span class="logo-sub">Remonty i wykończenia wnętrz</span>
+      </a>
+
+      <nav class="navlinks" id="navlinks" aria-label="Nawigacja główna">
+        <a href="#start">Strona główna</a>
+        <a href="#uslugi">Usługi</a>
+        <a href="#realizacje">Realizacje</a>
+        <a href="#proces">Jak pracujemy</a>
+        <a href="#rejon">Obszar działania</a>
+        <a href="#kontakt">Kontakt</a>
+      </nav>
+
+      <a class="phone-pill" href="tel:+48512414770">☎ 512 414 770</a>
+      <button class="menu" id="menu" type="button" aria-controls="navlinks" aria-expanded="false" aria-label="Otwórz menu">☰</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="start">
+      <div class="wrap hero-grid">
+        <div class="hero-copy fade">
+          <span class="eyebrow">Remonty i wykończenia wnętrz</span>
+          <h1>Twój remont.<br>Dobrze <span class="gold">zrobiony.</span></h1>
+          <p>Estetyczne wnętrza, solidne wykonanie <span class="lead-strong">i dbałość o każdy detal.</span></p>
+
+          <div class="hero-points">
+            <span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12 12 3l9 9-9 9z"/><path d="m12 3 3 9-3 9-3-9z"/></svg>
+              Wysoka jakość
+            </span>
+            <span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v7c0 5 4 8 8 10 4-2 8-5 8-10V5z"/><path d="m9 12 2 2 4-4"/></svg>
+              Terminowość
+            </span>
+            <span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v11h14V10"/><path d="M9 21v-8h6v8"/></svg>
+              Czystość pracy
+            </span>
+          </div>
+
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="mailto:pavlokvaritiuk@gmail.com?subject=Prośba%20o%20wycenę%20PAVBUD">Zamów wycenę →</a>
+            <a class="btn btn-outline" href="tel:+48512414770">Zadzwoń 512 414 770</a>
+          </div>
+        </div>
+
+        <div class="hero-visual fade">
+          <div class="hero-card">
+            <img src="assets/hero.jpg" alt="Elegancki nowoczesny salon z ciepłym drewnem i jasną sofą">
+            <span class="hero-note">Zdjęcie ilustracyjne</span>
+          </div>
+          <div class="glass one"><strong>Krótkie terminy</strong><span>Zapytaj o dostępność i możliwy termin realizacji.</span></div>
+          <div class="glass two"><strong>Płytki · panele · gładzie</strong><span>Od przygotowania ścian po finalne detale wykończenia.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="uslugi">
+      <div class="wrap">
+        <div class="section-head fade">
+          <div>
+            <span class="eyebrow">Nasze usługi</span>
+            <h2>Kompleksowe <span style="color:var(--gold)">wykończenia wnętrz</span></h2>
+          </div>
+          <p>Od przygotowania ścian, przez płytkowanie i panele, aż po finalne detale. Każdy element pokazuje dokładnie to, czym zajmuje się PAVBUD.</p>
+        </div>
+
+        <div class="services">
+          <article class="service fade">
+            <div class="service-media"><img src="assets/service_paint.jpg" alt="Wałek do malowania ściany"><span class="service-icon">✦</span></div>
+            <div class="service-body"><h3>Malowanie</h3><p>Precyzyjne i estetyczne malowanie ścian i sufitów.</p><a class="service-link" href="mailto:pavlokvaritiuk@gmail.com?subject=Malowanie%20-%20wycena%20PAVBUD" aria-label="Zapytaj o malowanie">→</a></div>
+          </article>
+          <article class="service fade">
+            <div class="service-media"><img src="assets/service_tiles.jpg" alt="Zbliżenie na płytki ceramiczne"><span class="service-icon">▦</span></div>
+            <div class="service-body"><h3>Płytkowanie</h3><p>Łazienki, kuchnie, posadzki i ściany z dbałością o równe linie.</p><a class="service-link" href="mailto:pavlokvaritiuk@gmail.com?subject=Płytkowanie%20-%20wycena%20PAVBUD" aria-label="Zapytaj o płytkowanie">→</a></div>
+          </article>
+          <article class="service fade">
+            <div class="service-media"><img src="assets/service_panels.jpg" alt="Drewniane panele podłogowe"><span class="service-icon">⌁</span></div>
+            <div class="service-body"><h3>Panele podłogowe</h3><p>Montaż paneli i listew przypodłogowych we wnętrzach.</p><a class="service-link" href="mailto:pavlokvaritiuk@gmail.com?subject=Panele%20podłogowe%20-%20wycena%20PAVBUD" aria-label="Zapytaj o panele podłogowe">→</a></div>
+          </article>
+          <article class="service fade">
+            <div class="service-media"><img src="assets/service_plaster.jpg" alt="Nakładanie gładzi na ścianę"><span class="service-icon">✳</span></div>
+            <div class="service-body"><h3>Gładzie</h3><p>Idealnie gładkie powierzchnie przygotowane pod wykończenie.</p><a class="service-link" href="mailto:pavlokvaritiuk@gmail.com?subject=Gładzie%20-%20wycena%20PAVBUD" aria-label="Zapytaj o gładzie">→</a></div>
+          </article>
+          <article class="service fade">
+            <div class="service-media"><img src="assets/service_finish.jpg" alt="Eleganckie wnętrze z umywalką i złotą armaturą"><span class="service-icon">✤</span></div>
+            <div class="service-body"><h3>Wykończenia</h3><p>Dopracowane detale, montaż akcesoriów i estetyczne finalne akcenty.</p><a class="service-link" href="mailto:pavlokvaritiuk@gmail.com?subject=Wykończenia%20-%20zapytanie%20PAVBUD" aria-label="Zapytaj o wykończenia">→</a></div>
+          </article>
+          <article class="service fade">
+            <div class="service-media"><img src="assets/service_finish.jpg" alt="Detal wykończenia wnętrza"><span class="service-icon">◇</span></div>
+            <div class="service-body"><h3>Detale i montaż</h3><p>Ostatni etap prac, który nadaje wnętrzu spójny i dopracowany charakter.</p><a class="service-link" href="mailto:pavlokvaritiuk@gmail.com?subject=Detale%20i%20montaż%20-%20zapytanie%20PAVBUD" aria-label="Zapytaj o detale i montaż">→</a></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="realisations" id="realizacje">
+      <div class="realisations-grid">
+        <div class="realisations-copy fade">
+          <span class="eyebrow">Realizacje</span>
+          <h2>Wnętrza,<br>które cieszą na lata</h2>
+          <p>Każda realizacja to połączenie funkcjonalności, estetyki i solidnego wykonania. Sekcja jest przygotowana pod zdjęcia wnętrz — bez zewnętrznych elewacji i bez przypadkowych kadrów domu.</p>
+          <a class="btn btn-primary" href="#kontakt">Zobacz więcej realizacji →</a>
+          <small class="realisations-note">Po dodaniu zdjęć z Waszego mieszkania tę sekcję można od razu zmienić w prawdziwe portfolio PAVBUD.</small>
+        </div>
+        <div class="real-grid fade">
+          <figure class="real-card"><img src="assets/gallery_bath.jpg" alt="Jasna łazienka z podświetlanym lustrem"><span>Łazienka</span></figure>
+          <figure class="real-card"><img src="assets/gallery_kitchen.jpg" alt="Nowoczesna kuchnia z drewnianą zabudową"><span>Kuchnia</span></figure>
+          <figure class="real-card"><img src="assets/gallery_living.jpg" alt="Salon z podświetlaną zabudową RTV"><span>Salon</span></figure>
+          <figure class="real-card"><img src="assets/gallery_bedroom.jpg" alt="Sypialnia w ciepłych beżach"><span>Sypialnia</span></figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="section process" id="proces">
+      <div class="wrap process-grid">
+        <div class="process-intro fade">
+          <span class="eyebrow">Jak pracujemy</span>
+          <h2>Prosty proces<br>– świetny efekt</h2>
+        </div>
+        <div class="step fade"><div class="step-top"><span class="step-no">01</span><span class="step-ico">💬</span></div><h3>Rozmowa i wycena</h3><p>Poznajemy Twoje potrzeby i przygotowujemy indywidualną wycenę.</p></div>
+        <div class="step fade"><div class="step-top"><span class="step-no">02</span><span class="step-ico">🗓️</span></div><h3>Ustalenie terminu</h3><p>Dopasowujemy dogodny termin realizacji prac.</p></div>
+        <div class="step fade"><div class="step-top"><span class="step-no">03</span><span class="step-ico">🛠️</span></div><h3>Realizacja prac</h3><p>Solidnie, czysto i zgodnie z ustaleniami.</p></div>
+        <div class="step fade"><div class="step-top"><span class="step-no">04</span><span class="step-ico">✓</span></div><h3>Gotowe wnętrze</h3><p>Efekt, który cieszy i podnosi wartość nieruchomości.</p></div>
+      </div>
+    </section>
+
+    <section class="area" id="rejon">
+      <div class="area-grid">
+        <div class="area-copy fade">
+          <span class="eyebrow">Obszar działania</span>
+          <h2>Bielsko-Biała<br>i okolice</h2>
+          <p>Działamy na terenie Bielska-Białej oraz w najbliższych miejscowościach.</p>
+          <div class="towns" aria-label="Wybierz miejscowość na mapie">
+            <button class="town active" data-place="Bielsko-Biała">Bielsko-Biała</button>
+            <button class="town" data-place="Grodziec">Grodziec</button>
+            <button class="town" data-place="Jasienica">Jasienica</button>
+            <button class="town" data-place="Jaworze">Jaworze</button>
+            <button class="town" data-place="Pogórze">Pogórze</button>
+            <button class="town" data-place="Skoczów">Skoczów</button>
+          </div>
+        </div>
+        <div class="map-shell fade">
+          <div id="map"></div>
+          <div class="map-badge">Orientacyjny obszar naszych usług</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact" id="kontakt">
+      <div class="wrap contact-grid fade">
+        <div class="contact-copy">
+          <span class="eyebrow">Kontakt</span>
+          <h2>Masz pytania?<br>Skontaktuj się z nami.</h2>
+          <p>Chętnie doradzimy i przygotujemy indywidualną wycenę dopasowaną do zakresu prac.</p>
+        </div>
+        <div class="contact-actions">
+          <a class="contact-link" href="tel:+48512414770">📞 512 414 770</a>
+          <a class="contact-link" href="mailto:pavlokvaritiuk@gmail.com?subject=Zapytanie%20do%20PAVBUD">✉️ pavlokvaritiuk@gmail.com</a>
+          <a class="contact-link light" href="mailto:pavlokvaritiuk@gmail.com?subject=Prośba%20o%20wycenę%20PAVBUD">Zamów wycenę →</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer">
+      <div>
+        <div class="footer-brand">PAV<span class="gold">BUD</span></div>
+        <small>Usługi remontowo-wykończeniowe · Pavlo Kvartiuk</small>
+      </div>
+      <div>© 2026 PAVBUD · Bielsko-Biała i okolice</div>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+  <script>
+    const menu = document.getElementById('menu');
+    const navlinks = document.getElementById('navlinks');
+    menu?.addEventListener('click', () => {
+      const open = navlinks.classList.toggle('open');
+      menu.setAttribute('aria-expanded', String(open));
+      menu.textContent = open ? '×' : '☰';
+    });
+
+    const reveal = () => {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.querySelectorAll('.fade').forEach(el => el.classList.add('visible'));
+        return;
+      }
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+      document.querySelectorAll('.fade').forEach(el => observer.observe(el));
+    };
+    reveal();
+
+    window.addEventListener('load', () => {
+      if (!window.L) return;
+      const places = {
+        'Bielsko-Biała': [49.8221, 19.0449],
+        'Grodziec': [49.80064, 18.86948],
+        'Jasienica': [49.81312, 18.92155],
+        'Jaworze': [49.79351, 18.94790],
+        'Pogórze': [49.79941, 18.83826],
+        'Skoczów': [49.7999, 18.78776]
+      };
+
+      const map = L.map('map', { scrollWheelZoom: false, zoomControl: true, fadeAnimation: false });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>'
+      }).addTo(map);
+
+      const markers = {};
+      Object.entries(places).forEach(([name, coords]) => {
+        const marker = L.marker(coords, {
+          icon: L.divIcon({ className: '', html: '<div class="pin"></div>', iconSize: [22, 22], iconAnchor: [11, 11] })
+        }).addTo(map);
+        marker.bindPopup(`<strong>${name}</strong><br>PAVBUD · orientacyjny obszar usług`);
+        markers[name] = marker;
+      });
+
+      map.fitBounds(L.latLngBounds(Object.values(places)).pad(0.22), { animate: false, maxZoom: 11 });
+
+      document.querySelectorAll('.town').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.town').forEach(x => x.classList.remove('active'));
+          btn.classList.add('active');
+          const name = btn.dataset.place;
+          if (places[name]) {
+            map.setView(places[name], 12, { animate: false });
+            markers[name].openPopup();
+          }
+        });
+      });
+
+      setTimeout(() => map.invalidateSize(), 200);
+    });
+  </script>
 </body>
 </html>
