@@ -93,9 +93,9 @@
     .section-head{display:flex;justify-content:space-between;gap:26px;align-items:end;margin-bottom:38px}
     .section-head p{max-width:370px;color:var(--muted);margin:0 0 7px}
 
-    .services{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
+    .services{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
     .service{background:var(--paper);border:1px solid #efe8dc;border-radius:20px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;min-width:0}
-    .service-media{height:152px;position:relative;overflow:hidden;background:#d8cabb}
+    .service-media{height:190px;position:relative;overflow:hidden;background:#d8cabb}
     .service-media img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
     .service:hover .service-media img{transform:scale(1.03)}
     .service-icon{position:absolute;left:14px;bottom:-1px;transform:translateY(50%);width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#f8f1e7;border:4px solid #fff;color:#b28a57;font:600 22px/1 var(--serif)}
@@ -194,7 +194,7 @@
       .hero-copy h1{font-size:clamp(50px,15vw,80px)}
       .hero-copy p{font-size:16px}
       .hero-actions{display:grid;grid-template-columns:1fr}.hero-actions .btn{width:100%}
-      .services{grid-template-columns:1fr}
+      .services{grid-template-columns:repeat(2,minmax(0,1fr))}.service-media{height:145px}.service-body h3{font-size:23px}.service-body p{font-size:12px}
       .real-grid{grid-template-columns:1fr 1fr}
       .process-grid{grid-template-columns:1fr}
       .step::after{display:none}
@@ -203,6 +203,7 @@
       .contact-actions{display:grid;grid-template-columns:1fr}.contact-link{width:100%}
       #map,.map-shell{min-height:320px;height:320px}
     }
+    @media (max-width:360px){.services{grid-template-columns:1fr}}
     @media (prefers-reduced-motion: reduce){
       html{scroll-behavior:auto}
       *{transition:none!important;animation:none!important}
@@ -286,33 +287,33 @@
             <span class="eyebrow">Nasze usługi</span>
             <h2>Kompleksowe <span style="color:var(--gold)">wykończenia wnętrz</span></h2>
           </div>
-          <p>Od przygotowania ścian, przez płytkowanie i panele, aż po finalne detale. Każdy element pokazuje dokładnie to, czym zajmuje się PAVBUD.</p>
+          <p>Od przygotowania ścian, przez płytkowanie i panele, aż po finalne detale. Starannie wykonamy każdy etap Twojego remontu.</p>
         </div>
 
         <div class="services">
           <article class="service fade">
-            <div class="service-media"><img src="assets/service_paint.jpg" alt="Wałek do malowania ściany"><span class="service-icon">✦</span></div>
+            <div class="service-media"><img src="assets/service-paint-exact.jpg" alt="Wałek do malowania ściany"><span class="service-icon">✦</span></div>
             <div class="service-body"><h3>Malowanie</h3><p>Precyzyjne i estetyczne malowanie ścian i sufitów.</p><a class="service-link" href="mailto:pavlokvaritiuk@gmail.com?subject=Malowanie%20-%20wycena%20PAVBUD" aria-label="Zapytaj o malowanie">→</a></div>
           </article>
           <article class="service fade">
-            <div class="service-media"><img src="assets/service_tiles.jpg" alt="Zbliżenie na płytki ceramiczne"><span class="service-icon">▦</span></div>
+            <div class="service-media"><img src="assets/service-tiles-exact.jpg" alt="Zbliżenie na płytki ceramiczne"><span class="service-icon">▦</span></div>
             <div class="service-body"><h3>Płytkowanie</h3><p>Łazienki, kuchnie, posadzki i ściany z dbałością o równe linie.</p><a class="service-link" href="mailto:pavlokvaritiuk@gmail.com?subject=Płytkowanie%20-%20wycena%20PAVBUD" aria-label="Zapytaj o płytkowanie">→</a></div>
           </article>
           <article class="service fade">
-            <div class="service-media"><img src="assets/service_panels.jpg" alt="Drewniane panele podłogowe"><span class="service-icon">⌁</span></div>
+            <div class="service-media"><img src="assets/service-panels-exact.jpg" alt="Drewniane panele podłogowe"><span class="service-icon">⌁</span></div>
             <div class="service-body"><h3>Panele podłogowe</h3><p>Montaż paneli i listew przypodłogowych we wnętrzach.</p><a class="service-link" href="mailto:pavlokvaritiuk@gmail.com?subject=Panele%20podłogowe%20-%20wycena%20PAVBUD" aria-label="Zapytaj o panele podłogowe">→</a></div>
           </article>
           <article class="service fade">
-            <div class="service-media"><img src="assets/service_plaster.jpg" alt="Nakładanie gładzi na ścianę"><span class="service-icon">✳</span></div>
+            <div class="service-media"><img src="assets/service-plaster-exact.jpg" alt="Nakładanie gładzi na ścianę"><span class="service-icon">✳</span></div>
             <div class="service-body"><h3>Gładzie</h3><p>Idealnie gładkie powierzchnie przygotowane pod wykończenie.</p><a class="service-link" href="mailto:pavlokvaritiuk@gmail.com?subject=Gładzie%20-%20wycena%20PAVBUD" aria-label="Zapytaj o gładzie">→</a></div>
           </article>
           <article class="service fade">
-            <div class="service-media"><img src="assets/service_finish.jpg" alt="Eleganckie wnętrze z umywalką i złotą armaturą"><span class="service-icon">✤</span></div>
-            <div class="service-body"><h3>Wykończenia</h3><p>Dopracowane detale, montaż akcesoriów i estetyczne finalne akcenty.</p><a class="service-link" href="mailto:pavlokvaritiuk@gmail.com?subject=Wykończenia%20-%20zapytanie%20PAVBUD" aria-label="Zapytaj o wykończenia">→</a></div>
+            <div class="service-media"><img src="assets/service-trim-exact.jpg" alt="Biała listwa przypodłogowa zamontowana przy drewnianej podłodze"><span class="service-icon">⌁</span></div>
+            <div class="service-body"><h3>Listwy i wykończenia</h3><p>Montaż listew przypodłogowych i wykończenia detali.</p><a class="service-link" href="mailto:pavlokvaritiuk@gmail.com?subject=Wykończenia%20-%20zapytanie%20PAVBUD" aria-label="Zapytaj o wykończenia">→</a></div>
           </article>
           <article class="service fade">
-            <div class="service-media"><img src="assets/service_finish.jpg" alt="Detal wykończenia wnętrza"><span class="service-icon">◇</span></div>
-            <div class="service-body"><h3>Detale i montaż</h3><p>Ostatni etap prac, który nadaje wnętrzu spójny i dopracowany charakter.</p><a class="service-link" href="mailto:pavlokvaritiuk@gmail.com?subject=Detale%20i%20montaż%20-%20zapytanie%20PAVBUD" aria-label="Zapytaj o detale i montaż">→</a></div>
+            <div class="service-media"><img src="assets/service-interior-exact.jpg" alt="Wnętrze z dekoracyjną lamelową zabudową i oświetleniem"><span class="service-icon">✧</span></div>
+            <div class="service-body"><h3>Wykończenia wnętrz</h3><p>Dopasowanie detali, montaż akcesoriów i finalne wykończenie.</p><a class="service-link" href="mailto:pavlokvaritiuk@gmail.com?subject=Detale%20i%20montaż%20-%20zapytanie%20PAVBUD" aria-label="Zapytaj o detale i montaż">→</a></div>
           </article>
         </div>
       </div>
@@ -323,9 +324,9 @@
         <div class="realisations-copy fade">
           <span class="eyebrow">Realizacje</span>
           <h2>Wnętrza,<br>które cieszą na lata</h2>
-          <p>Każda realizacja to połączenie funkcjonalności, estetyki i solidnego wykonania. Sekcja jest przygotowana pod zdjęcia wnętrz — bez zewnętrznych elewacji i bez przypadkowych kadrów domu.</p>
-          <a class="btn btn-primary" href="#kontakt">Zobacz więcej realizacji →</a>
-          <small class="realisations-note">Po dodaniu zdjęć z Waszego mieszkania tę sekcję można od razu zmienić w prawdziwe portfolio PAVBUD.</small>
+          <p>Każde wnętrze zasługuje na staranne wykończenie. Zobacz inspiracje do remontu łazienki, kuchni, salonu i sypialni.</p>
+          <a class="btn btn-primary" href="#kontakt">Zapytaj o realizację →</a>
+          <small class="realisations-note">Zdjęcia mają charakter ilustracyjny i nie przedstawiają jeszcze realizacji PAVBUD.</small>
         </div>
         <div class="real-grid fade">
           <figure class="real-card"><img src="assets/gallery_bath.jpg" alt="Jasna łazienka z podświetlanym lustrem"><span>Łazienka</span></figure>
