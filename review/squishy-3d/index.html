@@ -330,6 +330,9 @@ function decoration(c,skin,r){
  if(type==='hair'){c.strokeStyle='#403044';c.lineWidth=r*.045;for(let j=-1;j<=1;j++){let x=j*r*.17;c.beginPath();c.moveTo(x,-r*.76);c.quadraticCurveTo(x-r*.06,-r*1.08,x+r*.07,-r*1.12);c.stroke()}}
  if(type==='flame'){c.fillStyle='#ffa04d';c.beginPath();c.moveTo(-r*.21,-r*.78);c.quadraticCurveTo(-r*.29,-r*1.03,r*.08,-r*1.31);c.quadraticCurveTo(r*.11,-r*1.08,r*.25,-r*1.07);c.quadraticCurveTo(r*.38,-r*.76,0,-r*.74);c.fill();c.fillStyle='#ffe18d';c.beginPath();c.ellipse(0,-r*.91,r*.1,r*.15,0,0,7);c.fill()}
  if(type==='fountain'){c.strokeStyle='#8dcaee';c.lineWidth=r*.046;for(const s of [-1,0,1]){c.beginPath();c.moveTo(0,-r*.78);c.quadraticCurveTo(s*r*.3,-r*1.44,s*r*.47,-r*1.2);c.stroke();c.fillStyle='#c1f2fa';c.beginPath();c.ellipse(s*r*.47,-r*1.2,r*.06,r*.1,0,0,7);c.fill()}}
+ if(type==='star'){c.fillStyle='#ffca63';c.strokeStyle='#fff5c0';c.lineWidth=r*.035;c.beginPath();for(let j=0;j<10;j++){const a=-Math.PI/2+j*Math.PI/5,rd=j%2?r*.13:r*.28;c.lineTo(Math.cos(a)*rd,Math.sin(a)*rd-r*.94)}c.closePath();c.fill();c.stroke()}
+ if(type==='panda'){for(const s of [-1,1]){c.fillStyle='#766284';c.beginPath();c.arc(s*r*.58,-r*.80,r*.26,0,Math.PI*2);c.fill();c.fillStyle='#f8dcf0';c.beginPath();c.arc(s*r*.58,-r*.8,r*.12,0,Math.PI*2);c.fill()}}
+ if(type==='cloud'){c.fillStyle='#fffdf8';for(const [x,y,sz] of [[-.26,-.92,.23],[0,-1.06,.3],[.30,-.92,.22]]){c.beginPath();c.arc(r*x,r*y,r*sz,0,Math.PI*2);c.fill()}}
  if(type==='plush'){c.strokeStyle='#ffffffb9';c.lineWidth=r*.045;c.setLineDash([r*.07,r*.1]);c.beginPath();c.arc(0,0,r*.77,0,Math.PI);c.stroke();c.setLineDash([]);c.fillStyle='#ffa9d1';c.beginPath();c.ellipse(0,r*.56,r*.31,r*.12,0,0,7);c.fill()}
  c.restore();
 }
@@ -388,7 +391,7 @@ function sprite(c,kind,x,y,radius,angle=0,impact=0,opacity=1,b=null){
  // Every mochi on the board, including the small/medium stages, uses the real
  // transparent 3D assets. The same artwork is used in the upcoming-piece tray.
  const spriteIndex=kind===7
-  ?(Number.isInteger(b?.skin)&&b.skin>=3&&b.skin<9?b.skin+4:4)
+  ?(Number.isInteger(b?.skin)&&b.skin>=9?undefined:(Number.isInteger(b?.skin)&&b.skin>=3&&b.skin<9?b.skin+4:4))
   :GAME_ASSETS[kind];
  if(spriteIndex!==undefined&&asset(c,spriteIndex,0,0,radius*2.34)){
   if(b&&kind<=1)livingFace(c,kind,radius,b);
@@ -596,7 +599,7 @@ function paint(){
 }
 let lastHomeDraw=0;
 function loop(ts){paintTime=ts/1000;if(playing&&ts-lastSavedAt>1900){save();lastSavedAt=ts;}if(!last)last=ts;
-if(ts-lastHomeDraw>=85&&document.getElementById('home').style.display!=='none'){drawHome();lastHomeDraw=ts;}const dt=Math.min(.06,(ts-last)/1000);last=ts;if(playing){acc+=dt;let n=0;while(acc>=1/120&&n<8){simulate(1/120);acc-=1/120;n++}}paint();requestAnimationFrame(loop)}requestAnimationFrame(loop);
+if(ts-lastHomeDraw>=85&&document.getElementById('home').style.display!=='none'){drawHome();lastHomeDraw=ts;}const dt=Math.min(.06,(ts-last)/1000);last=ts;if(playing&&!tutorialOpen){acc+=dt*speedChoice;let n=0;while(acc>=1/120&&n<8){simulate(1/120);acc-=1/120;n++}}updateLevel();paint();requestAnimationFrame(loop)}requestAnimationFrame(loop);
 
 function renderCards(where){
  const shop=where==='shop',root=document.getElementById(shop?'shopCards':'collectionCards');
@@ -616,7 +619,7 @@ function renderCards(where){
    else if(shop&&coins>=50){coins-=50;unlocked.push(i);selected=i;save();refreshViews()}};
   card.appendChild(button);root.appendChild(card);
   const c=picture.getContext('2d');c.clearRect(0,0,240,240);
-  if(finalAtlasReady){asset(c,i===0?4:(i<=2?i+4:i+4),120,124,196)}else sprite(c,7,120,130,77,0,0,1,{id:i+16,skin:i});
+  if(finalAtlasReady&&i<9){asset(c,i===0?4:(i<=2?i+4:i+4),120,124,196)}else sprite(c,7,120,130,77,0,0,1,{id:i+16,skin:i});
  });
 }
 function refreshViews(){refreshWallet();drawHome();renderCards('shop');renderCards('collection')}
@@ -626,17 +629,21 @@ function showPage(page){
  if(page!=='game'){if(playing)save();playing=false;}
  if(page==='shop'||page==='collection')refreshViews();
 }
-document.querySelector('#play').onclick=()=>{showPage('game');if(!resumeRun())reset()};
+document.querySelector('#play').onclick=()=>{showPage('game');if(!resumeRun())reset();if(!tutorialSeen)openTutorial()};
 document.querySelector('#restart').onclick=reset;
 document.querySelector('#back').onclick=()=>showPage('home');
 document.querySelector('#openCollection').onclick=()=>showPage('collection');
 document.querySelector('#openShop').onclick=()=>showPage('shop');
 document.querySelector('#collectionBack').onclick=()=>showPage('home');
 document.querySelector('#shopBack').onclick=()=>showPage('home');
+document.querySelectorAll('#speedControls [data-speed]').forEach(btn=>btn.onclick=()=>{speedChoice=Number(btn.dataset.speed);refreshSpeedControls();save()});
+document.getElementById('tutorialOpenBtn').onclick=openTutorial;
+document.getElementById('tutorialSkip').onclick=closeTutorial;
+document.getElementById('tutorialNext').onclick=()=>{if(tutorialStep===ux.steps.length-1)closeTutorial();else{tutorialStep++;renderTutorial()}};
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&playing)save()});
 window.addEventListener('pagehide',()=>{if(playing)save()});
 let lastSavedAt=0;
 const originalLoop=loop; // periodic autosave is handled in game paint callback below
-loadSave();applyLanguage();refreshViews();
+loadSave();applyLanguage();refreshSpeedControls();refreshViews();updateLevel();
 })();
 </script></body></html>
