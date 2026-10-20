@@ -132,11 +132,19 @@ const skins=[
  ['Listek','#b7e8a5','leaf'],['Kwiatek','#ffc2df','flower'],['Korona','#dcc7ff','crown'],
  ['Kropeczki','#b2e1e8','dots'],['Kocie uszy','#ffdbab','cat'],['Trzy włoski','#ebc3b0','hair'],
  ['Płomyk','#ffc5a6','flame'],['Fontanna','#bde2fa','fountain'],['Pluszak','#d2c6f2','plush'],
- ['Gwiazdka','#ffe7ac','star'],['Panda','#e0d7f6','panda'],['Chmurka','#cbeeff','cloud']
+ ['Gwiazdka','#ffe7ac','star'],['Panda','#e0d7f6','panda'],['Chmurka','#cbeeff','cloud'],['Dyniowy Squishy','#ffa44d','pumpkin']
 ];
 let coins=0,unlocked=[],selected=-1,highScore=0,paidBands=0,earned=0,queue=[],history=[],traces=[],savedRun=null;
-const levelStages=[{at:0,pl:'Ogródek',en:'Garden',bonus:0},{at:1200,pl:'Cukiernia',en:'Candy Shop',bonus:10},{at:3500,pl:'Chmurkowa Dolina',en:'Cloud Valley',bonus:15},{at:7000,pl:'Kraina Gwiazd',en:'Star Land',bonus:20}];
-let bestProgress=0,rewardedStage=0,speedChoice=1,tutorialSeen=false,tutorialOpen=false,tutorialStep=0;
+// Twenty-two rewarded levels: 18 regular + 4 Halloween, each worth 25 candies.
+const stageKeys=['garden','garden','garden','garden','candy','candy','candy','candy','cloud','cloud','cloud','cloud','star','star','star','star','moon','moon','pumpkin','pumpkin','pumpkin','pumpkin'];
+const levelStages=stageKeys.map((world,i)=>({world,at:(i+1)*280+120*i*(i+1)/2,bonus:25}));
+const HALLOWEEN_SKIN_INDEX=12,HALLOWEEN_PRICE=100;
+const HALLOWEEN_END_UTC=Date.UTC(2026,10,15,23,0,0); // November 16 00:00 in Europe/Warsaw
+function halloweenActive(){return Date.now()<HALLOWEEN_END_UTC}
+function skinPrice(i){return i===HALLOWEEN_SKIN_INDEX?HALLOWEEN_PRICE:50}
+function canPurchaseSkin(i){return i!==HALLOWEEN_SKIN_INDEX||halloweenActive()}
+let experience=0,completedLevels=0,runScoreTracked=0,speedChoice=1,tutorialSeen=false,tutorialOpen=false,tutorialStep=0;
+let selectedWorld='garden',countdownExpired=false;
 const storageKey='squishy-merge-v3';
 const language=(navigator.language||'pl').toLowerCase().startsWith('pl')?'pl':'en';
 const tr={pl:{next:'NASTĘPNE',collection:'Kolekcja',shop:'Sklep',menu:'MENU',restart:'OD NOWA',owned:'Odblokowany',buy:'Kup',candy:'cukierków',end:'KONIEC GRY!',final:'Końcowa forma!',flower:'Kwiatek',crown:'Korona'},en:{next:'NEXT',collection:'Collection',shop:'Shop',menu:'MENU',restart:'RESTART',owned:'Unlocked',buy:'Buy',candy:'candies',end:'GAME OVER!',final:'Final form!',flower:'Flower',crown:'Crown'}}[language];
@@ -168,8 +176,8 @@ function loadSave(){
    for(const skin of x.unlocked)if(Number.isInteger(skin)&&skin>=1&&skin<skins.length&&!unlocked.includes(skin))unlocked.push(skin);
   }
   if(unlocked.includes(x.selected))selected=x.selected;
-   bestProgress=Math.max(highScore,Number(x.bestProgress)||0);
-   rewardedStage=Math.max(0,Math.min(levelStages.length-1,Math.floor(Number(x.rewardedStage)||0)));
+   experience=x.levelProgressVersion===2?Math.max(0,Number(x.experience)||0):0;
+   completedLevels=x.levelProgressVersion===2?Math.max(0,Math.min(22,Math.floor(Number(x.completedLevels)||0))):0;
    speedChoice=[.8,1,1.25].includes(Number(x.speedChoice))?Number(x.speedChoice):1;
    tutorialSeen=!!x.tutorialSeen;
   if(x.run&&Array.isArray(x.run.bodies)&&x.run.bodies.length<=150)savedRun=x.run;
@@ -179,12 +187,12 @@ function loadSave(){
 function save(){
  try{
   if(playing){
-   savedRun={points,merges,drops,paidBands,earned,issuedRainbow,id,aim,queue:[...queue],history:[...history],
+   savedRun={points,merges,drops,paidBands,earned,runScoreTracked,issuedRainbow,id,aim,queue:[...queue],history:[...history],
     activeId:active?.id??null,bodies:bodies.map(b=>({...b}))};
   }else if(document.getElementById('game').style.display==='block'&&!active){
    savedRun=null; // completed round, not simply paused in menu
   }
-  localStorage.setItem(storageKey,JSON.stringify({coins,unlocked,selected,highScore,bestProgress,rewardedStage,speedChoice,tutorialSeen,run:savedRun}));
+  localStorage.setItem(storageKey,JSON.stringify({coins,unlocked,selected,highScore,experience,completedLevels,levelProgressVersion:2,speedChoice,tutorialSeen,run:savedRun}));
  }catch(e){/* storage may be disabled in private browsing */}
 }
 function resumeRun(){
@@ -194,6 +202,7 @@ function resumeRun(){
   points=Math.max(0,Number(s.points)||0);merges=Math.max(0,Number(s.merges)||0);
   drops=Math.max(0,Number(s.drops)||0);paidBands=Math.max(0,Number(s.paidBands)||0);
   earned=Math.max(0,Number(s.earned)||0);issuedRainbow=!!s.issuedRainbow;
+   runScoreTracked=Number.isFinite(s.runScoreTracked)?Math.max(0,Number(s.runScoreTracked)):Math.max(0,Number(s.points)||0);
   id=Math.max(1,Number(s.id)||1);aim=Math.max(20,Math.min(W-20,Number(s.aim)||W/2));
   queue=Array.isArray(s.queue)?s.queue.filter(n=>Number.isInteger(n)&&n>=-2&&n<=4).slice(0,4):[];
   history=Array.isArray(s.history)?s.history.filter(n=>Number.isInteger(n)&&n>=-2&&n<=4).slice(-6):[];
@@ -212,18 +221,32 @@ function resumeRun(){
 }
 
 function refreshWallet(){for(const id of ['walletMenu','walletCollection','walletShop'])document.getElementById(id).querySelector('.walletAmount').textContent=coins;const gameAmount=document.getElementById('inGameCoins');if(gameAmount)gameAmount.textContent=coins}
+function getStageWorld(){
+ const idx=Math.min(levelStages.length-1,completedLevels);
+ return levelStages[idx].world;
+}
+function applyWorld(world){
+ if(selectedWorld===world&&document.documentElement.dataset.world===world)return;
+ selectedWorld=world;document.documentElement.dataset.world=world;
+ const palettes={garden:['#fffafa','#f3ecff','#e5fff2'],candy:['#fff4f3','#ffdbed','#f8e4ad'],cloud:['#f4fdff','#dcf3ff','#d9f4fa'],star:['#fcf3ff','#eadbff','#d8e8ff'],moon:['#f3f2ff','#d7dafc','#e7c9f7'],pumpkin:['#fff1e1','#ffd2a2','#ffdec4']};
+ const colors=palettes[world]||palettes.garden;
+ for(let i=0;i<3;i++)document.documentElement.style.setProperty('--world-'+i,colors[i]);
+}
 function updateLevel(){
- bestProgress=Math.max(bestProgress,points);
- let index=0;for(let i=1;i<levelStages.length;i++)if(bestProgress>=levelStages[i].at)index=i;
- if(index>rewardedStage){
-  let bonus=0;for(let i=rewardedStage+1;i<=index;i++)bonus+=levelStages[i].bonus;
-  rewardedStage=index;coins+=bonus;message='🌟 '+ux.level+' '+(index+1)+'! +'+bonus+' 🍬';msgAge=0;refreshWallet();save();
+ if(playing&&points>runScoreTracked){experience+=points-runScoreTracked;runScoreTracked=points;}
+ let completed=0;while(completed<levelStages.length&&experience>=levelStages[completed].at)completed++;
+ if(completed>completedLevels){
+  const gained=(completed-completedLevels)*25;completedLevels=completed;coins+=gained;earned+=gained;
+  message='🌟 '+tr.earnedMessage+'! +'+gained+' 🍬';msgAge=0;refreshWallet();save();
  }
- const now=levelStages[index],next=levelStages[index+1];
- document.getElementById('levelName').textContent='🌸 '+ux.level+' '+(index+1)+' · '+now[language];
- document.getElementById('levelReward').textContent=next?'🎁 +'+next.bonus+' 🍬':'🏆';
- document.getElementById('levelGoal').textContent=next?ux.nextGoal+': '+Math.max(0,next.at-bestProgress):ux.maxLevel;
- const pct=next?Math.max(0,Math.min(100,(bestProgress-now.at)/(next.at-now.at)*100)):100;
+ applyWorld(getStageWorld());
+ const done=completedLevels===levelStages.length;
+ const stage=levelStages[Math.min(completedLevels,levelStages.length-1)];
+ const previous=completedLevels?levelStages[completedLevels-1].at:0;
+ document.getElementById('levelName').textContent='🌸 '+tr.level+' '+Math.min(completedLevels+1,22)+'/22 · '+tr.worlds[stage.world];
+ document.getElementById('levelReward').textContent=done?'🏆':'🎁 +25 🍬';
+ document.getElementById('levelGoal').textContent=done?tr.maxLevel:tr.nextGoal+': '+Math.max(0,stage.at-experience);
+ const pct=done?100:Math.max(0,Math.min(100,(experience-previous)/(stage.at-previous)*100));
  const fill=document.getElementById('levelFill');fill.style.width=pct+'%';fill.setAttribute('role','progressbar');fill.setAttribute('aria-valuenow',Math.round(pct));fill.setAttribute('aria-valuemin','0');fill.setAttribute('aria-valuemax','100');
 }
 function refreshSpeedControls(){
@@ -251,8 +274,7 @@ function closeTutorial(){
  tutorialOpen=false;tutorialSeen=true;last=0;acc=0;
  document.getElementById('tutorialOverlay').style.display='none';save();
 }
-function award(){let n=Math.floor(points/10000);if(n<=paidBands)return;let gain=(n-paidBands)*5;
- coins+=gain;earned+=gain;paidBands=n;message='+'+gain+' '+tr.candy+'!';msgAge=0;save();refreshWallet()}
+function award(){updateLevel()} // Bonus candies come from levels, never a record score.
 function pickKind(){const weights=[34,30,24,10,2],recent=history.slice(-5);
  const allowed=weights.map((w,k)=>({k,w})).filter(o=>!(recent.at(-1)===o.k&&recent.at(-2)===o.k)
  && !(o.k===0&&recent.filter(v=>v===0).length>=2));
@@ -333,7 +355,13 @@ function decoration(c,skin,r){
  if(type==='star'){c.fillStyle='#ffca63';c.strokeStyle='#fff5c0';c.lineWidth=r*.035;c.beginPath();for(let j=0;j<10;j++){const a=-Math.PI/2+j*Math.PI/5,rd=j%2?r*.13:r*.28;c.lineTo(Math.cos(a)*rd,Math.sin(a)*rd-r*.94)}c.closePath();c.fill();c.stroke()}
  if(type==='panda'){for(const s of [-1,1]){c.fillStyle='#766284';c.beginPath();c.arc(s*r*.58,-r*.80,r*.26,0,Math.PI*2);c.fill();c.fillStyle='#f8dcf0';c.beginPath();c.arc(s*r*.58,-r*.8,r*.12,0,Math.PI*2);c.fill()}}
  if(type==='cloud'){c.fillStyle='#fffdf8';for(const [x,y,sz] of [[-.26,-.92,.23],[0,-1.06,.3],[.30,-.92,.22]]){c.beginPath();c.arc(r*x,r*y,r*sz,0,Math.PI*2);c.fill()}}
- if(type==='plush'){c.strokeStyle='#ffffffb9';c.lineWidth=r*.045;c.setLineDash([r*.07,r*.1]);c.beginPath();c.arc(0,0,r*.77,0,Math.PI);c.stroke();c.setLineDash([]);c.fillStyle='#ffa9d1';c.beginPath();c.ellipse(0,r*.56,r*.31,r*.12,0,0,7);c.fill()}
+ if(type==='pumpkin'){
+   c.lineCap='round';c.strokeStyle='#db6f36';c.lineWidth=r*.065;
+   for(const v of [-.43,.43]){c.beginPath();c.moveTo(v*r*.82,-r*.55);c.bezierCurveTo(v*r*1.1,-r*.06,v*r*.92,r*.34,v*r*.71,r*.60);c.stroke()}
+   c.fillStyle='#65bc68';c.beginPath();c.moveTo(-r*.13,-r*.93);c.lineTo(-r*.08,-r*1.40);c.quadraticCurveTo(r*.18,-r*1.48,r*.18,-r*1.27);c.lineTo(r*.12,-r*.91);c.closePath();c.fill();
+   c.fillStyle='#7ddc83';c.beginPath();c.ellipse(r*.28,-r*1.25,r*.30,r*.12,-.38,0,Math.PI*2);c.fill();
+  }
+  if(type==='plush'){c.strokeStyle='#ffffffb9';c.lineWidth=r*.045;c.setLineDash([r*.07,r*.1]);c.beginPath();c.arc(0,0,r*.77,0,Math.PI);c.stroke();c.setLineDash([]);c.fillStyle='#ffa9d1';c.beginPath();c.ellipse(0,r*.56,r*.31,r*.12,0,0,7);c.fill()}
  c.restore();
 }
 function face(c,r,b){
@@ -442,7 +470,7 @@ function spawn(){
 function reset(){
  savedRun=null;bodies=[];puffs=[];petals=[];fusions=[];traces=[];active=null;points=0;merges=0;pops=0;spills=0;drops=0;aim=180;
  heldFor=0;blockedFor=0;issuedRainbow=false;playing=true;petalTime=0;message='';msgAge=0;id=0;
- earned=0;paidBands=0;queue=[];history=[];fillQueue();spawn();save();
+ earned=0;paidBands=0;runScoreTracked=0;queue=[];history=[];fillQueue();spawn();save();
 }
 function drop(){if(!playing||!active||!active.held)return;removeInvalidRainbows();active.held=false;active.vy=Math.max(active.vy,120);heldFor=0;save();}
 function aimAt(e){const rect=cvs.getBoundingClientRect();const radius=active?r(active):21;aim=Math.max(radius+2,Math.min(W-radius-2,(e.clientX-rect.left)/rect.width*W));if(active?.held)active.x=aim;}
@@ -502,7 +530,7 @@ function merge(){
    message='✨ '+(next===5?tr.flower:next===6?tr.crown:names[next])+'!';msgAge=0;}
  if(isActive){active=null;drops++;points+=5;}save();return true;
  }}return false}
-function finish(){playing=false;active=null;highScore=Math.max(points,highScore);award();save();refreshWallet();message=tr.end+' '+points+' • +'+earned+' 🍬 • '+highScore;msgAge=0;}
+function finish(){updateLevel();playing=false;active=null;highScore=Math.max(points,highScore);save();refreshWallet();message=tr.end+' '+points+' • +'+earned+' 🍬';msgAge=0;}
 function simulate(dt){if(!playing)return;removeInvalidRainbows();msgAge+=dt;heldFor+=active?.held?dt:0;
  if(active?.held&&heldFor>=5)drop();
  petalTime+=dt;if(petalTime>.5&&petals.length<30){petalTime=0;petals.push({x:rr(0,W),y:-10,size:rr(3.5,7),age:0,speed:rr(20,38),phase:rr(0,7),settled:false})}
