@@ -1,25 +1,29 @@
-<!doctype html>
-<html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Squishy Merge · Halloween Sprite</title>
-<style>
-:root{font-family:ui-rounded,system-ui,-apple-system,sans-serif;color:#8d5d81;background:#fff1ee}
-*{box-sizing:border-box}body{margin:0;min-height:100dvh;background:radial-gradient(circle at 12% 18%,#ffe8c9,transparent 45%),linear-gradient(#ffedf5,#f1e5ff);padding:22px 13px}
-article{margin:0 auto;max-width:430px;padding:20px 14px 23px;text-align:center;border:3px solid #fff;border-radius:34px;background:linear-gradient(155deg,#fff8ec,#ffe0c3,#fbe5f6);box-shadow:0 14px 40px #aa82a655}
-.eyebrow{display:inline-block;padding:7px 13px;background:#a26aba;color:white;font-weight:1000;font-size:11px;letter-spacing:1px;border-radius:999px}
-h1{font-size:27px;letter-spacing:-.6px;color:#95518c;margin:10px 0 4px}p{font-size:14px;line-height:1.55;margin:4px auto 18px;max-width:330px}
-.spriteBox{background:radial-gradient(circle at 49% 48%,#fffcea,#ffcf9b 75%,#ffbdb4);border:4px solid #fff;border-radius:29px;box-shadow:inset 0 2px 16px #d39c9536;overflow:hidden}
-canvas{display:block;max-width:100%;aspect-ratio:1/1;width:100%}
-.price{margin:14px auto 0;font-size:22px;font-weight:950;color:#a26689}
-.note{font-size:12px;opacity:.78;margin-top:11px}
-a{display:inline-block;margin-top:10px;border-radius:17px;background:#a4d2a7;color:#4a7263;padding:12px 18px;font-weight:850;text-decoration:none;font-size:14px}
-</style></head>
-<body><article><div class="eyebrow">🎃 HALLOWEEN SEASON</div><h1 id="head"></h1><p id="description"></p>
-<div class="spriteBox"><canvas id="sprite" width="800" height="800" aria-label="Actual code-rendered pumpkin Squishy sprite"></canvas></div>
-<div class="price">🎃 100 🍬</div><div class="note" id="note"></div>
-<a id="back" href="./"></a></article>
-<script>
-(()=>{
-'use strict';
+<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Squishy Merge — Pumpkin Costume</title><style>:root{font-family:ui-rounded,system-ui,-apple-system,sans-serif;color:#745b85}
+*{box-sizing:border-box}
+body{margin:0;min-height:100dvh;padding:13px;background:radial-gradient(circle at 18% 10%,#fff2ce,transparent 43%),linear-gradient(#ffecf5,#f0e4ff);display:grid;place-items:center}
+main{width:min(100%,520px);border:3px solid white;background:linear-gradient(150deg,#fffaf1,#ffe3bd 54%,#fbe6ff);box-shadow:0 12px 40px #bd93b94d;border-radius:30px;padding:18px 16px;text-align:center}
+.tag{display:inline-block;border-radius:30px;padding:6px 13px;background:#a26db4;color:#fff;font-size:11px;font-weight:900;letter-spacing:1px}
+h1{font-size:clamp(21px,5vw,28px);margin:12px 0 4px;color:#995b90}p{font-size:13px;line-height:1.5;margin:5px 0 12px}
+.stage{background:radial-gradient(circle at 50% 45%,#fffdf5 0%,#ffe3bb 63%,#ffd1bb 100%);border:3px solid white;border-radius:23px;box-shadow:inset 0 0 20px #d4a5982a;overflow:hidden}
+canvas{width:100%;height:auto;display:block;aspect-ratio:1}
+.comparison{display:grid;grid-template-columns:1fr 2fr;gap:9px;align-items:end;max-width:440px;margin:0 auto}
+.comparison .stage{padding:4px}
+.smallTitle{font-size:11px;font-weight:900;color:#967497;padding:6px 0 2px}
+.price{font-size:20px;font-weight:900;color:#a56c8c;margin-top:10px}
+a{margin-top:11px;display:inline-block;background:#94cdaa;border-radius:14px;padding:12px 15px;font-size:13px;font-weight:900;text-decoration:none;color:#44715a}
+.note{font-size:11px;color:#897e95;line-height:1.35;margin-top:9px}</style></head><body><main>
+<div class="tag">🎃 HALLOWEEN SEASON</div><h1 id="title"></h1><p id="intro"></p>
+<div class="comparison"><div><div id="fromName" class="smallTitle"></div><div class="stage"><canvas id="original" width="320" height="350"></canvas></div></div>
+<div><div id="toName" class="smallTitle"></div><div class="stage"><canvas id="costume" width="480" height="500"></canvas></div></div></div>
+<div id="price" class="price"></div><div id="note" class="note"></div><a id="back" href="./"></a>
+</main><script>
+(()=>{'use strict';
+const words={"pl":["Dyniowy Squishy","To ten sam kremowy Squishy 3D co w grze, tylko przebrany w miękki kostium dyni.","Oryginał","Kostium Halloween","Za postać: 100 cukierków","Porównanie rysowane tym samym silnikiem sprite’ów co w grze.","← Wróć do gry"],"en":["Pumpkin Squishy","The exact same cream 3D Squishy from the game, now wearing a soft pumpkin costume.","Original","Halloween costume","Character price: 100 candies","Both characters use the game's real sprite renderer.","← Back to the game"],"de":["Kürbis-Squishy","Derselbe cremefarbene 3D-Squishy wie im Spiel – nur im weichen Kürbiskostüm.","Original","Halloween-Kostüm","Preis: 100 Bonbons","Beide Figuren werden vom originalen Sprite-Renderer gezeichnet.","← Zurück zum Spiel"],"es":["Squishy Calabaza","El mismo Squishy 3D color crema del juego, pero vestido con un suave disfraz de calabaza.","Original","Disfraz de Halloween","Precio: 100 caramelos","Ambos personajes se dibujan con el motor de sprites original.","← Volver al juego"],"cs":["Dýňový Squishy","Stejný krémový 3D Squishy ze hry, jen oblečený do měkkého dýňového kostýmu.","Originál","Halloweenský kostým","Cena: 100 bonbonů","Obě postavičky vykresluje stejný herní sprite engine.","← Zpět do hry"]};
+const lang=(navigator.language||'en').toLowerCase().split(/[-_]/)[0];
+const entries=words[lang]||words.en;
+document.documentElement.lang=words[lang]?lang:'en';
+['title','intro','fromName','toName','price','note','back'].forEach((id,i)=>document.getElementById(id).textContent=entries[i]);
 const pastel=['#c7adf5','#ffb6c9','#ffc79d','#dfb79c','#c3e5ad'];
 const skins=[
  ['Listek','#b7e8a5','leaf'],['Kwiatek','#ffc2df','flower'],['Korona','#dcc7ff','crown'],
@@ -27,8 +31,20 @@ const skins=[
  ['Płomyk','#ffc5a6','flame'],['Fontanna','#bde2fa','fountain'],['Pluszak','#d2c6f2','plush'],
  ['Gwiazdka','#ffe7ac','star'],['Panda','#e0d7f6','panda'],['Chmurka','#cbeeff','cloud'],['Dyniowy Squishy','#ffa44d','pumpkin']
 ];
-let paintTime=0, selected=12, finalAtlasReady=false;
-function asset(){return false} // exactly matches the seasonal skin code path (no atlas cell for skin 12)
+const HALLOWEEN_SKIN_INDEX=12, GAME_ASSETS=[0,1,2,3,4,5,6];
+let selected=12,paintTime=0,finalAtlasReady=false;
+const finalAtlas=new Image();
+finalAtlas.onload=()=>{finalAtlasReady=true};
+fetch('../squishy-3d/assets/squishy-final-precise.b64')
+ .then(r=>{if(!r.ok)throw new Error('Missing atlas');return r.text()})
+ .then(data=>{finalAtlas.src='data:image/webp;base64,'+data.trim()})
+ .catch(()=>{finalAtlas.src='../squishy-3d/assets/squishy-assets-v5.webp'});
+function asset(c,index,x,y,size){
+ if(!finalAtlasReady)return false;
+ const cell=192,col=index%5,row=Math.floor(index/5);
+ c.drawImage(finalAtlas,col*cell,row*cell,cell,cell,x-size/2,y-size/2,size,size);
+ return true;
+}
 
 function mochiPath(c,r){
  c.beginPath();c.moveTo(-r*.82,r*.29);c.bezierCurveTo(-r*1.06,-r*.23,-r*.84,-r*.75,-r*.43,-r*.78);
@@ -75,6 +91,78 @@ function face(c,r,b){
  c.restore();
 }
 
+function special(c,kind,r){
+ if(kind===-2){c.fillStyle='#fff7ed';c.beginPath();c.arc(0,0,r*.93,0,7);c.fill();c.save();c.beginPath();c.arc(0,0,r*.9,0,7);c.clip();c.rotate(-.4);for(let i=-5;i<=5;i++){c.fillStyle=i%2?'#f37285':'#fff8f0';c.fillRect(i*r*.35,-r,r*.35,2*r)}c.restore();c.strokeStyle='#edb7b6';c.lineWidth=1.4;c.beginPath();c.arc(0,0,r*.9,0,7);c.stroke();}
+ else if(kind===-1){let g=c.createConicGradient(paintTime,0,0);['#f3b1dc','#fff0a9','#b4f1d2','#b9d2ff','#d6bfff','#f3b1dc'].forEach((color,i)=>g.addColorStop(i/5,color));c.fillStyle=g;c.beginPath();c.arc(0,0,r*.9,0,7);c.fill();face(c,r,{id:3})}
+ else{const g=c.createRadialGradient(-r*.4,-r*.4,1,0,0,r);g.addColorStop(0,'#fff');g.addColorStop(1,'#a5d7ec77');c.fillStyle=g;c.beginPath();c.arc(0,0,r*.9,0,7);c.fill();}
+}
+
+function livingFace(c,kind,radius,b){
+ // The original eyes and mouth already belong to the illustration.
+ // Animate only tiny highlights INSIDE them: no extra displaced eye or mouth.
+ const id=b.id||0,t=paintTime+id*.57;
+ const blinking=(t%(4.1+(id%4)*.42))<.15;
+ const anchors={
+  0:[], 1:[[-.31,.25]],2:[[-.30,.24],[.29,.24]],3:[],
+  4:[[-.28,.22],[.29,.22]],5:[[-.29,.23],[.29,.23]]
+ };
+ const eyes=anchors[kind]||[];
+ c.save();
+ // Narrow pearly glints shift on existing eyes, never painting new pupils.
+ for(const [ex,ey] of eyes){
+  c.fillStyle='rgba(255,255,255,.72)';
+  c.beginPath();
+  c.ellipse((ex-.055+Math.sin(t*.9)*.015)*radius,(ey-.09)*radius,
+    radius*.022,radius*.033,0,0,Math.PI*2);c.fill();
+ }
+ // A micro glint within the already-printed mouth reads as a lively smile.
+ if((kind!==3)&&!blinking){
+  c.fillStyle='rgba(255,205,220,.28)';
+  c.beginPath();c.ellipse(0,radius*.48,radius*.070,radius*.014,0,0,Math.PI*2);c.fill();
+ }
+ c.restore();
+}
+
+function drawPumpkinCostume(c,r){
+ c.save();
+ const shell=c.createLinearGradient(-r*.95,-r*.95,r*.95,r*.85);
+ shell.addColorStop(0,'#ffe2a0');shell.addColorStop(.26,'#ffb459');
+ shell.addColorStop(.61,'#f98a43');shell.addColorStop(1,'#e57745');
+ // Soft padded pumpkin hood: generous face opening lets the original eyes
+ // and mouth shine through; it inherits the same bounce/rotation transform.
+ c.beginPath();c.ellipse(0,r*.04,r*.93,r*.91,0,0,Math.PI*2);
+ c.ellipse(0,r*.18,r*.66,r*.59,0,0,Math.PI*2,true);
+ c.fillStyle=shell;c.fill('evenodd');
+ c.lineWidth=r*.038;c.strokeStyle='rgba(255,241,190,.72)';
+ c.beginPath();c.ellipse(0,r*.18,r*.66,r*.59,0,0,Math.PI*2);c.stroke();
+ // Pumpkin seams in the orange padded shell, outside the exposed face.
+ c.lineCap='round';
+ for(const side of [-1,1]){
+  c.strokeStyle=side===-1?'rgba(189,89,39,.42)':'rgba(255,235,168,.83)';
+  c.lineWidth=r*.052;
+  c.beginPath();
+  c.moveTo(side*r*.54,-r*.61);
+  c.bezierCurveTo(side*r*.92,-r*.29,side*r*.91,r*.44,side*r*.54,r*.70);
+  c.stroke();
+ }
+ // Glossy cap and stitched green stem.
+ c.fillStyle='#ffcf75';c.beginPath();c.ellipse(-r*.37,-r*.58,r*.17,r*.07,-.6,0,Math.PI*2);c.fill();
+ c.fillStyle='#4d9c5a';c.strokeStyle='#2f7a51';c.lineWidth=r*.026;
+ c.beginPath();c.moveTo(-r*.10,-r*.76);c.lineTo(-r*.06,-r*1.19);
+ c.quadraticCurveTo(r*.06,-r*1.38,r*.18,-r*1.20);
+ c.lineTo(r*.12,-r*.76);c.closePath();c.fill();c.stroke();
+ const leaf=c.createLinearGradient(0,-r*1.35,r*.57,-r*.97);
+ leaf.addColorStop(0,'#a1e180');leaf.addColorStop(1,'#62b46d');
+ c.fillStyle=leaf;c.beginPath();c.moveTo(r*.04,-r*1.06);
+ c.quadraticCurveTo(r*.25,-r*1.43,r*.59,-r*1.27);
+ c.quadraticCurveTo(r*.40,-r*.92,r*.04,-r*1.06);c.fill();
+ c.strokeStyle='#3e965e';c.lineWidth=r*.019;c.beginPath();
+ c.moveTo(r*.06,-r*1.06);c.lineTo(r*.45,-r*1.25);c.stroke();
+ // Small satin bow/stitch at the collar; still unmistakably a Squishy.
+ c.fillStyle='#f8d79c';c.beginPath();c.ellipse(0,r*.78,r*.20,r*.08,0,0,Math.PI*2);c.fill();
+ c.restore();
+}
+
 function sprite(c,kind,x,y,radius,angle=0,impact=0,opacity=1,b=null){
  c.save();c.translate(x,y+(b?.held?Math.sin(paintTime*3+b.id)*.8:0));c.rotate(angle);
  const w=b?.squish||0,m=b?.morph||0;const breath=b?.held?Math.sin(paintTime*2+(b?.id||0))*.014:Math.sin(paintTime*1.8+(b?.id||0))*.007;const scale=1-m*.28+Math.sin((1-m)*Math.PI)*m*.10+breath;
@@ -82,6 +170,11 @@ function sprite(c,kind,x,y,radius,angle=0,impact=0,opacity=1,b=null){
  c.shadowColor='#7055814f';c.shadowBlur=radius*.22;c.shadowOffsetY=radius*.12;
  if(kind===-2){if(!asset(c,13,0,0,radius*2.20))special(c,kind,radius);c.restore();return;}
  if(kind<0){special(c,kind,radius);c.restore();return;}
+ // Use the EXACT cream 3D Squishy sprite already in the game's final atlas.
+ // The costume is drawn above it, not a replacement for its face.
+ if(kind===7&&b?.skin===HALLOWEEN_SKIN_INDEX&&asset(c,3,0,0,radius*2.34)){
+  drawPumpkinCostume(c,radius);c.restore();return;
+ }
  // Every mochi on the board, including the small/medium stages, uses the real
  // transparent 3D assets. The same artwork is used in the upcoming-piece tray.
  const spriteIndex=kind===7
@@ -91,7 +184,7 @@ function sprite(c,kind,x,y,radius,angle=0,impact=0,opacity=1,b=null){
   if(b&&kind<=1)livingFace(c,kind,radius,b);
   c.restore();return;
  }
- const base=kind===7?(skins[b?.skin??selected]?.[1]||'#b7e8a5'):(pastel[kind]||'#e8c2e8');
+ const base=kind===7?(b?.skin===HALLOWEEN_SKIN_INDEX?'#ffe9d3':(skins[b?.skin??selected]?.[1]||'#b7e8a5')):(pastel[kind]||'#e8c2e8');
  function shade(f){return 'rgb('+[1,3,5].map(i=>{const a=parseInt(base.slice(i,i+2),16);return Math.round(a+(f>0?(255-a)*f:a*f))}).join(',')+')'}
  const grad=c.createRadialGradient(-radius*.41,-radius*.55,1,0,radius*.15,radius*1.37);
  grad.addColorStop(0,shade(.69));grad.addColorStop(.38,shade(.33));grad.addColorStop(.75,base);grad.addColorStop(1,shade(-.22));
@@ -100,25 +193,22 @@ function sprite(c,kind,x,y,radius,angle=0,impact=0,opacity=1,b=null){
  c.strokeStyle='#ffffff7f';c.lineWidth=radius*.048;c.lineCap='round';
  for(const j of [-2,-1,1,2]){c.beginPath();c.moveTo(j*radius*.055,-radius*.96);c.quadraticCurveTo(j*radius*.20,-radius*.66,j*radius*.22,-radius*.52);c.stroke();}
  c.fillStyle='#ffffff96';c.beginPath();c.ellipse(-radius*.39,-radius*.4,radius*.24,radius*.078,-.4,0,7);c.fill();
- if(kind===7)decoration(c,b?.skin??selected,radius);
- face(c,radius,b);c.restore();
+ if(kind===7&&b?.skin===HALLOWEEN_SKIN_INDEX){
+  face(c,radius,b);drawPumpkinCostume(c,radius);
+ }else{
+  if(kind===7)decoration(c,b?.skin??selected,radius);
+  face(c,radius,b);
+ }
+ c.restore();
 }
-const messages={
-pl:['Dyniowy Squishy','Squishy w dyniowym przebraniu! Tak wygląda sprite renderowany przez kod gry.','Ten sam renderer, co w kolekcji i na planszy.','← Zagraj w podgląd'],
-en:['Pumpkin Squishy','Squishy in a pumpkin costume! This is how the game code renders the sprite.','The same sprite renderer as the collection and game board.','← Open game preview'],
-de:['Kürbis-Squishy','Squishy im Kürbiskostüm! So zeichnet der Spielcode die Figur.','Derselbe Sprite-Renderer wie im Spiel und in der Sammlung.','← Spielvorschau öffnen'],
-es:['Squishy Calabaza','¡Squishy con disfraz de calabaza! Este es el sprite real del código.','El mismo renderizador de la colección y del tablero.','← Abrir vista previa'],
-cs:['Dýňový Squishy','Squishy v dýňovém kostýmu! Takto postavičku vykresluje kód hry.','Stejný renderer jako ve hře a ve sbírce.','← Otevřít náhled hry']
-};
-const lang=(navigator.language||'en').toLowerCase().split(/[-_]/)[0];
-const m=messages[lang]||messages.en;document.documentElement.lang=lang;
-document.getElementById('head').textContent=m[0];
-document.getElementById('description').textContent=m[1];
-document.getElementById('note').textContent=m[2];
-document.getElementById('back').textContent=m[3];
-const canvas=document.getElementById('sprite'),ctx=canvas.getContext('2d');
-function frame(now){paintTime=now/1000;ctx.clearRect(0,0,800,800);
- sprite(ctx,7,400,455,223,0,0,1,{id:52,skin:12});
+function frame(now){
+ paintTime=now/1000;
+ const left=document.getElementById('original'),lc=left.getContext('2d');
+ const right=document.getElementById('costume'),rc=right.getContext('2d');
+ lc.clearRect(0,0,left.width,left.height);rc.clearRect(0,0,right.width,right.height);
+ // Original cream Squishy: atlas cell 3 (same base used in the seasonal costume).
+ lc.save();lc.translate(160,178);asset(lc,3,0,0,230);lc.restore();
+ sprite(rc,7,240,276,150,0,0,1,{id:67,skin:HALLOWEEN_SKIN_INDEX});
  requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
