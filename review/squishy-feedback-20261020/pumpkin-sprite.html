@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Squishy Merge · Halloween Sprite</title>
+<style>
+:root{font-family:ui-rounded,system-ui,-apple-system,sans-serif;color:#8d5d81;background:#fff1ee}
+*{box-sizing:border-box}body{margin:0;min-height:100dvh;background:radial-gradient(circle at 12% 18%,#ffe8c9,transparent 45%),linear-gradient(#ffedf5,#f1e5ff);padding:22px 13px}
+article{margin:0 auto;max-width:430px;padding:20px 14px 23px;text-align:center;border:3px solid #fff;border-radius:34px;background:linear-gradient(155deg,#fff8ec,#ffe0c3,#fbe5f6);box-shadow:0 14px 40px #aa82a655}
+.eyebrow{display:inline-block;padding:7px 13px;background:#a26aba;color:white;font-weight:1000;font-size:11px;letter-spacing:1px;border-radius:999px}
+h1{font-size:27px;letter-spacing:-.6px;color:#95518c;margin:10px 0 4px}p{font-size:14px;line-height:1.55;margin:4px auto 18px;max-width:330px}
+.spriteBox{background:radial-gradient(circle at 49% 48%,#fffcea,#ffcf9b 75%,#ffbdb4);border:4px solid #fff;border-radius:29px;box-shadow:inset 0 2px 16px #d39c9536;overflow:hidden}
+canvas{display:block;max-width:100%;aspect-ratio:1/1;width:100%}
+.price{margin:14px auto 0;font-size:22px;font-weight:950;color:#a26689}
+.note{font-size:12px;opacity:.78;margin-top:11px}
+a{display:inline-block;margin-top:10px;border-radius:17px;background:#a4d2a7;color:#4a7263;padding:12px 18px;font-weight:850;text-decoration:none;font-size:14px}
+</style></head>
+<body><article><div class="eyebrow">🎃 HALLOWEEN SEASON</div><h1 id="head"></h1><p id="description"></p>
+<div class="spriteBox"><canvas id="sprite" width="800" height="800" aria-label="Actual code-rendered pumpkin Squishy sprite"></canvas></div>
+<div class="price">🎃 100 🍬</div><div class="note" id="note"></div>
+<a id="back" href="./"></a></article>
+<script>
+(()=>{
+'use strict';
+const pastel=['#c7adf5','#ffb6c9','#ffc79d','#dfb79c','#c3e5ad'];
+const skins=[
+ ['Listek','#b7e8a5','leaf'],['Kwiatek','#ffc2df','flower'],['Korona','#dcc7ff','crown'],
+ ['Kropeczki','#b2e1e8','dots'],['Kocie uszy','#ffdbab','cat'],['Trzy włoski','#ebc3b0','hair'],
+ ['Płomyk','#ffc5a6','flame'],['Fontanna','#bde2fa','fountain'],['Pluszak','#d2c6f2','plush'],
+ ['Gwiazdka','#ffe7ac','star'],['Panda','#e0d7f6','panda'],['Chmurka','#cbeeff','cloud'],['Dyniowy Squishy','#ffa44d','pumpkin']
+];
+let paintTime=0, selected=12, finalAtlasReady=false;
+function asset(){return false} // exactly matches the seasonal skin code path (no atlas cell for skin 12)
+
+function mochiPath(c,r){
+ c.beginPath();c.moveTo(-r*.82,r*.29);c.bezierCurveTo(-r*1.06,-r*.23,-r*.84,-r*.75,-r*.43,-r*.78);
+ c.bezierCurveTo(-r*.2,-r*.83,-r*.22,-r*1.12,0,-r*1.09);
+ c.bezierCurveTo(r*.22,-r*1.08,r*.2,-r*.83,r*.44,-r*.78);
+ c.bezierCurveTo(r*.89,-r*.74,r*1.08,-r*.22,r*.84,r*.3);
+ c.bezierCurveTo(r*.65,r*.91,-r*.66,r*.91,-r*.82,r*.29);c.closePath();
+}
+
+function decoration(c,skin,r){
+ const sk=skins[skin];if(!sk)return;const type=sk[2];c.save();c.lineCap='round';
+ if(type==='dots'){c.fillStyle='#fff9';for(const [x,y] of [[-.55,-.33],[.53,-.4],[.59,.38],[-.55,.35]]){c.beginPath();c.arc(r*x,r*y,r*.065,0,7);c.fill();}}
+ if(type==='leaf'){for(const s of [-1,1]){c.fillStyle=s<0?'#78c39d':'#8ac96f';c.beginPath();c.ellipse(s*r*.2,-r*.99,r*.16,r*.3,s*.6,0,7);c.fill()}}
+ if(type==='flower'){c.translate(r*.36,-r*.85);for(let j=0;j<5;j++){c.save();c.rotate(j*Math.PI*2/5);c.fillStyle='#ff8bb9';c.beginPath();c.ellipse(0,-r*.14,r*.105,r*.17,0,0,7);c.fill();c.restore()}c.fillStyle='#fff19d';c.beginPath();c.arc(0,0,r*.09,0,7);c.fill()}
+ if(type==='crown'){c.fillStyle='#ffe18c';c.strokeStyle='#dba95a';c.lineWidth=r*.035;c.beginPath();c.moveTo(-r*.44,-r*.77);c.lineTo(-r*.43,-r*1.14);c.lineTo(-r*.18,-r*.96);c.lineTo(0,-r*1.24);c.lineTo(r*.18,-r*.96);c.lineTo(r*.44,-r*1.14);c.lineTo(r*.44,-r*.77);c.closePath();c.fill();c.stroke()}
+ if(type==='cat'){for(const s of [-1,1]){c.fillStyle='#ffdfb4';c.beginPath();c.moveTo(s*r*.16,-r*.89);c.lineTo(s*r*.52,-r*1.2);c.lineTo(s*r*.64,-r*.73);c.closePath();c.fill();c.fillStyle='#f5a0b4';c.beginPath();c.moveTo(s*r*.3,-r*.92);c.lineTo(s*r*.51,-r*1.10);c.lineTo(s*r*.56,-r*.85);c.fill()}}
+ if(type==='hair'){c.strokeStyle='#403044';c.lineWidth=r*.045;for(let j=-1;j<=1;j++){let x=j*r*.17;c.beginPath();c.moveTo(x,-r*.76);c.quadraticCurveTo(x-r*.06,-r*1.08,x+r*.07,-r*1.12);c.stroke()}}
+ if(type==='flame'){c.fillStyle='#ffa04d';c.beginPath();c.moveTo(-r*.21,-r*.78);c.quadraticCurveTo(-r*.29,-r*1.03,r*.08,-r*1.31);c.quadraticCurveTo(r*.11,-r*1.08,r*.25,-r*1.07);c.quadraticCurveTo(r*.38,-r*.76,0,-r*.74);c.fill();c.fillStyle='#ffe18d';c.beginPath();c.ellipse(0,-r*.91,r*.1,r*.15,0,0,7);c.fill()}
+ if(type==='fountain'){c.strokeStyle='#8dcaee';c.lineWidth=r*.046;for(const s of [-1,0,1]){c.beginPath();c.moveTo(0,-r*.78);c.quadraticCurveTo(s*r*.3,-r*1.44,s*r*.47,-r*1.2);c.stroke();c.fillStyle='#c1f2fa';c.beginPath();c.ellipse(s*r*.47,-r*1.2,r*.06,r*.1,0,0,7);c.fill()}}
+ if(type==='star'){c.fillStyle='#ffca63';c.strokeStyle='#fff5c0';c.lineWidth=r*.035;c.beginPath();for(let j=0;j<10;j++){const a=-Math.PI/2+j*Math.PI/5,rd=j%2?r*.13:r*.28;c.lineTo(Math.cos(a)*rd,Math.sin(a)*rd-r*.94)}c.closePath();c.fill();c.stroke()}
+ if(type==='panda'){for(const s of [-1,1]){c.fillStyle='#766284';c.beginPath();c.arc(s*r*.58,-r*.80,r*.26,0,Math.PI*2);c.fill();c.fillStyle='#f8dcf0';c.beginPath();c.arc(s*r*.58,-r*.8,r*.12,0,Math.PI*2);c.fill()}}
+ if(type==='cloud'){c.fillStyle='#fffdf8';for(const [x,y,sz] of [[-.26,-.92,.23],[0,-1.06,.3],[.30,-.92,.22]]){c.beginPath();c.arc(r*x,r*y,r*sz,0,Math.PI*2);c.fill()}}
+ if(type==='pumpkin'){
+   c.lineCap='round';c.strokeStyle='#db6f36';c.lineWidth=r*.065;
+   for(const v of [-.43,.43]){c.beginPath();c.moveTo(v*r*.82,-r*.55);c.bezierCurveTo(v*r*1.1,-r*.06,v*r*.92,r*.34,v*r*.71,r*.60);c.stroke()}
+   c.fillStyle='#65bc68';c.beginPath();c.moveTo(-r*.13,-r*.93);c.lineTo(-r*.08,-r*1.40);c.quadraticCurveTo(r*.18,-r*1.48,r*.18,-r*1.27);c.lineTo(r*.12,-r*.91);c.closePath();c.fill();
+   c.fillStyle='#7ddc83';c.beginPath();c.ellipse(r*.28,-r*1.25,r*.30,r*.12,-.38,0,Math.PI*2);c.fill();
+  }
+  if(type==='plush'){c.strokeStyle='#ffffffb9';c.lineWidth=r*.045;c.setLineDash([r*.07,r*.1]);c.beginPath();c.arc(0,0,r*.77,0,Math.PI);c.stroke();c.setLineDash([]);c.fillStyle='#ffa9d1';c.beginPath();c.ellipse(0,r*.56,r*.31,r*.12,0,0,7);c.fill()}
+ c.restore();
+}
+
+function face(c,r,b){
+ // Eyes and mouth share the mochi's transform, so they never drift.
+ const t=paintTime+(b?.id||0)*.77,period=3.45+((b?.id||0)%5)*.33,phase=t%period;
+ const blink=phase<.16?Math.sin(phase/.16*Math.PI):0,ey=r*.07,ex=r*.28,er=r*.087;
+ c.save();c.lineCap='round';for(const s of [-1,1]){
+  const x=s*ex;if(blink>.12){c.strokeStyle='#51394f';c.lineWidth=Math.max(1.2,r*.052);c.beginPath();c.moveTo(x-er*1.3,ey);c.quadraticCurveTo(x,ey+er*.8,x+er*1.3,ey);c.stroke();}
+  else{c.fillStyle='#463549';c.beginPath();c.ellipse(x,ey,er,er*1.18,0,0,7);c.fill();c.fillStyle='#fff';c.beginPath();c.arc(x-er*.25+Math.sin(t*1.2)*r*.017,ey-er*.30,er*.27,0,7);c.fill();}
+  c.fillStyle='#f49db6a3';c.beginPath();c.ellipse(s*r*.5,r*.26,r*.14,r*.08,0,0,7);c.fill();}
+ const open=.5+.5*Math.sin(t*2.6);c.strokeStyle='#633f55';c.lineWidth=Math.max(1.2,r*.052);c.lineCap='round';
+ if(open>.61){c.fillStyle='#a7536d';c.beginPath();c.ellipse(0,r*.38,r*.125,r*(.06+.04*open),0,0,7);c.fill();c.fillStyle='#ff99b0';c.beginPath();c.ellipse(0,r*.43,r*.06,r*.025,0,0,7);c.fill()}
+ else{c.beginPath();c.moveTo(-r*.13,r*.34);c.quadraticCurveTo(0,r*.49,r*.13,r*.34);c.stroke()}
+ c.restore();
+}
+
+function sprite(c,kind,x,y,radius,angle=0,impact=0,opacity=1,b=null){
+ c.save();c.translate(x,y+(b?.held?Math.sin(paintTime*3+b.id)*.8:0));c.rotate(angle);
+ const w=b?.squish||0,m=b?.morph||0;const breath=b?.held?Math.sin(paintTime*2+(b?.id||0))*.014:Math.sin(paintTime*1.8+(b?.id||0))*.007;const scale=1-m*.28+Math.sin((1-m)*Math.PI)*m*.10+breath;
+ c.scale(scale*(1+w*.17+impact*.06),scale*(1-w*.12-impact*.10));c.globalAlpha=opacity;
+ c.shadowColor='#7055814f';c.shadowBlur=radius*.22;c.shadowOffsetY=radius*.12;
+ if(kind===-2){if(!asset(c,13,0,0,radius*2.20))special(c,kind,radius);c.restore();return;}
+ if(kind<0){special(c,kind,radius);c.restore();return;}
+ // Every mochi on the board, including the small/medium stages, uses the real
+ // transparent 3D assets. The same artwork is used in the upcoming-piece tray.
+ const spriteIndex=kind===7
+  ?(Number.isInteger(b?.skin)&&b.skin>=9?undefined:(Number.isInteger(b?.skin)&&b.skin>=3&&b.skin<9?b.skin+4:4))
+  :GAME_ASSETS[kind];
+ if(spriteIndex!==undefined&&asset(c,spriteIndex,0,0,radius*2.34)){
+  if(b&&kind<=1)livingFace(c,kind,radius,b);
+  c.restore();return;
+ }
+ const base=kind===7?(skins[b?.skin??selected]?.[1]||'#b7e8a5'):(pastel[kind]||'#e8c2e8');
+ function shade(f){return 'rgb('+[1,3,5].map(i=>{const a=parseInt(base.slice(i,i+2),16);return Math.round(a+(f>0?(255-a)*f:a*f))}).join(',')+')'}
+ const grad=c.createRadialGradient(-radius*.41,-radius*.55,1,0,radius*.15,radius*1.37);
+ grad.addColorStop(0,shade(.69));grad.addColorStop(.38,shade(.33));grad.addColorStop(.75,base);grad.addColorStop(1,shade(-.22));
+ mochiPath(c,radius);c.fillStyle=grad;c.fill();c.shadowBlur=0;c.shadowOffsetY=0;
+ c.strokeStyle='#ffffff85';c.lineWidth=radius*.025;c.stroke();
+ c.strokeStyle='#ffffff7f';c.lineWidth=radius*.048;c.lineCap='round';
+ for(const j of [-2,-1,1,2]){c.beginPath();c.moveTo(j*radius*.055,-radius*.96);c.quadraticCurveTo(j*radius*.20,-radius*.66,j*radius*.22,-radius*.52);c.stroke();}
+ c.fillStyle='#ffffff96';c.beginPath();c.ellipse(-radius*.39,-radius*.4,radius*.24,radius*.078,-.4,0,7);c.fill();
+ if(kind===7)decoration(c,b?.skin??selected,radius);
+ face(c,radius,b);c.restore();
+}
+const messages={
+pl:['Dyniowy Squishy','Squishy w dyniowym przebraniu! Tak wygląda sprite renderowany przez kod gry.','Ten sam renderer, co w kolekcji i na planszy.','← Zagraj w podgląd'],
+en:['Pumpkin Squishy','Squishy in a pumpkin costume! This is how the game code renders the sprite.','The same sprite renderer as the collection and game board.','← Open game preview'],
+de:['Kürbis-Squishy','Squishy im Kürbiskostüm! So zeichnet der Spielcode die Figur.','Derselbe Sprite-Renderer wie im Spiel und in der Sammlung.','← Spielvorschau öffnen'],
+es:['Squishy Calabaza','¡Squishy con disfraz de calabaza! Este es el sprite real del código.','El mismo renderizador de la colección y del tablero.','← Abrir vista previa'],
+cs:['Dýňový Squishy','Squishy v dýňovém kostýmu! Takto postavičku vykresluje kód hry.','Stejný renderer jako ve hře a ve sbírce.','← Otevřít náhled hry']
+};
+const lang=(navigator.language||'en').toLowerCase().split(/[-_]/)[0];
+const m=messages[lang]||messages.en;document.documentElement.lang=lang;
+document.getElementById('head').textContent=m[0];
+document.getElementById('description').textContent=m[1];
+document.getElementById('note').textContent=m[2];
+document.getElementById('back').textContent=m[3];
+const canvas=document.getElementById('sprite'),ctx=canvas.getContext('2d');
+function frame(now){paintTime=now/1000;ctx.clearRect(0,0,800,800);
+ sprite(ctx,7,400,455,223,0,0,1,{id:52,skin:12});
+ requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script></body></html>
