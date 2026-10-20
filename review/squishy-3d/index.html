@@ -131,8 +131,8 @@ main{max-width:440px;padding:12px 12px 28px}
 .skinCard .seasonTag{display:block!important;grid-column:2;white-space:normal;font-size:17px;line-height:1.25;color:#a4574c}
 .skinCard .seasonTag small{display:block!important;color:#8a607e;font-size:11px;font-weight:750;padding-top:9px}
 .seasonalCard button{grid-column:2;font-size:16px;align-self:start}
-.menuBtns button{min-height:139px!important;padding:12px 11px 12px!important;overflow:visible}
-.menuBtns button .menuIcon{width:82px!important;height:82px!important;flex:0 0 82px;object-fit:contain!important;padding:6px;overflow:visible;filter:drop-shadow(0 3px 5px #d2a2bc3b)}
+.menuBtns button{min-height:157px!important;padding:12px 10px 10px!important;overflow:visible}
+.menuBtns button .menuIcon{width:106px!important;height:106px!important;flex:0 0 106px;object-fit:contain!important;padding:0;overflow:visible;filter:drop-shadow(0 3px 5px #d2a2bc3b)}
 .menuBtns button span:last-child{flex-shrink:0;line-height:1.25}
 #board{background:linear-gradient(160deg,var(--world-0,#fffafa),var(--world-1,#f3ecff) 56%,var(--world-2,#e5fff2))!important;transition:background .7s ease}
 #nextRow{background:var(--world-0,#fff7f9)!important;transition:background .7s ease}
@@ -362,16 +362,9 @@ fetch('assets/squishy-final-precise.b64').then(r=>{if(!r.ok)throw new Error('Atl
  .then(data=>{finalAtlas.src='data:image/webp;base64,'+data.trim()})
  .catch(()=>{finalAtlas.src='assets/squishy-assets-v5.webp'});
 finalAtlas.onerror=()=>{if(!finalAtlasReady&&finalAtlas.src.indexOf('squishy-assets-v5.webp')===-1){finalAtlas.src='assets/squishy-assets-v5.webp'}};
-function useMenuArt(id,file){
- const element=document.querySelector(id+' .menuIcon');
- if(!element)return;
- fetch('assets/'+file).then(r=>{if(!r.ok)throw new Error('Missing UI art');return r.text()})
- .then(b64=>{element.src='data:image/webp;base64,'+b64.trim()})
- .catch(()=>{ /* keep previous icon if offline */ });
-}
-useMenuArt('#openCollection','squishy-collection-internal.b64');
-useMenuArt('#openShop','squishy-shop-internal.b64');
-const homeArt=new Image();let homeReady=false;
+// Keep the original, fully illustrated v5 menu icons.
+ // The alternative internal .b64 icons are cropped at their lower edges.
+ const homeArt=new Image();let homeReady=false;
 homeArt.onload=()=>{homeReady=true;drawHome()};
 homeArt.src='assets/squishy-home-v5.webp';
 // Core game tiers use real cutouts from the same polished atlas as the shop.
