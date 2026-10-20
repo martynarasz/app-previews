@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="pl"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
+<title>Squishy Merge • 3D Sprite Preview</title>
+<style>
+:root{font-family:ui-rounded,system-ui,-apple-system,sans-serif;color:#71588f;background:#fef7fd}*{box-sizing:border-box}
+body{margin:0;min-height:100dvh;background:radial-gradient(ellipse at 10% 0,#ffe5f3,transparent 52%),linear-gradient(150deg,#fffafa,#efe2fa 65%,#e3f9ef);}
+main{max-width:440px;padding:12px 9px 32px;margin:auto;text-align:center}
+h1{margin:3px 0 9px;font-size:34px;letter-spacing:-1.3px;color:#8766ae;text-shadow:0 3px #fff}
+#home{margin:0 auto;padding-top:28px} #hero{width:100%;aspect-ratio:1/1;display:block;border-radius:28px;background:linear-gradient(135deg,#fff4fb,#efdeff,#e4ffef);border:2px solid #fff;box-shadow:0 13px 30px #b78abf3a}
+button{border:0;border-radius:20px;background:#9c83da;color:#fff;padding:15px 24px;font-size:19px;font-weight:900;box-shadow:0 8px 19px #9070bc47;cursor:pointer;font-family:inherit}
+button:active{transform:scale(.98)}#play{display:block;width:92px;height:92px;padding:0;border-radius:50%;font-size:47px;margin:12px auto 8px;background:linear-gradient(140deg,#b4ed8f,#70ce91,#47b775);box-shadow:0 8px 22px #73b98465;border:4px solid #ffffffba}
+#game{display:none}#status{font-size:19px;font-weight:900;padding:3px 0 8px}#boardWrap{position:relative;margin:0 auto;width:100%;max-width:425px;touch-action:none}
+#board{width:100%;aspect-ratio:360/465;display:block;border-radius:29px;border:3px solid #fff;background:linear-gradient(145deg,#fff8fc,#f2e8fc 55%,#e5fbf3);box-shadow:0 12px 30px #9071ac4a;touch-action:none}
+#count{pointer-events:none;position:absolute;top:40px;left:0;right:0;font-size:98px;font-weight:1000;color:#9c77cc;text-shadow:0 2px #fff,0 8px 19px #a879aa60;display:none;animation:pop .3s ease-out}@keyframes pop{from{transform:scale(.65)}to{transform:scale(1)}}
+#feedback{height:36px;margin-top:8px;font-size:15px;font-weight:800;color:#ae82ba}
+#restart{background:#e5d6f6;color:#755b98;font-size:15px;padding:12px 22px;box-shadow:none}
+.note{font-size:12px;color:#9b85af;margin:14px auto;max-width:380px;line-height:1.5}
+#back{background:transparent;color:#9078a6;box-shadow:none;font-size:13px;padding:10px}
+
+.topbar{display:flex;align-items:center;justify-content:center;margin:8px auto 14px}
+.wallet{display:inline-flex;background:white;border:2px solid #f7dfec;border-radius:30px;padding:7px 12px;font-size:13px;font-weight:900;color:#ad7398}
+.menuBtns{display:flex;gap:9px;margin:14px auto;justify-content:center}
+.menuBtns button{width:38%;max-width:95px;height:75px;background:linear-gradient(145deg,#fff8d4,#f7c3d9);color:#906caa;border:3px solid #ffffff;border-radius:24px;font-size:32px;box-shadow:0 6px 14px #927bab21}
+#collectionScreen,#shopScreen{display:none}
+.screenHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:13px auto}.screenHead h2{margin:0;font-size:24px;color:#8b6a9d}
+.screenHead button{font-size:12px;background:#fff;color:#80689d;padding:10px;box-shadow:none}
+.help{font-size:13px;color:#997fa8;line-height:1.5;margin:9px auto 16px}
+.skinGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.skinCard{border:2px solid #f3e3ed;border-radius:16px;padding:7px 5px;background:#fffaff;min-width:0}
+.skinCard.selected{border-color:#9ad9c8;background:#f4fff8}
+.skinCard canvas{width:100%;display:block;aspect-ratio:1/1}
+.skinCard strong{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.skinCard small{display:block;font-size:11px;color:#9f89ac;margin:5px auto}
+.skinCard button{width:100%;font-size:11px;padding:8px 2px;border-radius:10px;box-shadow:none}
+.skinCard button:disabled{opacity:.7;background:#dbcfe4}
+#nextRow{display:flex;align-items:center;justify-content:center;gap:9px;min-height:60px}
+#nextRow span{font-size:12px;font-weight:900;color:#9982a6}
+#nextCanvas{width:200px;height:55px}
+
+.pepperCoin{display:inline-block;flex-shrink:0;width:26px;height:26px;vertical-align:middle;background-image:var(--squishy-candy,url("../squishy-3d/assets/squishy-assets-v5.webp"));background-repeat:no-repeat;background-size:500% 300%;background-position:75% 100%;filter:drop-shadow(0 2px 2px #d86a8b5c)}
+#status .pepperCoin{width:22px;height:22px}
+.wallet{gap:7px;font-size:17px;padding:8px 13px}
+.skinGrid{gap:9px;margin:12px auto}
+.skinCard{background:linear-gradient(155deg,#fffbf2,#ffe8f2);border:2px solid #fff;border-radius:18px;box-shadow:0 5px 13px #aa85b926;padding:7px 5px 11px;position:relative}
+.skinCard:nth-child(3n+1){background:linear-gradient(155deg,#fff4db,#ffe3ed)}
+.skinCard:nth-child(3n+2){background:linear-gradient(155deg,#ffe5f5,#ffeefa)}
+.skinCard:nth-child(3n){background:linear-gradient(155deg,#e8e0f6,#faeafa)}
+.skinCard.locked{background:linear-gradient(160deg,#e0d7ed,#bcb0d0)}
+.skinCard.locked canvas{filter:brightness(0) saturate(100%) invert(28%) sepia(12%) saturate(844%) hue-rotate(226deg) brightness(91%);opacity:.65}
+.skinCard strong,.skinCard small{display:none}
+.skinCard button{display:flex;align-items:center;justify-content:center;gap:6px;border-radius:15px;background:linear-gradient(#fffefa,#ffedeb);color:#76556d;min-height:36px;font-size:17px;box-shadow:0 2px 5px #a782aa3a}
+.skinCard button:disabled{background:linear-gradient(#fffefa,#fff3f2);color:#8f6e96;opacity:1}
+.skinCard button.owned{background:linear-gradient(#9fe28e,#76c570);color:white}
+.skinCard button.selected{background:linear-gradient(#a4d6e3,#87b5d4);color:#fff}
+.skinCard button .pepperCoin{width:23px;height:23px}
+#home{padding-top:5px}body{padding-bottom:26px}
+
+.srOnly{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+body:before{content:"";position:fixed;inset:0;background:url("../squishy-3d/assets/squishy-home.webp") center / cover no-repeat;opacity:.13;filter:blur(12px);pointer-events:none}
+main{position:relative;z-index:1}
+
+/* Friendly menu labels under the collection and shop icons. */
+.menuBtns{gap:14px;max-width:390px;margin:14px auto}
+.menuBtns button{flex:1;width:auto;max-width:177px;min-width:0;height:78px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:14px;font-weight:900;padding:8px 10px}
+.menuBtns button span:first-child{font-size:27px;line-height:1.05}
+.menuBtns button span:last-child{font-size:13px;letter-spacing:.1px;line-height:1.2}
+
+/* Final pastel sakura interface, responsive and without duplicated text. */
+body{background:linear-gradient(165deg,#fff2fb 0%,#f8efff 43%,#e7f9ef 100%)}
+body:before{background-image:url("../squishy-3d/assets/squishy-home-v5.webp");opacity:.19;filter:blur(23px)}
+main{max-width:440px;padding:12px 12px 28px}
+#home{padding-top:7px}
+#hero{border-radius:30px;border:4px solid rgba(255,255,255,.95);box-shadow:0 15px 31px #ce93b83d}
+.menuBtns{gap:16px;max-width:395px}
+.menuBtns button{width:50%;max-width:170px;height:auto;min-height:125px;gap:2px;
+ padding:7px 10px 9px;background:linear-gradient(155deg,#fff8f6,#ffe9f3);
+ border:3px solid #fff;border-radius:27px;box-shadow:0 8px 22px #c68ba839;
+ color:#8e5c8a;font-size:14px}
+.menuBtns button .menuIcon{width:88px;height:88px;object-fit:contain;filter:drop-shadow(0 4px 5px #d2a2bc3b)}
+.menuBtns button span:last-child{font-size:15px;font-weight:900;line-height:1.15}
+#play{border-color:#fff8f4;box-shadow:0 8px 23px #8fccaa8a}
+#board{background:linear-gradient(155deg,#fffafa,#f3ecff 55%,#e5fff2)}
+#nextRow{border-radius:20px;background:#fff7f9bb;margin:3px 8px 11px;padding:4px;box-shadow:0 3px 10px #ae86ad1a}
+.skinCard{border-radius:22px}
+
+/* Extra levels, speed modes and skippable help — tester preview. */
+#levelStrip{max-width:420px;margin:7px auto 9px;background:#fff9feee;border:2px solid white;border-radius:18px;padding:8px 12px;box-shadow:0 5px 15px #bd93bd25}
+.levelLine{display:flex;justify-content:space-between;gap:8px;font-size:13px;font-weight:900;color:#8267a6}
+.levelTrack{height:8px;background:#f3def3;border-radius:12px;overflow:hidden;margin:7px 0}
+#levelFill{height:100%;width:0;background:linear-gradient(90deg,#8fd9a8,#c19de9);border-radius:12px;transition:width .3s}
+#levelGoal{display:block;font-size:11px;color:#9b80a9}
+#speedRow{display:flex;justify-content:center;align-items:center;gap:8px;margin:3px auto 9px}
+#speedControls{display:flex;gap:5px;background:#fff8fd;border:2px solid white;border-radius:19px;padding:4px;flex:1}
+#speedControls button{flex:1;padding:8px 4px;border-radius:13px;background:transparent;color:#8f79a1;box-shadow:none;font-size:12px;white-space:nowrap}
+#speedControls button.active{background:linear-gradient(135deg,#a7e3c4,#c6a7ec);color:#fff;box-shadow:0 3px 8px #aa95bb30}
+#tutorialOpenBtn{padding:8px;min-width:40px;height:40px;border-radius:50%;background:#fff;color:#9272b0;box-shadow:none;font-size:20px}
+#tutorialOverlay{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:#675179a8;padding:16px;backdrop-filter:blur(5px)}
+#tutorialCard{width:min(100%,360px);background:linear-gradient(155deg,#fffdfa,#ffeaf6 60%,#effce9);border:3px solid white;border-radius:30px;padding:26px 22px;box-shadow:0 20px 70px #4c37574d;text-align:center}
+#tutorialIcon{font-size:54px;display:block;margin:7px 0}
+#tutorialHeading{font-size:23px;color:#8561a8;margin:8px 0}
+#tutorialText{font-size:15px;line-height:1.55;color:#725e83;min-height:73px}
+#tutorialDots{letter-spacing:7px;color:#a88ad2;font-size:22px;margin:10px auto}
+#tutorialActions{display:flex;gap:10px;justify-content:center}
+#tutorialActions button{font-size:15px;padding:12px 18px}
+#tutorialSkip{background:#fff;color:#8e79a2;box-shadow:none}
+#tutorialNext{background:linear-gradient(135deg,#a6da92,#7cc7a7)}
+</style></head><body><main>
+
+<section id="home">
+<div class="topbar"><span class="wallet" id="walletMenu"><span class="pepperCoin"></span><span class="walletAmount">0</span></span></div>
+<canvas id="hero" width="780" height="780"></canvas>
+<button id="play" aria-label="Graj">▶</button>
+<div class="menuBtns"><button id="openCollection" aria-label="Kolekcja"><img class="menuIcon" src="../squishy-3d/assets/collection-v5.webp" alt=""><span>Kolekcja</span></button><button id="openShop" aria-label="Sklep"><img class="menuIcon" src="../squishy-3d/assets/shop-v5.webp" alt=""><span>Sklep</span></button></div>
+</section>
+<section id="game"><div id="status">⭐ 0　<span class="pepperCoin"></span> <span id="inGameCoins">0</span></div><div id="nextRow"><span>NASTĘPNE</span><canvas id="nextCanvas" width="600" height="165"></canvas></div>
+<div id="levelStrip" role="status" aria-live="polite"><div class="levelLine"><span id="levelName">🌸 Poziom 1</span><span id="levelReward"></span></div><div class="levelTrack"><div id="levelFill"></div></div><small id="levelGoal"></small></div>
+<div id="speedRow"><div id="speedControls" role="group" aria-label="Szybkość gry"><button data-speed="0.8">🌿 0.8×</button><button data-speed="1">🌸 1×</button><button data-speed="1.25">⚡ 1.25×</button></div><button id="tutorialOpenBtn" aria-label="Jak grać?">?</button></div>
+<div id="boardWrap"><canvas id="board" width="1080" height="1395"></canvas><div id="count"></div></div>
+<div id="feedback"></div><button id="restart">↻ OD NOWA</button><button id="back">← MENU</button></section>
+<section id="collectionScreen"><div class="screenHead"><button id="collectionBack">← MENU</button><span class="srOnly">Kolekcja</span><span class="wallet" id="walletCollection"><span class="pepperCoin"></span><span class="walletAmount">0</span></span></div>
+<div class="skinGrid" id="collectionCards"></div></section>
+<section id="shopScreen"><div class="screenHead"><button id="shopBack">← MENU</button><span class="srOnly">Sklep</span><span class="wallet" id="walletShop"><span class="pepperCoin"></span><span class="walletAmount">0</span></span></div>
+<div class="skinGrid" id="shopCards"></div></section>
+</main><div id="tutorialOverlay" role="dialog" aria-modal="true" aria-labelledby="tutorialHeading">
+<div id="tutorialCard"><span id="tutorialIcon">👆</span><h2 id="tutorialHeading"></h2><p id="tutorialText"></p><div id="tutorialDots" aria-hidden="true"></div><div id="tutorialActions"><button id="tutorialSkip"></button><button id="tutorialNext"></button></div></div></div><script>
+(()=>{'use strict';
+
+const names=['Lawendowy','Truskawkowy','Brzoskwiniowy','Toffi','Miętowy','Kwiatek','Korona','Finał'];
+const pastel=['#c7adf5','#ffb6c9','#ffc79d','#dfb79c','#c3e5ad'];
+const skins=[
+ ['Listek','#b7e8a5','leaf'],['Kwiatek','#ffc2df','flower'],['Korona','#dcc7ff','crown'],
+ ['Kropeczki','#b2e1e8','dots'],['Kocie uszy','#ffdbab','cat'],['Trzy włoski','#ebc3b0','hair'],
+ ['Płomyk','#ffc5a6','flame'],['Fontanna','#bde2fa','fountain'],['Pluszak','#d2c6f2','plush'],
+ ['Gwiazdka','#ffe7ac','star'],['Panda','#e0d7f6','panda'],['Chmurka','#cbeeff','cloud']
+];
+let coins=0,unlocked=[],selected=-1,highScore=0,paidBands=0,earned=0,queue=[],history=[],traces=[],savedRun=null;
+const levelStages=[{at:0,pl:'Ogródek',en:'Garden',bonus:0},{at:1200,pl:'Cukiernia',en:'Candy Shop',bonus:10},{at:3500,pl:'Chmurkowa Dolina',en:'Cloud Valley',bonus:15},{at:7000,pl:'Kraina Gwiazd',en:'Star Land',bonus:20}];
+let bestProgress=0,rewardedStage=0,speedChoice=1,tutorialSeen=false,tutorialOpen=false,tutorialStep=0;
+const storageKey='squishy-merge-v3';
+const language=(navigator.language||'pl').toLowerCase().startsWith('pl')?'pl':'en';
+const tr={pl:{next:'NASTĘPNE',collection:'Kolekcja',shop:'Sklep',menu:'MENU',restart:'OD NOWA',owned:'Odblokowany',buy:'Kup',candy:'cukierków',end:'KONIEC GRY!',final:'Końcowa forma!',flower:'Kwiatek',crown:'Korona'},en:{next:'NEXT',collection:'Collection',shop:'Shop',menu:'MENU',restart:'RESTART',owned:'Unlocked',buy:'Buy',candy:'candies',end:'GAME OVER!',final:'Final form!',flower:'Flower',crown:'Crown'}}[language];
+const ux={pl:{level:'Poziom',nextGoal:'Do kolejnego poziomu',maxLevel:'Wszystkie poziomy odkryte!',skip:'Pomiń',next:'Dalej',start:'Graj!',how:'Jak grać?',speed:'Szybkość gry',steps:[
+{icon:'👆',title:'Wybierz miejsce',body:'Dotknij planszy i przesuń palcem w lewo lub w prawo, żeby ustawić Squishy.'},
+{icon:'💗',title:'Upuść Squishy',body:'Puść palec, aby zrzucić postać. Trzy najmniejsze takie same Squishy łączą się w jedną większą!'},
+{icon:'✨',title:'Łącz i odkrywaj',body:'Kolejne jednakowe postacie łączą się parami. Zdobywaj punkty i cukierki, kupuj nowe postacie oraz odkrywaj poziomy.'}
+]},en:{level:'Level',nextGoal:'Points to next level',maxLevel:'All levels discovered!',skip:'Skip',next:'Next',start:'Play!',how:'How to play?',speed:'Game speed',steps:[
+{icon:'👆',title:'Choose where to drop',body:'Touch the board and slide left or right to position your Squishy.'},
+{icon:'💗',title:'Drop your Squishy',body:'Release your finger to drop. Three matching smallest Squishies merge into a bigger one!'},
+{icon:'✨',title:'Merge and discover',body:'Other matching characters merge in pairs. Earn points and candy, collect characters, and discover new levels.'}
+]}}[language];
+function applyLanguage(){
+ document.documentElement.lang=language;
+ for(const [selector,label] of [['#openCollection span',tr.collection],['#openShop span',tr.shop],['#nextRow span',tr.next],['#restart','↻ '+tr.restart],['#back','← '+tr.menu],['#collectionBack','← '+tr.menu],['#shopBack','← '+tr.menu]]){
+  const n=document.querySelector(selector);if(n)n.textContent=label;
+ }
+ document.querySelector('#openCollection').setAttribute('aria-label',tr.collection);
+ document.querySelector('#openShop').setAttribute('aria-label',tr.shop);
+}
+
+function loadSave(){
+ // The leaf Squishy is free and always belongs to every player, including old saves.
+ unlocked=[0];selected=0;coins=0;highScore=0;
+ try{
+  const x=JSON.parse(localStorage.getItem(storageKey)||'{}');
+  coins=Math.max(0,Number(x.coins)||0);highScore=Math.max(0,Number(x.highScore)||0);
+  if(Array.isArray(x.unlocked)){
+   for(const skin of x.unlocked)if(Number.isInteger(skin)&&skin>=1&&skin<skins.length&&!unlocked.includes(skin))unlocked.push(skin);
+  }
+  if(unlocked.includes(x.selected))selected=x.selected;
+   bestProgress=Math.max(highScore,Number(x.bestProgress)||0);
+   rewardedStage=Math.max(0,Math.min(levelStages.length-1,Math.floor(Number(x.rewardedStage)||0)));
+   speedChoice=[.8,1,1.25].includes(Number(x.speedChoice))?Number(x.speedChoice):1;
+   tutorialSeen=!!x.tutorialSeen;
+  if(x.run&&Array.isArray(x.run.bodies)&&x.run.bodies.length<=150)savedRun=x.run;
+ }catch(e){/* corrupted or blocked storage starts with the free skin */}
+}
+
+function save(){
+ try{
+  if(playing){
+   savedRun={points,merges,drops,paidBands,earned,issuedRainbow,id,aim,queue:[...queue],history:[...history],
+    activeId:active?.id??null,bodies:bodies.map(b=>({...b}))};
+  }else if(document.getElementById('game').style.display==='block'&&!active){
+   savedRun=null; // completed round, not simply paused in menu
+  }
+  localStorage.setItem(storageKey,JSON.stringify({coins,unlocked,selected,highScore,bestProgress,rewardedStage,speedChoice,tutorialSeen,run:savedRun}));
+ }catch(e){/* storage may be disabled in private browsing */}
+}
+function resumeRun(){
+ const s=savedRun;
+ if(!s||!Array.isArray(s.bodies)||s.bodies.length>150)return false;
+ try{
+  points=Math.max(0,Number(s.points)||0);merges=Math.max(0,Number(s.merges)||0);
+  drops=Math.max(0,Number(s.drops)||0);paidBands=Math.max(0,Number(s.paidBands)||0);
+  earned=Math.max(0,Number(s.earned)||0);issuedRainbow=!!s.issuedRainbow;
+  id=Math.max(1,Number(s.id)||1);aim=Math.max(20,Math.min(W-20,Number(s.aim)||W/2));
+  queue=Array.isArray(s.queue)?s.queue.filter(n=>Number.isInteger(n)&&n>=-2&&n<=4).slice(0,4):[];
+  history=Array.isArray(s.history)?s.history.filter(n=>Number.isInteger(n)&&n>=-2&&n<=4).slice(-6):[];
+  bodies=s.bodies.filter(b=>Number.isInteger(b.kind)&&b.kind>=-3&&b.kind<=7&&
+    Number.isFinite(b.x)&&Number.isFinite(b.y)).map(b=>({
+     ...b,x:Math.max(0,Math.min(W,b.x)),y:Math.max(0,Math.min(H,b.y)),
+     vx:Number(b.vx)||0,vy:Number(b.vy)||0,angle:Number(b.angle)||0,
+     spin:Number(b.spin)||0,cool:.12,held:!!b.held,rest:0
+    }));
+  active=bodies.find(b=>b.id===s.activeId)||null;
+  if(active&&!active.held)active=null;
+  playing=true;heldFor=0;blockedFor=0;acc=0;last=0;
+  fillQueue();if(!active)spawn();drawQueue();
+  return true;
+ }catch(e){savedRun=null;return false}
+}
+
+function refreshWallet(){for(const id of ['walletMenu','walletCollection','walletShop'])document.getElementById(id).querySelector('.walletAmount').textContent=coins;const gameAmount=document.getElementById('inGameCoins');if(gameAmount)gameAmount.textContent=coins}
+function updateLevel(){
+ bestProgress=Math.max(bestProgress,points);
+ let index=0;for(let i=1;i<levelStages.length;i++)if(bestProgress>=levelStages[i].at)index=i;
+ if(index>rewardedStage){
+  let bonus=0;for(let i=rewardedStage+1;i<=index;i++)bonus+=levelStages[i].bonus;
+  rewardedStage=index;coins+=bonus;message='🌟 '+ux.level+' '+(index+1)+'! +'+bonus+' 🍬';msgAge=0;refreshWallet();save();
+ }
+ const now=levelStages[index],next=levelStages[index+1];
+ document.getElementById('levelName').textContent='🌸 '+ux.level+' '+(index+1)+' · '+now[language];
+ document.getElementById('levelReward').textContent=next?'🎁 +'+next.bonus+' 🍬':'🏆';
+ document.getElementById('levelGoal').textContent=next?ux.nextGoal+': '+Math.max(0,next.at-bestProgress):ux.maxLevel;
+ const pct=next?Math.max(0,Math.min(100,(bestProgress-now.at)/(next.at-now.at)*100)):100;
+ const fill=document.getElementById('levelFill');fill.style.width=pct+'%';fill.setAttribute('role','progressbar');fill.setAttribute('aria-valuenow',Math.round(pct));fill.setAttribute('aria-valuemin','0');fill.setAttribute('aria-valuemax','100');
+}
+function refreshSpeedControls(){
+ document.querySelectorAll('#speedControls [data-speed]').forEach(btn=>{
+  const on=Number(btn.dataset.speed)===speedChoice;btn.classList.toggle('active',on);btn.setAttribute('aria-pressed',on?'true':'false');
+ });
+ document.getElementById('speedControls').setAttribute('aria-label',ux.speed);
+ document.getElementById('tutorialOpenBtn').setAttribute('aria-label',ux.how);
+}
+function renderTutorial(){
+ const step=ux.steps[tutorialStep];
+ document.getElementById('tutorialIcon').textContent=step.icon;
+ document.getElementById('tutorialHeading').textContent=step.title;
+ document.getElementById('tutorialText').textContent=step.body;
+ document.getElementById('tutorialDots').textContent=ux.steps.map((_,i)=>i===tutorialStep?'●':'○').join(' ');
+ document.getElementById('tutorialSkip').textContent=ux.skip;
+ document.getElementById('tutorialNext').textContent=tutorialStep===ux.steps.length-1?ux.start:ux.next;
+}
+function openTutorial(){
+ if(!playing)return;
+ tutorialOpen=true;tutorialStep=0;acc=0;
+ document.getElementById('tutorialOverlay').style.display='flex';renderTutorial();
+}
+function closeTutorial(){
+ tutorialOpen=false;tutorialSeen=true;last=0;acc=0;
+ document.getElementById('tutorialOverlay').style.display='none';save();
+}
+function award(){let n=Math.floor(points/10000);if(n<=paidBands)return;let gain=(n-paidBands)*5;
+ coins+=gain;earned+=gain;paidBands=n;message='+'+gain+' '+tr.candy+'!';msgAge=0;save();refreshWallet()}
+function pickKind(){const weights=[34,30,24,10,2],recent=history.slice(-5);
+ const allowed=weights.map((w,k)=>({k,w})).filter(o=>!(recent.at(-1)===o.k&&recent.at(-2)===o.k)
+ && !(o.k===0&&recent.filter(v=>v===0).length>=2));
+ let x=Math.random()*allowed.reduce((s,v)=>s+v.w,0);
+ for(const a of allowed){x-=a.w;if(x<=0)return a.k}return allowed.at(-1).k;
+}
+function rainbowAllowed(){
+ const stable=bodies.filter(b=>!b.held&&b.kind>=0);
+ if(stable.length<8)return false;
+ if(stable.some(b=>b.kind>=3))return false;
+ return stable.filter(b=>b.kind<=2).length>=8;
+}
+function removeInvalidRainbows(){
+ if(rainbowAllowed())return;
+ queue=queue.map(k=>k===-1?0:k);
+ if(active?.kind===-1){
+  active.kind=0;active.y=Math.max(r(active)+6,active.y);
+  issuedRainbow=false;
+ }
+}
+function fillQueue(){while(queue.length<4){let k=pickKind();if(drops>=30&&rainbowAllowed()&&!issuedRainbow&&!queue.includes(-1)&&Math.random()<.0025)k=-1;
+ else if(drops>=15&&Math.random()<.009)k=-2;queue.push(k);history.push(k);if(history.length>6)history.shift();}}
+function drawQueue(){const canvas=document.getElementById('nextCanvas'),c=canvas.getContext('2d');c.clearRect(0,0,600,165);
+ c.save();c.scale(3,3);queue.slice(0,3).forEach((k,i)=>sprite(c,k,38+66*i,28,20));c.restore()}
+
+const finalAtlas=new Image();let finalAtlasReady=false;
+finalAtlas.onload=()=>{finalAtlasReady=true;document.documentElement.style.setProperty('--squishy-candy','url("'+finalAtlas.src+'")');refreshViews();if(queue.length)drawQueue()};
+// Cleaned individual sprite silhouettes, with a local fallback if loading is blocked.
+fetch('../squishy-3d/assets/squishy-final-precise.b64').then(r=>{if(!r.ok)throw new Error('Atlas fetch failed');return r.text()})
+ .then(data=>{finalAtlas.src='data:image/webp;base64,'+data.trim()})
+ .catch(()=>{finalAtlas.src='../squishy-3d/assets/squishy-assets-v5.webp'});
+finalAtlas.onerror=()=>{if(!finalAtlasReady&&finalAtlas.src.indexOf('squishy-assets-v5.webp')===-1){finalAtlas.src='../squishy-3d/assets/squishy-assets-v5.webp'}};
+function useMenuArt(id,file){
+ const element=document.querySelector(id+' .menuIcon');
+ if(!element)return;
+ fetch('../squishy-3d/assets/'+file).then(r=>{if(!r.ok)throw new Error('Missing UI art');return r.text()})
+ .then(b64=>{element.src='data:image/webp;base64,'+b64.trim()})
+ .catch(()=>{ /* keep previous icon if offline */ });
+}
+useMenuArt('#openCollection','squishy-collection-internal.b64');
+useMenuArt('#openShop','squishy-shop-internal.b64');
+const homeArt=new Image();let homeReady=false;
+homeArt.onload=()=>{homeReady=true;drawHome()};
+homeArt.src='../squishy-3d/assets/squishy-home-v5.webp';
+// Core game tiers use real cutouts from the same polished atlas as the shop.
+const GAME_ASSETS=[0,1,2,3,4,5,6];
+const R=[20,27,34,42,49,57,65,72],W=360,H=465,gravity=520,cap=345;const kindSprite={0:0,1:1,2:2,3:3,4:4,'-1':5,'-2':6,'-3':7};
+const cvs=document.querySelector('#board'),hero=document.querySelector('#hero'),ctx=cvs.getContext('2d'),hc=hero.getContext('2d');
+const status=document.querySelector('#status'),feedback=document.querySelector('#feedback'),count=document.querySelector('#count');
+let bodies=[],puffs=[],petals=[],fusions=[],active=null,points=0,merges=0,pops=0,spills=0,drops=0,aim=180,heldFor=0,blockedFor=0,last=0,acc=0,playing=false,id=0,issuedRainbow=false,message='',msgAge=0,petalTime=0,pointer=null,paintTime=0;
+const r=b=>b.kind===-3?11:b.kind<0?21:(R[b.kind]||72);
+function asset(c,index,x,y,size){
+ if(!finalAtlasReady)return false;
+ const cell=192,col=index%5,row=Math.floor(index/5);
+ c.drawImage(finalAtlas,col*cell,row*cell,cell,cell,x-size/2,y-size/2,size,size);
+ return true;
+}
+const rr=(a,b)=>Math.random()*(b-a)+a;
+
+
+function mochiPath(c,r){
+ c.beginPath();c.moveTo(-r*.82,r*.29);c.bezierCurveTo(-r*1.06,-r*.23,-r*.84,-r*.75,-r*.43,-r*.78);
+ c.bezierCurveTo(-r*.2,-r*.83,-r*.22,-r*1.12,0,-r*1.09);
+ c.bezierCurveTo(r*.22,-r*1.08,r*.2,-r*.83,r*.44,-r*.78);
+ c.bezierCurveTo(r*.89,-r*.74,r*1.08,-r*.22,r*.84,r*.3);
+ c.bezierCurveTo(r*.65,r*.91,-r*.66,r*.91,-r*.82,r*.29);c.closePath();
+}
+function decoration(c,skin,r){
+ const sk=skins[skin];if(!sk)return;const type=sk[2];c.save();c.lineCap='round';
+ if(type==='dots'){c.fillStyle='#fff9';for(const [x,y] of [[-.55,-.33],[.53,-.4],[.59,.38],[-.55,.35]]){c.beginPath();c.arc(r*x,r*y,r*.065,0,7);c.fill();}}
+ if(type==='leaf'){for(const s of [-1,1]){c.fillStyle=s<0?'#78c39d':'#8ac96f';c.beginPath();c.ellipse(s*r*.2,-r*.99,r*.16,r*.3,s*.6,0,7);c.fill()}}
+ if(type==='flower'){c.translate(r*.36,-r*.85);for(let j=0;j<5;j++){c.save();c.rotate(j*Math.PI*2/5);c.fillStyle='#ff8bb9';c.beginPath();c.ellipse(0,-r*.14,r*.105,r*.17,0,0,7);c.fill();c.restore()}c.fillStyle='#fff19d';c.beginPath();c.arc(0,0,r*.09,0,7);c.fill()}
+ if(type==='crown'){c.fillStyle='#ffe18c';c.strokeStyle='#dba95a';c.lineWidth=r*.035;c.beginPath();c.moveTo(-r*.44,-r*.77);c.lineTo(-r*.43,-r*1.14);c.lineTo(-r*.18,-r*.96);c.lineTo(0,-r*1.24);c.lineTo(r*.18,-r*.96);c.lineTo(r*.44,-r*1.14);c.lineTo(r*.44,-r*.77);c.closePath();c.fill();c.stroke()}
+ if(type==='cat'){for(const s of [-1,1]){c.fillStyle='#ffdfb4';c.beginPath();c.moveTo(s*r*.16,-r*.89);c.lineTo(s*r*.52,-r*1.2);c.lineTo(s*r*.64,-r*.73);c.closePath();c.fill();c.fillStyle='#f5a0b4';c.beginPath();c.moveTo(s*r*.3,-r*.92);c.lineTo(s*r*.51,-r*1.10);c.lineTo(s*r*.56,-r*.85);c.fill()}}
+ if(type==='hair'){c.strokeStyle='#403044';c.lineWidth=r*.045;for(let j=-1;j<=1;j++){let x=j*r*.17;c.beginPath();c.moveTo(x,-r*.76);c.quadraticCurveTo(x-r*.06,-r*1.08,x+r*.07,-r*1.12);c.stroke()}}
+ if(type==='flame'){c.fillStyle='#ffa04d';c.beginPath();c.moveTo(-r*.21,-r*.78);c.quadraticCurveTo(-r*.29,-r*1.03,r*.08,-r*1.31);c.quadraticCurveTo(r*.11,-r*1.08,r*.25,-r*1.07);c.quadraticCurveTo(r*.38,-r*.76,0,-r*.74);c.fill();c.fillStyle='#ffe18d';c.beginPath();c.ellipse(0,-r*.91,r*.1,r*.15,0,0,7);c.fill()}
+ if(type==='fountain'){c.strokeStyle='#8dcaee';c.lineWidth=r*.046;for(const s of [-1,0,1]){c.beginPath();c.moveTo(0,-r*.78);c.quadraticCurveTo(s*r*.3,-r*1.44,s*r*.47,-r*1.2);c.stroke();c.fillStyle='#c1f2fa';c.beginPath();c.ellipse(s*r*.47,-r*1.2,r*.06,r*.1,0,0,7);c.fill()}}
+ if(type==='star'){c.fillStyle='#ffca63';c.strokeStyle='#fff5c0';c.lineWidth=r*.035;c.beginPath();for(let j=0;j<10;j++){const a=-Math.PI/2+j*Math.PI/5,rd=j%2?r*.13:r*.28;c.lineTo(Math.cos(a)*rd,Math.sin(a)*rd-r*.94)}c.closePath();c.fill();c.stroke()}
+ if(type==='panda'){for(const s of [-1,1]){c.fillStyle='#766284';c.beginPath();c.arc(s*r*.58,-r*.80,r*.26,0,Math.PI*2);c.fill();c.fillStyle='#f8dcf0';c.beginPath();c.arc(s*r*.58,-r*.8,r*.12,0,Math.PI*2);c.fill()}}
+ if(type==='cloud'){c.fillStyle='#fffdf8';for(const [x,y,sz] of [[-.26,-.92,.23],[0,-1.06,.3],[.30,-.92,.22]]){c.beginPath();c.arc(r*x,r*y,r*sz,0,Math.PI*2);c.fill()}}
+ if(type==='plush'){c.strokeStyle='#ffffffb9';c.lineWidth=r*.045;c.setLineDash([r*.07,r*.1]);c.beginPath();c.arc(0,0,r*.77,0,Math.PI);c.stroke();c.setLineDash([]);c.fillStyle='#ffa9d1';c.beginPath();c.ellipse(0,r*.56,r*.31,r*.12,0,0,7);c.fill()}
+ c.restore();
+}
+function face(c,r,b){
+ // Eyes and mouth share the mochi's transform, so they never drift.
+ const t=paintTime+(b?.id||0)*.77,period=3.45+((b?.id||0)%5)*.33,phase=t%period;
+ const blink=phase<.16?Math.sin(phase/.16*Math.PI):0,ey=r*.07,ex=r*.28,er=r*.087;
+ c.save();c.lineCap='round';for(const s of [-1,1]){
+  const x=s*ex;if(blink>.12){c.strokeStyle='#51394f';c.lineWidth=Math.max(1.2,r*.052);c.beginPath();c.moveTo(x-er*1.3,ey);c.quadraticCurveTo(x,ey+er*.8,x+er*1.3,ey);c.stroke();}
+  else{c.fillStyle='#463549';c.beginPath();c.ellipse(x,ey,er,er*1.18,0,0,7);c.fill();c.fillStyle='#fff';c.beginPath();c.arc(x-er*.25+Math.sin(t*1.2)*r*.017,ey-er*.30,er*.27,0,7);c.fill();}
+  c.fillStyle='#f49db6a3';c.beginPath();c.ellipse(s*r*.5,r*.26,r*.14,r*.08,0,0,7);c.fill();}
+ const open=.5+.5*Math.sin(t*2.6);c.strokeStyle='#633f55';c.lineWidth=Math.max(1.2,r*.052);c.lineCap='round';
+ if(open>.61){c.fillStyle='#a7536d';c.beginPath();c.ellipse(0,r*.38,r*.125,r*(.06+.04*open),0,0,7);c.fill();c.fillStyle='#ff99b0';c.beginPath();c.ellipse(0,r*.43,r*.06,r*.025,0,0,7);c.fill()}
+ else{c.beginPath();c.moveTo(-r*.13,r*.34);c.quadraticCurveTo(0,r*.49,r*.13,r*.34);c.stroke()}
+ c.restore();
+}
+function special(c,kind,r){
+ if(kind===-2){c.fillStyle='#fff7ed';c.beginPath();c.arc(0,0,r*.93,0,7);c.fill();c.save();c.beginPath();c.arc(0,0,r*.9,0,7);c.clip();c.rotate(-.4);for(let i=-5;i<=5;i++){c.fillStyle=i%2?'#f37285':'#fff8f0';c.fillRect(i*r*.35,-r,r*.35,2*r)}c.restore();c.strokeStyle='#edb7b6';c.lineWidth=1.4;c.beginPath();c.arc(0,0,r*.9,0,7);c.stroke();}
+ else if(kind===-1){let g=c.createConicGradient(paintTime,0,0);['#f3b1dc','#fff0a9','#b4f1d2','#b9d2ff','#d6bfff','#f3b1dc'].forEach((color,i)=>g.addColorStop(i/5,color));c.fillStyle=g;c.beginPath();c.arc(0,0,r*.9,0,7);c.fill();face(c,r,{id:3})}
+ else{const g=c.createRadialGradient(-r*.4,-r*.4,1,0,0,r);g.addColorStop(0,'#fff');g.addColorStop(1,'#a5d7ec77');c.fillStyle=g;c.beginPath();c.arc(0,0,r*.9,0,7);c.fill();}
+}
+
+
+function livingFace(c,kind,radius,b){
+ // The original eyes and mouth already belong to the illustration.
+ // Animate only tiny highlights INSIDE them: no extra displaced eye or mouth.
+ const id=b.id||0,t=paintTime+id*.57;
+ const blinking=(t%(4.1+(id%4)*.42))<.15;
+ const anchors={
+  0:[], 1:[[-.31,.25]],2:[[-.30,.24],[.29,.24]],3:[],
+  4:[[-.28,.22],[.29,.22]],5:[[-.29,.23],[.29,.23]]
+ };
+ const eyes=anchors[kind]||[];
+ c.save();
+ // Narrow pearly glints shift on existing eyes, never painting new pupils.
+ for(const [ex,ey] of eyes){
+  c.fillStyle='rgba(255,255,255,.72)';
+  c.beginPath();
+  c.ellipse((ex-.055+Math.sin(t*.9)*.015)*radius,(ey-.09)*radius,
+    radius*.022,radius*.033,0,0,Math.PI*2);c.fill();
+ }
+ // A micro glint within the already-printed mouth reads as a lively smile.
+ if((kind!==3)&&!blinking){
+  c.fillStyle='rgba(255,205,220,.28)';
+  c.beginPath();c.ellipse(0,radius*.48,radius*.070,radius*.014,0,0,Math.PI*2);c.fill();
+ }
+ c.restore();
+}
+function sprite(c,kind,x,y,radius,angle=0,impact=0,opacity=1,b=null){
+ c.save();c.translate(x,y+(b?.held?Math.sin(paintTime*3+b.id)*.8:0));c.rotate(angle);
+ const w=b?.squish||0,m=b?.morph||0;const breath=b?.held?Math.sin(paintTime*2+(b?.id||0))*.014:Math.sin(paintTime*1.8+(b?.id||0))*.007;const scale=1-m*.28+Math.sin((1-m)*Math.PI)*m*.10+breath;
+ c.scale(scale*(1+w*.17+impact*.06),scale*(1-w*.12-impact*.10));c.globalAlpha=opacity;
+ c.shadowColor='#7055814f';c.shadowBlur=radius*.22;c.shadowOffsetY=radius*.12;
+ if(kind===-2){if(!asset(c,13,0,0,radius*2.20))special(c,kind,radius);c.restore();return;}
+ if(kind<0){special(c,kind,radius);c.restore();return;}
+ // Every mochi on the board, including the small/medium stages, uses the real
+ // transparent 3D assets. The same artwork is used in the upcoming-piece tray.
+ const spriteIndex=kind===7
+  ?(Number.isInteger(b?.skin)&&b.skin>=9?undefined:(Number.isInteger(b?.skin)&&b.skin>=3&&b.skin<9?b.skin+4:4))
+  :GAME_ASSETS[kind];
+ if(spriteIndex!==undefined&&asset(c,spriteIndex,0,0,radius*2.34)){
+  if(b&&kind<=1)livingFace(c,kind,radius,b);
+  c.restore();return;
+ }
+ const base=kind===7?(skins[b?.skin??selected]?.[1]||'#b7e8a5'):(pastel[kind]||'#e8c2e8');
+ function shade(f){return 'rgb('+[1,3,5].map(i=>{const a=parseInt(base.slice(i,i+2),16);return Math.round(a+(f>0?(255-a)*f:a*f))}).join(',')+')'}
+ const grad=c.createRadialGradient(-radius*.41,-radius*.55,1,0,radius*.15,radius*1.37);
+ grad.addColorStop(0,shade(.69));grad.addColorStop(.38,shade(.33));grad.addColorStop(.75,base);grad.addColorStop(1,shade(-.22));
+ mochiPath(c,radius);c.fillStyle=grad;c.fill();c.shadowBlur=0;c.shadowOffsetY=0;
+ c.strokeStyle='#ffffff85';c.lineWidth=radius*.025;c.stroke();
+ c.strokeStyle='#ffffff7f';c.lineWidth=radius*.048;c.lineCap='round';
+ for(const j of [-2,-1,1,2]){c.beginPath();c.moveTo(j*radius*.055,-radius*.96);c.quadraticCurveTo(j*radius*.20,-radius*.66,j*radius*.22,-radius*.52);c.stroke();}
+ c.fillStyle='#ffffff96';c.beginPath();c.ellipse(-radius*.39,-radius*.4,radius*.24,radius*.078,-.4,0,7);c.fill();
+ if(kind===7)decoration(c,b?.skin??selected,radius);
+ face(c,radius,b);c.restore();
+}
+function drawHome(){hc.clearRect(0,0,780,780);if(homeReady){hc.drawImage(homeArt,0,0,780,780);return;}hc.save();hc.scale(2,2);
+ [[4,183,83,77],[3,310,168,72],[2,95,152,60],[1,194,190,50],[0,45,206,42]]
+ .forEach(([k,x,y,r])=>sprite(hc,k,x,y,r,0,0,1,{id:k}));
+ for(let i=0;i<12;i++)drawPetal(hc,20+i*31,16+i%3*24,5,i*.6,.65);hc.restore();}
+function availableLane(kind,preferred=aim){
+ const radius=kind<0?21:R[kind],cy=radius+6,edge=radius+2;
+ const sx=Math.max(edge,Math.min(W-edge,preferred));
+ const clear=x=>bodies.every(b=>b.held||Math.hypot(b.x-x,b.y-cy)>=r(b)+radius+3);
+ if(clear(sx))return sx;
+ let candidate=null,distance=Infinity;
+ for(let x=edge;x<=W-edge;x+=3){
+  if(clear(x)&&Math.abs(x-sx)<distance){candidate=x;distance=Math.abs(x-sx)}
+ }
+ return candidate;
+}
+
+function spawn(){
+ if(!playing||active)return;
+ removeInvalidRainbows();fillQueue();let kind=queue[0],lane=availableLane(kind);
+ if(lane===null){
+  let index=queue.findIndex(k=>availableLane(k)!==null);
+  if(index>0){kind=queue.splice(index,1)[0];lane=availableLane(kind)}
+  else if(availableLane(0)!==null){kind=0;lane=availableLane(0)}
+  else{blockedFor+=1/120;if(blockedFor>2.2)finish();return;}
+ }else queue.shift();
+ blockedFor=0;if(kind===-1)issuedRainbow=true;
+ const radius=kind<0?21:R[kind];aim=lane;
+ active={id:id++,kind,x:lane,y:radius+6,vx:0,vy:0,spin:0,angle:0,rollV:0,impact:0,squish:0,squishV:0,morph:0,held:true,cool:.23,rest:0};
+ bodies.push(active);heldFor=0;fillQueue();drawQueue();
+}
+function reset(){
+ savedRun=null;bodies=[];puffs=[];petals=[];fusions=[];traces=[];active=null;points=0;merges=0;pops=0;spills=0;drops=0;aim=180;
+ heldFor=0;blockedFor=0;issuedRainbow=false;playing=true;petalTime=0;message='';msgAge=0;id=0;
+ earned=0;paidBands=0;queue=[];history=[];fillQueue();spawn();save();
+}
+function drop(){if(!playing||!active||!active.held)return;removeInvalidRainbows();active.held=false;active.vy=Math.max(active.vy,120);heldFor=0;save();}
+function aimAt(e){const rect=cvs.getBoundingClientRect();const radius=active?r(active):21;aim=Math.max(radius+2,Math.min(W-radius-2,(e.clientX-rect.left)/rect.width*W));if(active?.held)active.x=aim;}
+let touchStart=null;cvs.addEventListener('pointerdown',e=>{pointer={x:e.clientX,y:e.clientY,dragged:false};touchStart=e.clientY;aimAt(e);cvs.setPointerCapture(e.pointerId)});
+cvs.addEventListener('pointermove',e=>{if(!pointer)return;aimAt(e);if(Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y)>12)pointer.dragged=true});
+cvs.addEventListener('pointerup',e=>{if(!pointer)return;aimAt(e);drop();pointer=null});
+cvs.addEventListener('pointercancel',()=>pointer=null);
+function border(b){const radius=r(b);
+ if(b.x<radius){b.x=radius;b.vx=Math.abs(b.vx)*.13}
+ if(b.x>W-radius){b.x=W-radius;b.vx=-Math.abs(b.vx)*.13}
+ if(b.y>H-radius){b.y=H-radius;if(b.vy>55){const hit=Math.min(.35,Math.abs(b.vy)/1100);b.impact=Math.max(b.impact,hit);b.squishV=(b.squishV||0)+hit*3.2;}if(b.vy>60)b.vy*= -.11;else b.vy=0;b.vx*=.78}
+ if(b.y<radius){b.y=radius;b.vy=Math.max(0,b.vy)}
+}
+function touch(a,b){return Math.hypot(a.x-b.x,a.y-b.y)<=r(a)+r(b)+4}
+function collision(a,b){const dx=b.x-a.x,dy=b.y-a.y,d=Math.max(.01,Math.hypot(dx,dy)),overlap=r(a)+r(b)-d;if(overlap<=0)return;
+ const nx=d<.02?1:dx/d,ny=d<.02?0:dy/d,ia=(21/r(a))**2,ib=(21/r(b))**2,w=ia+ib;
+ a.x-=nx*overlap*.79*ia/w;b.x+=nx*overlap*.79*ib/w;
+ a.y-=ny*overlap*.79*ia/w;b.y+=ny*overlap*.79*ib/w;
+ const approach=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;
+ if(approach<0){const m=-approach*1.03/w;
+ a.vx-=nx*m*ia;b.vx+=nx*m*ib;a.vy-=ny*m*ia;b.vy+=ny*m*ib;
+ a.spin=Math.min(.55,Math.max(-.55,a.spin+approach*.0003));b.spin=Math.min(.55,Math.max(-.55,b.spin-approach*.0003));const hit=Math.min(.35,-approach/950);if(hit>.035){a.squishV=(a.squishV||0)+hit*2.1;b.squishV=(b.squishV||0)+hit*2.1;}}}
+function puff(x,y,kind){puffs.push({x,y,kind,age:0})}
+function collect(kind){for(const b of bodies)if(b.kind===kind)return true;return false}
+function merge(){
+ // The last two forms become one final form of the same size,
+ // so they never grow and never release pellets.
+ const ready=bodies.filter(b=>b.kind===7&&!b.held&&b.cool<=0);
+ for(let i=0;i<ready.length;i++)for(let j=i+1;j<ready.length;j++){
+  const a=ready[i],b=ready[j];if(!touch(a,b))continue;
+  const keepSkin=a.skin>=0?a.skin:b.skin;
+  const radius=R[7],x=Math.max(radius,Math.min(W-radius,(a.x+b.x)/2)),
+    y=Math.max(radius,Math.min(H-radius,(a.y+b.y)/2));
+  bodies=bodies.filter(q=>q!==a&&q!==b);
+  bodies.push({id:id++,kind:7,skin:keepSkin,x,y,vx:(a.vx+b.vx)*.2,vy:0,
+    spin:0,angle:0,rollV:0,impact:.2,squish:.15,squishV:0,morph:.6,
+    held:false,cool:.6,rest:0});
+  merges++;points+=180;award();message='✨ Merge!';msgAge=0;save();
+  return true;
+ }
+ for(let kind=6;kind>=0;kind--){const seen=new Set();for(const seed of bodies){if(seed.kind!==kind||seed.held||seed.cool>0||seen.has(seed.id))continue;
+ const group=[seed];seen.add(seed.id);for(let cur=0;cur<group.length;cur++)for(const q of bodies){if(q.kind===kind&&!q.held&&q.cool<=0&&!seen.has(q.id)&&touch(group[cur],q)){group.push(q);seen.add(q.id)}}
+ const amount=kind===0?3:2;if(group.length<amount)continue;
+ const found=group.slice(0,amount),x=found.reduce((s,b)=>s+b.x,0)/amount,y=found.reduce((s,b)=>s+b.y,0)/amount;
+ let isActive=found.includes(active);fusions.push({parts:found.map(b=>({kind:b.kind,x:b.x,y:b.y,radius:r(b),angle:b.angle})),x,y,age:0});bodies=bodies.filter(b=>!found.includes(b));merges++;points+=[45,85,155,260,460,700,1050][kind];award();
+
+ if(kind===6){
+   // Two green mochi become the selected final collectible form.
+   // Final forms continue merging two into one, with fixed radius and no pellets.
+   const big={id:id++,kind:7,skin:selected>=0?selected:0,x:Math.max(R[7],Math.min(W-R[7],x)),y:Math.max(R[7],Math.min(H-R[7],y)),
+      vx:0,vy:-62,spin:0,angle:0,rollV:0,impact:.35,squish:.18,squishV:0,morph:1,
+      held:false,cool:.54,rest:0,traceTimer:0};
+   bodies.push(big);pops++;
+   message='🌸 '+tr.final;msgAge=0;
+ }else{const next=kind+1,RN=R[next];const bigger={id:id++,kind:next,x:Math.max(RN,Math.min(W-RN,x)),y:Math.max(RN,Math.min(H-RN,y)),vx:0,vy:0,spin:0,angle:0,rollV:0,impact:.4,squish:.15,squishV:0,morph:1,held:false,cool:.32,rest:0};bodies.push(bigger);
+   for(let k=0;k<9;k++){for(const q of bodies)if(q!==bigger&&!q.held)collision(q,bigger);bodies.forEach(b=>{if(!b.held)border(b)})}
+   message='✨ '+(next===5?tr.flower:next===6?tr.crown:names[next])+'!';msgAge=0;}
+ if(isActive){active=null;drops++;points+=5;}save();return true;
+ }}return false}
+function finish(){playing=false;active=null;highScore=Math.max(points,highScore);award();save();refreshWallet();message=tr.end+' '+points+' • +'+earned+' 🍬 • '+highScore;msgAge=0;}
+function simulate(dt){if(!playing)return;removeInvalidRainbows();msgAge+=dt;heldFor+=active?.held?dt:0;
+ if(active?.held&&heldFor>=5)drop();
+ petalTime+=dt;if(petalTime>.5&&petals.length<30){petalTime=0;petals.push({x:rr(0,W),y:-10,size:rr(3.5,7),age:0,speed:rr(20,38),phase:rr(0,7),settled:false})}
+ for(const p of petals){p.age+=dt;if(!p.settled){p.y+=p.speed*dt;p.x+=Math.sin(p.phase+p.age*1.65)*13*dt;if(p.y>=H-5){p.y=H-rr(3,10);p.settled=true}}}
+ petals=petals.filter(p=>p.age<(p.settled?19:29));
+ puffs.forEach(p=>p.age+=dt);puffs=puffs.filter(p=>p.age<1.4);fusions.forEach(f=>f.age+=dt);fusions=fusions.filter(f=>f.age<.32);traces.forEach(t=>t.age+=dt);traces=traces.filter(t=>t.age<7);
+
+ for(const b of bodies){
+   b.cool=Math.max(0,b.cool-dt);b.impact=Math.max(0,b.impact-dt*2.4);
+   b.morph=Math.max(0,(b.morph||0)-dt*2.8);
+   b.squishV=(b.squishV||0)+(-36*(b.squish||0)-9*(b.squishV||0))*dt;
+   b.squish=Math.max(-.24,Math.min(.35,(b.squish||0)+b.squishV*dt));
+   if(b.held){b.x=aim;b.y=r(b)+6;b.vx=b.vy=b.spin=b.angle=b.rollV=0;continue}
+   if(b===active)b.vx+=Math.max(-650,Math.min(650,(aim-b.x)*14-b.vx*8))*dt;
+   b.vy=Math.min(cap,b.vy+gravity*dt);
+   b.vx=Math.max(-188,Math.min(188,b.vx*Math.exp(-1.5*dt)));
+   b.spin=Math.max(-.55,Math.min(.55,b.spin*Math.exp(-3*dt)));
+   b.x+=b.vx*dt;b.y+=b.vy*dt;
+
+   // Rolling follows lateral movement, then gently returns upright like soft mochi.
+   const desired=Math.max(-.36,Math.min(.36,b.vx/Math.max(110,r(b)*4.2)*.5+b.spin*.3));
+   b.rollV=(b.rollV||0)+(desired-(b.angle||0))*25*dt;
+   b.rollV*=Math.exp(-7*dt);
+   b.angle=Math.max(-.43,Math.min(.43,(b.angle||0)+b.rollV*dt));
+   border(b);
+ }
+ for(let it=0;it<4;it++){for(let i=0;i<bodies.length;i++)for(let j=i+1;j<bodies.length;j++)if(!bodies[i].held&&!bodies[j].held)collision(bodies[i],bodies[j]);for(const b of bodies)if(!b.held)border(b)}
+ for(let i=0;i<4;i++){if(!merge())break}
+
+ // Never lose because a single tower reached the top. New pieces may still
+ // spawn in any genuinely empty lane, including on the opposite side.
+ if(active&&!active.held){const b=active;const supported=b.y>=H-r(b)-.7||bodies.some(q=>q!==b&&q.y>b.y&&touch(q,b));
+   if(supported&&Math.abs(b.vy)<72)b.rest=(b.rest||0)+dt;else b.rest=0;
+   if(b.rest>.18){active=null;drops++;points+=3;award();
+     // Check right at impact, even if a large merge happened this very frame.
+     if(b.kind===-1&&!rainbowAllowed()){b.kind=0;issuedRainbow=false;}
+     if(b.kind===-1){bodies=[];puffs=[];blockedFor=0;points+=140;award();puff(b.x,b.y,5);message='🌈 TĘCZOWY CLEAR!';msgAge=0}
+     if(b.kind===-2){const cx=b.x,cy=b.y;let cleared=0;
+       bodies=bodies.filter(other=>{if(other===b)return false;if(other.kind===-1||other.kind===-2)return true;
+         const nearby=Math.hypot(other.x-cx,other.y-cy)<116+r(other)*.15;if(nearby)cleared++;return !nearby});
+       blockedFor=0;points+=45+cleared*12;award();puff(cx,cy,6);message='PUF! '+cleared;msgAge=0}
+     save();}}
+ if(!active&&playing)spawn();
+}
+function drawPetal(c,x,y,s,a,alpha){c.save();c.translate(x,y);c.rotate(a);c.globalAlpha=alpha;c.fillStyle='#f7adcf';c.strokeStyle='#e39cbb';c.lineWidth=.6;c.beginPath();c.moveTo(0,s*.43);c.bezierCurveTo(-s*.87,s*.04,-s*.55,-s*.95,0,-s*.86);c.bezierCurveTo(s*.53,-s*.98,s*.85,s*.02,0,s*.43);c.fill();c.stroke();c.restore()}
+function cloud(c,p){const t=p.age/1.4;let fade=Math.max(0,1-t);
+ if(t<.38)sprite(c,p.kind===4?4:-2,p.x,p.y,(43+t*120)*(p.kind===4?1.45:.8),0,0,1);
+ for(let i=0;i<10;i++){const a=i*Math.PI/5,d=11+t*(40+i%3*5),x=p.x+Math.cos(a)*d,y=p.y+Math.sin(a)*d-t*18,sz=13+t*11;
+ const g=c.createRadialGradient(x,y,0,x,y,sz);g.addColorStop(0,'rgba(255,255,255,'+(fade*.75)+')');g.addColorStop(.55,'rgba(231,197,239,'+(fade*.4)+')');g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.beginPath();c.arc(x,y,sz,0,7);c.fill()}}
+
+
+function drawTrace(c,t){
+ const a=Math.max(0,.28*(1-t.age/7)),r=3.4+Math.sin(t.age*2)*.4;
+ c.save();c.translate(t.x,t.y);c.globalAlpha=a;
+ const variant=t.skin;
+ if(variant===0){ // leaf
+  c.rotate(-.55);c.fillStyle='#72be8c';c.beginPath();c.ellipse(0,0,r*.70,r*1.1,0,0,7);c.fill();
+  c.strokeStyle='#4b9a68';c.lineWidth=.6;c.beginPath();c.moveTo(0,-r);c.lineTo(0,r);c.stroke();
+ }else if(variant===1){ // sakura blossom
+  c.fillStyle='#f68fb7';for(let j=0;j<5;j++){let an=j*Math.PI*2/5;c.beginPath();c.ellipse(Math.cos(an)*r*.56,Math.sin(an)*r*.56,r*.39,r*.57,an,0,7);c.fill()}
+ }else if(variant===2){ // star from crown
+  c.strokeStyle='#ddb158';c.lineWidth=1.1;c.beginPath();c.moveTo(0,-r*1.6);c.lineTo(0,r*1.6);c.moveTo(-r*1.6,0);c.lineTo(r*1.6,0);c.stroke();
+ }else if(variant===3){ // dots
+  c.fillStyle='#9bcfe2';for(let j=0;j<3;j++){c.beginPath();c.arc((j-1)*r*.9,Math.sin(j*2)*r*.5,r*.35,0,7);c.fill();}
+ }else if(variant===4){ // paw
+  c.fillStyle='#e9ab99';c.beginPath();c.ellipse(0,r*.35,r*.9,r*.65,0,0,7);c.fill();
+  for(let j=-1;j<=1;j++){c.beginPath();c.arc(j*r*.7,-r*.7,r*.33,0,7);c.fill()}
+ }else if(variant===5){ // hair curls
+  c.strokeStyle='#ab8c86';c.lineWidth=.8;for(let j=-1;j<=1;j++){c.beginPath();c.moveTo(j*r*.7,-r);c.quadraticCurveTo((j+.4)*r*.7,0,j*r*.7,r);c.stroke()}
+ }else if(variant===6){ // warm ember
+  c.fillStyle='#f3b675';c.beginPath();c.moveTo(0,-r*1.4);c.quadraticCurveTo(-r*1.2,0,0,r);c.quadraticCurveTo(r*1.1,0,0,-r*1.4);c.fill();
+ }else if(variant===7){ // water drop
+  c.fillStyle='#8dd0f1';c.beginPath();c.moveTo(0,-r*1.5);c.bezierCurveTo(-r*.85,-r*.1,-r*.85,r,0,r);c.bezierCurveTo(r*.85,r,r*.85,-r*.1,0,-r*1.5);c.fill();
+ }else if(variant===8){ // tiny plush heart
+  c.fillStyle='#d1b2ec';c.beginPath();c.moveTo(0,r*1.2);c.bezierCurveTo(-r*1.8,0,-r*.65,-r*1.2,0,-r*.25);c.bezierCurveTo(r*.65,-r*1.2,r*1.8,0,0,r*1.2);c.fill();
+ }else{c.fillStyle='#bee6ba';c.beginPath();c.arc(0,0,r,0,7);c.fill()}
+ c.restore();
+}
+function paint(){
+ ctx.clearRect(0,0,cvs.width,cvs.height);ctx.save();ctx.scale(3,3);
+ for(const p of petals.filter(p=>p.settled))drawPetal(ctx,p.x,p.y,p.size,-.3,.45);
+ for(const tr of traces)drawTrace(ctx,tr);
+ for(const b of bodies)sprite(ctx,b.kind,b.x,b.y,r(b),b.angle,b.impact,1,b);
+ for(const f of fusions){
+  const t=Math.min(1,f.age/.32),e=1-(1-t)*(1-t);
+  for(const p of f.parts)sprite(ctx,p.kind,p.x+(f.x-p.x)*e,p.y+(f.y-p.y)*e,p.radius*(1-t*.66),p.angle+t*.3,0,Math.max(0,1-t*.95));
+ }
+ for(const p of puffs)cloud(ctx,p);
+ for(const p of petals.filter(p=>!p.settled))drawPetal(ctx,p.x,p.y,p.size,.5+Math.sin(p.age*2)*.8,.7);
+ ctx.restore();status.firstChild.textContent='⭐ '+points+'　';document.getElementById('inGameCoins').textContent=coins;
+ const n=playing&&active?.held&&heldFor>=2?Math.max(1,3-Math.floor(heldFor-2)):0;
+ count.textContent=n||'';count.style.display=n?'block':'none';
+ feedback.textContent=(!playing||msgAge<1.5)?message:'';
+}
+let lastHomeDraw=0;
+function loop(ts){paintTime=ts/1000;if(playing&&ts-lastSavedAt>1900){save();lastSavedAt=ts;}if(!last)last=ts;
+if(ts-lastHomeDraw>=85&&document.getElementById('home').style.display!=='none'){drawHome();lastHomeDraw=ts;}const dt=Math.min(.06,(ts-last)/1000);last=ts;if(playing&&!tutorialOpen){acc+=dt*speedChoice;let n=0;while(acc>=1/120&&n<8){simulate(1/120);acc-=1/120;n++}}updateLevel();paint();requestAnimationFrame(loop)}requestAnimationFrame(loop);
+
+function renderCards(where){
+ const shop=where==='shop',root=document.getElementById(shop?'shopCards':'collectionCards');
+ root.textContent='';
+ skins.forEach((sk,i)=>{
+  if(shop&&i<3)return;if(!shop&&!unlocked.includes(i))return;
+  const owned=unlocked.includes(i),chosen=selected===i,card=document.createElement('div');
+  card.className='skinCard'+(chosen?' selected':'')+(owned?'':' locked');
+  const picture=document.createElement('canvas');picture.width=240;picture.height=240;card.appendChild(picture);
+  const button=document.createElement('button');
+  if(owned){button.textContent=chosen?'✓':'✓';button.className='owned'+(chosen?' selected':'')}
+  else {const coin=document.createElement('span');coin.className='pepperCoin';button.appendChild(coin);
+   const value=document.createElement('span');value.textContent='50';button.appendChild(value)}
+  button.setAttribute('aria-label',owned?tr.owned+' '+sk[0]:tr.buy+' '+sk[0]+' 50 '+tr.candy);
+  button.disabled=chosen||(!shop&&!owned)||(shop&&!owned&&coins<50);
+  button.onclick=()=>{if(owned){selected=i;save();refreshViews()}
+   else if(shop&&coins>=50){coins-=50;unlocked.push(i);selected=i;save();refreshViews()}};
+  card.appendChild(button);root.appendChild(card);
+  const c=picture.getContext('2d');c.clearRect(0,0,240,240);
+  if(finalAtlasReady&&i<9){asset(c,i===0?4:(i<=2?i+4:i+4),120,124,196)}else sprite(c,7,120,130,77,0,0,1,{id:i+16,skin:i});
+ });
+}
+function refreshViews(){refreshWallet();drawHome();renderCards('shop');renderCards('collection')}
+function showPage(page){
+ for(const [id,key] of [['home','home'],['game','game'],['collectionScreen','collection'],['shopScreen','shop']])
+  document.getElementById(id).style.display=key===page?'block':'none';
+ if(page!=='game'){if(playing)save();playing=false;}
+ if(page==='shop'||page==='collection')refreshViews();
+}
+document.querySelector('#play').onclick=()=>{showPage('game');if(!resumeRun())reset();if(!tutorialSeen)openTutorial()};
+document.querySelector('#restart').onclick=reset;
+document.querySelector('#back').onclick=()=>showPage('home');
+document.querySelector('#openCollection').onclick=()=>showPage('collection');
+document.querySelector('#openShop').onclick=()=>showPage('shop');
+document.querySelector('#collectionBack').onclick=()=>showPage('home');
+document.querySelector('#shopBack').onclick=()=>showPage('home');
+document.querySelectorAll('#speedControls [data-speed]').forEach(btn=>btn.onclick=()=>{speedChoice=Number(btn.dataset.speed);refreshSpeedControls();save()});
+document.getElementById('tutorialOpenBtn').onclick=openTutorial;
+document.getElementById('tutorialSkip').onclick=closeTutorial;
+document.getElementById('tutorialNext').onclick=()=>{if(tutorialStep===ux.steps.length-1)closeTutorial();else{tutorialStep++;renderTutorial()}};
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&playing)save()});
+window.addEventListener('pagehide',()=>{if(playing)save()});
+let lastSavedAt=0;
+const originalLoop=loop; // periodic autosave is handled in game paint callback below
+loadSave();applyLanguage();refreshSpeedControls();refreshViews();updateLevel();
+})();
+</script></body></html>
