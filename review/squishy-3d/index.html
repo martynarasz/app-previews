@@ -171,7 +171,8 @@ function applyLanguage(){
  for(const [selector,label] of [['#openCollection span',tr.collection],['#openShop span',tr.shop],['#nextRow span',tr.next],['#restart','↻ '+tr.restart],['#back','← '+tr.menu],['#collectionBack','← '+tr.menu],['#shopBack','← '+tr.menu]]){
   const n=document.querySelector(selector);if(n)n.textContent=label;
  }
- document.querySelector('#openCollection').setAttribute('aria-label',tr.collection);
+ document.querySelector('#play').setAttribute('aria-label',tr.start);
+  document.querySelector('#openCollection').setAttribute('aria-label',tr.collection);
  document.querySelector('#openShop').setAttribute('aria-label',tr.shop);
 }
 
@@ -687,7 +688,11 @@ function refreshViews(){refreshWallet();drawHome();renderCards('shop');renderCar
 function updateHalloweenCountdown(){
  const remaining=HALLOWEEN_END_UTC-Date.now(),available=remaining>0;
  const secs=Math.max(0,Math.ceil(remaining/1000)),day=Math.floor(secs/86400),hour=Math.floor(secs%86400/3600),minute=Math.floor(secs%3600/60),sec=secs%60;
- const parts=[day,hour,minute,sec].map((n,i)=>n+' '+tr.timeUnits[i]).join(' · ');
+ const dayWord=language==='pl'?(day===1?'dzień':'dni'):
+  language==='cs'?(day===1?'den':day>=2&&day<=4?'dny':'dní'):
+  language==='en'?(day===1?'day':'days'):
+  language==='de'?(day===1?'Tag':'Tage'):(day===1?'día':'días');
+ const parts=[day+' '+dayWord,hour+' '+tr.timeUnits[1],minute+' '+tr.timeUnits[2],sec+' '+tr.timeUnits[3]].join(' · ');
  const label=available?'🎃 '+tr.seasonDeadline+' · '+tr.seasonCountdown+': '+parts:'🎃 '+tr.seasonEnded;
  for(const id of ['seasonPromo','seasonShopNote'])document.getElementById(id).textContent=label;
  if(countdownExpired!==!available){countdownExpired=!available;renderCards('shop')}
