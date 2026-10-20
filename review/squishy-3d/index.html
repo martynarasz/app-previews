@@ -83,6 +83,28 @@ main{max-width:440px;padding:12px 12px 28px}
 #board{background:linear-gradient(155deg,#fffafa,#f3ecff 55%,#e5fff2)}
 #nextRow{border-radius:20px;background:#fff7f9bb;margin:3px 8px 11px;padding:4px;box-shadow:0 3px 10px #ae86ad1a}
 .skinCard{border-radius:22px}
+
+/* Extra levels, speed modes and skippable help — tester preview. */
+#levelStrip{max-width:420px;margin:7px auto 9px;background:#fff9feee;border:2px solid white;border-radius:18px;padding:8px 12px;box-shadow:0 5px 15px #bd93bd25}
+.levelLine{display:flex;justify-content:space-between;gap:8px;font-size:13px;font-weight:900;color:#8267a6}
+.levelTrack{height:8px;background:#f3def3;border-radius:12px;overflow:hidden;margin:7px 0}
+#levelFill{height:100%;width:0;background:linear-gradient(90deg,#8fd9a8,#c19de9);border-radius:12px;transition:width .3s}
+#levelGoal{display:block;font-size:11px;color:#9b80a9}
+#speedRow{display:flex;justify-content:center;align-items:center;gap:8px;margin:3px auto 9px}
+#speedControls{display:flex;gap:5px;background:#fff8fd;border:2px solid white;border-radius:19px;padding:4px;flex:1}
+#speedControls button{flex:1;padding:8px 4px;border-radius:13px;background:transparent;color:#8f79a1;box-shadow:none;font-size:12px;white-space:nowrap}
+#speedControls button.active{background:linear-gradient(135deg,#a7e3c4,#c6a7ec);color:#fff;box-shadow:0 3px 8px #aa95bb30}
+#tutorialOpenBtn{padding:8px;min-width:40px;height:40px;border-radius:50%;background:#fff;color:#9272b0;box-shadow:none;font-size:20px}
+#tutorialOverlay{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:#675179a8;padding:16px;backdrop-filter:blur(5px)}
+#tutorialCard{width:min(100%,360px);background:linear-gradient(155deg,#fffdfa,#ffeaf6 60%,#effce9);border:3px solid white;border-radius:30px;padding:26px 22px;box-shadow:0 20px 70px #4c37574d;text-align:center}
+#tutorialIcon{font-size:54px;display:block;margin:7px 0}
+#tutorialHeading{font-size:23px;color:#8561a8;margin:8px 0}
+#tutorialText{font-size:15px;line-height:1.55;color:#725e83;min-height:73px}
+#tutorialDots{letter-spacing:7px;color:#a88ad2;font-size:22px;margin:10px auto}
+#tutorialActions{display:flex;gap:10px;justify-content:center}
+#tutorialActions button{font-size:15px;padding:12px 18px}
+#tutorialSkip{background:#fff;color:#8e79a2;box-shadow:none}
+#tutorialNext{background:linear-gradient(135deg,#a6da92,#7cc7a7)}
 </style></head><body><main>
 
 <section id="home">
@@ -92,13 +114,16 @@ main{max-width:440px;padding:12px 12px 28px}
 <div class="menuBtns"><button id="openCollection" aria-label="Kolekcja"><img class="menuIcon" src="assets/collection-v5.webp" alt=""><span>Kolekcja</span></button><button id="openShop" aria-label="Sklep"><img class="menuIcon" src="assets/shop-v5.webp" alt=""><span>Sklep</span></button></div>
 </section>
 <section id="game"><div id="status">⭐ 0　<span class="pepperCoin"></span> <span id="inGameCoins">0</span></div><div id="nextRow"><span>NASTĘPNE</span><canvas id="nextCanvas" width="600" height="165"></canvas></div>
+<div id="levelStrip" role="status" aria-live="polite"><div class="levelLine"><span id="levelName">🌸 Poziom 1</span><span id="levelReward"></span></div><div class="levelTrack"><div id="levelFill"></div></div><small id="levelGoal"></small></div>
+<div id="speedRow"><div id="speedControls" role="group" aria-label="Szybkość gry"><button data-speed="0.8">🌿 0.8×</button><button data-speed="1">🌸 1×</button><button data-speed="1.25">⚡ 1.25×</button></div><button id="tutorialOpenBtn" aria-label="Jak grać?">?</button></div>
 <div id="boardWrap"><canvas id="board" width="1080" height="1395"></canvas><div id="count"></div></div>
 <div id="feedback"></div><button id="restart">↻ OD NOWA</button><button id="back">← MENU</button></section>
 <section id="collectionScreen"><div class="screenHead"><button id="collectionBack">← MENU</button><span class="srOnly">Kolekcja</span><span class="wallet" id="walletCollection"><span class="pepperCoin"></span><span class="walletAmount">0</span></span></div>
 <div class="skinGrid" id="collectionCards"></div></section>
 <section id="shopScreen"><div class="screenHead"><button id="shopBack">← MENU</button><span class="srOnly">Sklep</span><span class="wallet" id="walletShop"><span class="pepperCoin"></span><span class="walletAmount">0</span></span></div>
 <div class="skinGrid" id="shopCards"></div></section>
-</main><script>
+</main><div id="tutorialOverlay" role="dialog" aria-modal="true" aria-labelledby="tutorialHeading">
+<div id="tutorialCard"><span id="tutorialIcon">👆</span><h2 id="tutorialHeading"></h2><p id="tutorialText"></p><div id="tutorialDots" aria-hidden="true"></div><div id="tutorialActions"><button id="tutorialSkip"></button><button id="tutorialNext"></button></div></div></div><script>
 (()=>{'use strict';
 
 const names=['Lawendowy','Truskawkowy','Brzoskwiniowy','Toffi','Miętowy','Kwiatek','Korona','Finał'];
@@ -106,12 +131,24 @@ const pastel=['#c7adf5','#ffb6c9','#ffc79d','#dfb79c','#c3e5ad'];
 const skins=[
  ['Listek','#b7e8a5','leaf'],['Kwiatek','#ffc2df','flower'],['Korona','#dcc7ff','crown'],
  ['Kropeczki','#b2e1e8','dots'],['Kocie uszy','#ffdbab','cat'],['Trzy włoski','#ebc3b0','hair'],
- ['Płomyk','#ffc5a6','flame'],['Fontanna','#bde2fa','fountain'],['Pluszak','#d2c6f2','plush']
+ ['Płomyk','#ffc5a6','flame'],['Fontanna','#bde2fa','fountain'],['Pluszak','#d2c6f2','plush'],
+ ['Gwiazdka','#ffe7ac','star'],['Panda','#e0d7f6','panda'],['Chmurka','#cbeeff','cloud']
 ];
 let coins=0,unlocked=[],selected=-1,highScore=0,paidBands=0,earned=0,queue=[],history=[],traces=[],savedRun=null;
+const levelStages=[{at:0,pl:'Ogródek',en:'Garden',bonus:0},{at:1200,pl:'Cukiernia',en:'Candy Shop',bonus:10},{at:3500,pl:'Chmurkowa Dolina',en:'Cloud Valley',bonus:15},{at:7000,pl:'Kraina Gwiazd',en:'Star Land',bonus:20}];
+let bestProgress=0,rewardedStage=0,speedChoice=1,tutorialSeen=false,tutorialOpen=false,tutorialStep=0;
 const storageKey='squishy-merge-v3';
 const language=(navigator.language||'pl').toLowerCase().startsWith('pl')?'pl':'en';
 const tr={pl:{next:'NASTĘPNE',collection:'Kolekcja',shop:'Sklep',menu:'MENU',restart:'OD NOWA',owned:'Odblokowany',buy:'Kup',candy:'cukierków',end:'KONIEC GRY!',final:'Końcowa forma!',flower:'Kwiatek',crown:'Korona'},en:{next:'NEXT',collection:'Collection',shop:'Shop',menu:'MENU',restart:'RESTART',owned:'Unlocked',buy:'Buy',candy:'candies',end:'GAME OVER!',final:'Final form!',flower:'Flower',crown:'Crown'}}[language];
+const ux={pl:{level:'Poziom',nextGoal:'Do kolejnego poziomu',maxLevel:'Wszystkie poziomy odkryte!',skip:'Pomiń',next:'Dalej',start:'Graj!',how:'Jak grać?',speed:'Szybkość gry',steps:[
+{icon:'👆',title:'Wybierz miejsce',body:'Dotknij planszy i przesuń palcem w lewo lub w prawo, żeby ustawić Squishy.'},
+{icon:'💗',title:'Upuść Squishy',body:'Puść palec, aby zrzucić postać. Trzy najmniejsze takie same Squishy łączą się w jedną większą!'},
+{icon:'✨',title:'Łącz i odkrywaj',body:'Kolejne jednakowe postacie łączą się parami. Zdobywaj punkty i cukierki, kupuj nowe postacie oraz odkrywaj poziomy.'}
+]},en:{level:'Level',nextGoal:'Points to next level',maxLevel:'All levels discovered!',skip:'Skip',next:'Next',start:'Play!',how:'How to play?',speed:'Game speed',steps:[
+{icon:'👆',title:'Choose where to drop',body:'Touch the board and slide left or right to position your Squishy.'},
+{icon:'💗',title:'Drop your Squishy',body:'Release your finger to drop. Three matching smallest Squishies merge into a bigger one!'},
+{icon:'✨',title:'Merge and discover',body:'Other matching characters merge in pairs. Earn points and candy, collect characters, and discover new levels.'}
+]}}[language];
 function applyLanguage(){
  document.documentElement.lang=language;
  for(const [selector,label] of [['#openCollection span',tr.collection],['#openShop span',tr.shop],['#nextRow span',tr.next],['#restart','↻ '+tr.restart],['#back','← '+tr.menu],['#collectionBack','← '+tr.menu],['#shopBack','← '+tr.menu]]){
@@ -128,9 +165,13 @@ function loadSave(){
   const x=JSON.parse(localStorage.getItem(storageKey)||'{}');
   coins=Math.max(0,Number(x.coins)||0);highScore=Math.max(0,Number(x.highScore)||0);
   if(Array.isArray(x.unlocked)){
-   for(const skin of x.unlocked)if(Number.isInteger(skin)&&skin>=1&&skin<9&&!unlocked.includes(skin))unlocked.push(skin);
+   for(const skin of x.unlocked)if(Number.isInteger(skin)&&skin>=1&&skin<skins.length&&!unlocked.includes(skin))unlocked.push(skin);
   }
   if(unlocked.includes(x.selected))selected=x.selected;
+   bestProgress=Math.max(highScore,Number(x.bestProgress)||0);
+   rewardedStage=Math.max(0,Math.min(levelStages.length-1,Math.floor(Number(x.rewardedStage)||0)));
+   speedChoice=[.8,1,1.25].includes(Number(x.speedChoice))?Number(x.speedChoice):1;
+   tutorialSeen=!!x.tutorialSeen;
   if(x.run&&Array.isArray(x.run.bodies)&&x.run.bodies.length<=150)savedRun=x.run;
  }catch(e){/* corrupted or blocked storage starts with the free skin */}
 }
@@ -143,7 +184,7 @@ function save(){
   }else if(document.getElementById('game').style.display==='block'&&!active){
    savedRun=null; // completed round, not simply paused in menu
   }
-  localStorage.setItem(storageKey,JSON.stringify({coins,unlocked,selected,highScore,run:savedRun}));
+  localStorage.setItem(storageKey,JSON.stringify({coins,unlocked,selected,highScore,bestProgress,rewardedStage,speedChoice,tutorialSeen,run:savedRun}));
  }catch(e){/* storage may be disabled in private browsing */}
 }
 function resumeRun(){
@@ -171,6 +212,45 @@ function resumeRun(){
 }
 
 function refreshWallet(){for(const id of ['walletMenu','walletCollection','walletShop'])document.getElementById(id).querySelector('.walletAmount').textContent=coins;const gameAmount=document.getElementById('inGameCoins');if(gameAmount)gameAmount.textContent=coins}
+function updateLevel(){
+ bestProgress=Math.max(bestProgress,points);
+ let index=0;for(let i=1;i<levelStages.length;i++)if(bestProgress>=levelStages[i].at)index=i;
+ if(index>rewardedStage){
+  let bonus=0;for(let i=rewardedStage+1;i<=index;i++)bonus+=levelStages[i].bonus;
+  rewardedStage=index;coins+=bonus;message='🌟 '+ux.level+' '+(index+1)+'! +'+bonus+' 🍬';msgAge=0;refreshWallet();save();
+ }
+ const now=levelStages[index],next=levelStages[index+1];
+ document.getElementById('levelName').textContent='🌸 '+ux.level+' '+(index+1)+' · '+now[language];
+ document.getElementById('levelReward').textContent=next?'🎁 +'+next.bonus+' 🍬':'🏆';
+ document.getElementById('levelGoal').textContent=next?ux.nextGoal+': '+Math.max(0,next.at-bestProgress):ux.maxLevel;
+ const pct=next?Math.max(0,Math.min(100,(bestProgress-now.at)/(next.at-now.at)*100)):100;
+ const fill=document.getElementById('levelFill');fill.style.width=pct+'%';fill.setAttribute('role','progressbar');fill.setAttribute('aria-valuenow',Math.round(pct));fill.setAttribute('aria-valuemin','0');fill.setAttribute('aria-valuemax','100');
+}
+function refreshSpeedControls(){
+ document.querySelectorAll('#speedControls [data-speed]').forEach(btn=>{
+  const on=Number(btn.dataset.speed)===speedChoice;btn.classList.toggle('active',on);btn.setAttribute('aria-pressed',on?'true':'false');
+ });
+ document.getElementById('speedControls').setAttribute('aria-label',ux.speed);
+ document.getElementById('tutorialOpenBtn').setAttribute('aria-label',ux.how);
+}
+function renderTutorial(){
+ const step=ux.steps[tutorialStep];
+ document.getElementById('tutorialIcon').textContent=step.icon;
+ document.getElementById('tutorialHeading').textContent=step.title;
+ document.getElementById('tutorialText').textContent=step.body;
+ document.getElementById('tutorialDots').textContent=ux.steps.map((_,i)=>i===tutorialStep?'●':'○').join(' ');
+ document.getElementById('tutorialSkip').textContent=ux.skip;
+ document.getElementById('tutorialNext').textContent=tutorialStep===ux.steps.length-1?ux.start:ux.next;
+}
+function openTutorial(){
+ if(!playing)return;
+ tutorialOpen=true;tutorialStep=0;acc=0;
+ document.getElementById('tutorialOverlay').style.display='flex';renderTutorial();
+}
+function closeTutorial(){
+ tutorialOpen=false;tutorialSeen=true;last=0;acc=0;
+ document.getElementById('tutorialOverlay').style.display='none';save();
+}
 function award(){let n=Math.floor(points/10000);if(n<=paidBands)return;let gain=(n-paidBands)*5;
  coins+=gain;earned+=gain;paidBands=n;message='+'+gain+' '+tr.candy+'!';msgAge=0;save();refreshWallet()}
 function pickKind(){const weights=[34,30,24,10,2],recent=history.slice(-5);
