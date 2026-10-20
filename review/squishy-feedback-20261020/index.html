@@ -430,6 +430,15 @@ function fillQueue(){while(queue.length<4){let k=pickKind();if(drops>=30&&rainbo
 function drawQueue(){const canvas=document.getElementById('nextCanvas'),c=canvas.getContext('2d');c.clearRect(0,0,600,165);
  c.save();c.scale(3,3);queue.slice(0,3).forEach((k,i)=>sprite(c,k,38+66*i,28,20));c.restore()}
 
+// The approved seasonal sprite is a transparent WebP; one image shared by
+// shop, collection and gameplay. No redrawing or different-looking placeholder.
+const pumpkinSprite=new Image();let pumpkinSpriteReady=false;
+pumpkinSprite.onload=()=>{pumpkinSpriteReady=true;refreshViews()};
+pumpkinSprite.onerror=()=>{pumpkinSpriteReady=false};
+fetch('../squishy-3d/assets/squishy-halloween-sprite.b64')
+ .then(response=>{if(!response.ok)throw new Error('Pumpkin sprite unavailable');return response.text()})
+ .then(content=>{pumpkinSprite.src='data:image/webp;base64,'+content.trim()})
+ .catch(()=>{pumpkinSpriteReady=false}); // Only in offline/missing-asset failure use the previous drawn costume.
 const finalAtlas=new Image();let finalAtlasReady=false;
 finalAtlas.onload=()=>{finalAtlasReady=true;document.documentElement.style.setProperty('--squishy-candy','url("'+finalAtlas.src+'")');refreshViews();if(queue.length)drawQueue()};
 // Cleaned individual sprite silhouettes, with a local fallback if loading is blocked.
@@ -580,6 +589,16 @@ function sprite(c,kind,x,y,radius,angle=0,impact=0,opacity=1,b=null){
  c.shadowColor='#7055814f';c.shadowBlur=radius*.22;c.shadowOffsetY=radius*.12;
  if(kind===-2){if(!asset(c,13,0,0,radius*2.20))special(c,kind,radius);c.restore();return;}
  if(kind<0){special(c,kind,radius);c.restore();return;}
+ if(kind===7&&b?.skin===HALLOWEEN_SKIN_INDEX&&pumpkinSpriteReady){
+  // Preserve the approved PNG's shape, transparent edges and original expression.
+  // Stem extends above the standard Squishy body, as with other costume skins.
+  const width=radius*2.32,height=width*(209/224);
+  c.shadowColor='rgba(123,76,92,.32)';c.shadowBlur=radius*.12;
+  c.shadowOffsetY=radius*.11;
+  c.drawImage(pumpkinSprite,-width/2,-radius*1.30,width,height);
+  c.restore();return;
+ }
+ // Fallback if the image fails to load: the old drawn costume over the cream Squishy.
  // Use the EXACT cream 3D Squishy sprite already in the game's final atlas.
  // The costume is drawn above it, not a replacement for its face.
  if(kind===7&&b?.skin===HALLOWEEN_SKIN_INDEX&&asset(c,3,0,0,radius*2.34)){
