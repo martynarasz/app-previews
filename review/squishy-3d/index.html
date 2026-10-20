@@ -118,7 +118,7 @@ main{max-width:440px;padding:12px 12px 28px}
 .seasonCountdown:empty{display:none}
 #halloweenSeasonBanner{position:relative;overflow:hidden;margin:8px 0 17px;border:3px solid #fff;border-radius:25px;padding:15px 15px 14px;background:radial-gradient(circle at 95% 0%,#ffcd75aa,transparent 37%),linear-gradient(135deg,#ffcc91,#ffe6bf 53%,#f9d3e7);box-shadow:0 9px 24px #be878750;color:#95536f}
 #halloweenSeasonBanner[hidden]{display:none!important}
-#home:has(#halloweenSeasonBanner:not([hidden])) #hero{width:min(100%,285px);margin:0 auto}
+/* Hero now fills the remaining space in the responsive menu grid. */
 #halloweenSeasonBanner:before{content:'✦ ✦ ✦';position:absolute;top:2px;right:8px;letter-spacing:7px;color:#fff9df;font-size:17px}
 #halloweenSeasonBanner .seasonTitleBig{font-size:20px;font-weight:1000;letter-spacing:.6px;position:relative;color:#8f4d87;text-shadow:0 1px white}
 #halloweenSeasonBanner .seasonSub{font-size:12px;margin:5px 0;font-weight:800}
@@ -141,6 +141,60 @@ main{max-width:440px;padding:12px 12px 28px}
 #playUpdateText{font-weight:850;font-size:12px;flex:1;color:#8962a2}
 #playUpdateNow{font-size:12px;padding:11px 13px;background:#93ce9c;box-shadow:none}
 #playUpdateLater{font-size:20px;padding:3px 7px;background:transparent;color:#a998b4;box-shadow:none}
+
+/* Single-viewport responsive home screen on small and tall phones.
+   Only the home menu is height-constrained; game/shop/collection may scroll. */
+main{padding:calc(6px + env(safe-area-inset-top,0px)) 10px calc(6px + env(safe-area-inset-bottom,0px))}
+body{padding-bottom:0}
+#home{
+ height:calc(100dvh - 12px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
+ min-height:0;display:grid;grid-template-rows:min-content min-content minmax(0,1fr) min-content min-content;
+ align-items:center;justify-items:stretch;gap:clamp(3px,.9dvh,10px);padding:0;margin:0 auto;
+}
+#home .topbar{margin:0;min-height:29px}
+#home .wallet{font-size:clamp(12px,1.7dvh,16px);padding:4px 10px;line-height:1.1}
+#home #halloweenSeasonBanner{
+ margin:0;padding:clamp(7px,1dvh,12px) 9px;border-radius:clamp(15px,2.8dvh,24px);
+ box-shadow:0 3px 12px #be87872c
+}
+#home .seasonTitleBig{font-size:clamp(14px,2.1dvh,19px);line-height:1.1}
+#home .seasonSub{font-size:clamp(10px,1.5dvh,12px);line-height:1.15;margin:3px 0}
+#home .seasonCountdownBig{font-size:clamp(11px,1.7dvh,15px);padding:4px;margin:4px auto 5px}
+#home #seasonShopBtn{font-size:clamp(11px,1.65dvh,13px);padding:clamp(5px,.9dvh,9px) 14px;border-radius:12px}
+#home #hero{
+ display:block;width:auto!important;height:100%;max-height:100%;max-width:100%;min-height:0;
+ justify-self:center;align-self:center;aspect-ratio:1/1;object-fit:contain;
+ border-radius:clamp(16px,3dvh,27px);box-shadow:0 5px 13px #ce93b833
+}
+#home #play{
+ height:clamp(52px,9dvh,80px);width:clamp(52px,9dvh,80px);
+ font-size:clamp(27px,4.3dvh,39px);border-width:3px;
+ margin:0 auto;box-shadow:0 4px 12px #8fccaa66
+}
+#home .menuBtns{display:flex;width:100%;max-width:395px;min-height:0;gap:clamp(6px,2vw,14px);margin:0 auto}
+#home .menuBtns button{
+ flex:1 1 0;width:50%;max-width:none;min-width:0;min-height:0!important;
+ height:clamp(88px,15dvh,120px)!important;padding:4px 8px!important;gap:0;
+ border-radius:clamp(16px,2.5dvh,24px)
+}
+#home .menuBtns button .menuIcon{
+ width:clamp(58px,10.5dvh,91px)!important;height:clamp(58px,10.5dvh,91px)!important;
+ flex:0 0 auto;max-width:85%;padding:0;object-fit:contain
+}
+#home .menuBtns button span:last-child{font-size:clamp(11px,1.8dvh,15px);line-height:1.05}
+@media(max-height:650px){
+ #home{gap:3px}
+ #home #halloweenSeasonBanner{padding:5px 7px}
+ #home .seasonSub{display:none}
+ #home .seasonCountdownBig{padding:3px;margin:2px auto 3px}
+ #home .menuBtns button{height:clamp(78px,14dvh,100px)!important}
+ #home .menuBtns button .menuIcon{width:clamp(54px,9.5dvh,80px)!important;height:clamp(54px,9.5dvh,80px)!important}
+}
+@media(max-width:330px){
+ #home .menuBtns button{padding:3px 4px!important}
+ #home .seasonTitleBig{font-size:13px}
+}
+
 </style></head><body><main>
 
 <section id="home">
