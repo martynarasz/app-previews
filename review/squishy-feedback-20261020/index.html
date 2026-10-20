@@ -105,13 +105,27 @@ main{max-width:440px;padding:12px 12px 28px}
 #tutorialActions button{font-size:15px;padding:12px 18px}
 #tutorialSkip{background:#fff;color:#8e79a2;box-shadow:none}
 #tutorialNext{background:linear-gradient(135deg,#a6da92,#7cc7a7)}
+
+.seasonCountdown{font-size:12px;font-weight:850;line-height:1.5;margin:11px auto;background:#fff6e5ee;border:2px solid #fff;border-radius:16px;padding:10px 13px;color:#975f5c;box-shadow:0 4px 12px #b68b7230}
+.seasonCountdown:empty{display:none}
+.seasonalCard{grid-column:span 3;display:grid;grid-template-columns:40% 1fr;align-items:center;background:linear-gradient(145deg,#fff0d9,#ffe6ba)!important;gap:5px;border:2px solid #e8b47e}
+.seasonalCard canvas{grid-row:span 2}
+.skinCard .seasonTag{display:block!important;white-space:normal;font-size:15px;line-height:1.15;color:#a36942}
+.seasonalCard button{font-size:15px}
+#board{background:linear-gradient(160deg,var(--world-0,#fffafa),var(--world-1,#f3ecff) 56%,var(--world-2,#e5fff2))!important;transition:background .7s ease}
+#nextRow{background:var(--world-0,#fff7f9)!important;transition:background .7s ease}
+#levelStrip{background:var(--world-1,#fff9fe)!important;transition:background .7s ease}
+#playUpdateBanner{display:none;position:fixed;z-index:110;left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));max-width:425px;margin:auto;gap:8px;align-items:center;justify-content:space-between;padding:11px;border:2px solid white;border-radius:20px;background:#fffcfa;box-shadow:0 7px 24px #82668f55}
+#playUpdateText{font-weight:850;font-size:12px;flex:1;color:#8962a2}
+#playUpdateNow{font-size:12px;padding:11px 13px;background:#93ce9c;box-shadow:none}
+#playUpdateLater{font-size:20px;padding:3px 7px;background:transparent;color:#a998b4;box-shadow:none}
 </style></head><body><main>
 
 <section id="home">
 <div class="topbar"><span class="wallet" id="walletMenu"><span class="pepperCoin"></span><span class="walletAmount">0</span></span></div>
 <canvas id="hero" width="780" height="780"></canvas>
 <button id="play" aria-label="Graj">▶</button>
-<div class="menuBtns"><button id="openCollection" aria-label="Kolekcja"><img class="menuIcon" src="../squishy-3d/assets/collection-v5.webp" alt=""><span>Kolekcja</span></button><button id="openShop" aria-label="Sklep"><img class="menuIcon" src="../squishy-3d/assets/shop-v5.webp" alt=""><span>Sklep</span></button></div>
+<div class="menuBtns"><button id="openCollection" aria-label="Kolekcja"><img class="menuIcon" src="../squishy-3d/assets/collection-v5.webp" alt=""><span>Kolekcja</span></button><button id="openShop" aria-label="Sklep"><img class="menuIcon" src="../squishy-3d/assets/shop-v5.webp" alt=""><span>Sklep</span></button></div><div id="seasonPromo" class="seasonCountdown"></div>
 </section>
 <section id="game"><div id="status">⭐ 0　<span class="pepperCoin"></span> <span id="inGameCoins">0</span></div><div id="nextRow"><span>NASTĘPNE</span><canvas id="nextCanvas" width="600" height="165"></canvas></div>
 <div id="levelStrip" role="status" aria-live="polite"><div class="levelLine"><span id="levelName">🌸 Poziom 1</span><span id="levelReward"></span></div><div class="levelTrack"><div id="levelFill"></div></div><small id="levelGoal"></small></div>
@@ -121,7 +135,8 @@ main{max-width:440px;padding:12px 12px 28px}
 <section id="collectionScreen"><div class="screenHead"><button id="collectionBack">← MENU</button><span class="srOnly">Kolekcja</span><span class="wallet" id="walletCollection"><span class="pepperCoin"></span><span class="walletAmount">0</span></span></div>
 <div class="skinGrid" id="collectionCards"></div></section>
 <section id="shopScreen"><div class="screenHead"><button id="shopBack">← MENU</button><span class="srOnly">Sklep</span><span class="wallet" id="walletShop"><span class="pepperCoin"></span><span class="walletAmount">0</span></span></div>
-<div class="skinGrid" id="shopCards"></div></section>
+<div id="seasonShopNote" class="seasonCountdown"></div><div class="skinGrid" id="shopCards"></div></section>
+<div id="playUpdateBanner" role="status" aria-live="polite"><span id="playUpdateText"></span><button id="playUpdateNow"></button><button id="playUpdateLater" aria-label="Dismiss update">×</button></div>
 </main><div id="tutorialOverlay" role="dialog" aria-modal="true" aria-labelledby="tutorialHeading">
 <div id="tutorialCard"><span id="tutorialIcon">👆</span><h2 id="tutorialHeading"></h2><p id="tutorialText"></p><div id="tutorialDots" aria-hidden="true"></div><div id="tutorialActions"><button id="tutorialSkip"></button><button id="tutorialNext"></button></div></div></div><script>
 (()=>{'use strict';
@@ -132,25 +147,27 @@ const skins=[
  ['Listek','#b7e8a5','leaf'],['Kwiatek','#ffc2df','flower'],['Korona','#dcc7ff','crown'],
  ['Kropeczki','#b2e1e8','dots'],['Kocie uszy','#ffdbab','cat'],['Trzy włoski','#ebc3b0','hair'],
  ['Płomyk','#ffc5a6','flame'],['Fontanna','#bde2fa','fountain'],['Pluszak','#d2c6f2','plush'],
- ['Gwiazdka','#ffe7ac','star'],['Panda','#e0d7f6','panda'],['Chmurka','#cbeeff','cloud']
+ ['Gwiazdka','#ffe7ac','star'],['Panda','#e0d7f6','panda'],['Chmurka','#cbeeff','cloud'],['Dyniowy Squishy','#ffa44d','pumpkin']
 ];
 let coins=0,unlocked=[],selected=-1,highScore=0,paidBands=0,earned=0,queue=[],history=[],traces=[],savedRun=null;
-const levelStages=[{at:0,pl:'Ogródek',en:'Garden',bonus:0},{at:1200,pl:'Cukiernia',en:'Candy Shop',bonus:10},{at:3500,pl:'Chmurkowa Dolina',en:'Cloud Valley',bonus:15},{at:7000,pl:'Kraina Gwiazd',en:'Star Land',bonus:20}];
-let bestProgress=0,rewardedStage=0,speedChoice=1,tutorialSeen=false,tutorialOpen=false,tutorialStep=0;
+// Twenty-two rewarded levels: 18 regular + 4 Halloween, each worth 25 candies.
+const stageKeys=['garden','garden','garden','garden','candy','candy','candy','candy','cloud','cloud','cloud','cloud','star','star','star','star','moon','moon','pumpkin','pumpkin','pumpkin','pumpkin'];
+const levelStages=stageKeys.map((world,i)=>({world,at:(i+1)*280+120*i*(i+1)/2,bonus:25}));
+const HALLOWEEN_SKIN_INDEX=12,HALLOWEEN_PRICE=100;
+const HALLOWEEN_END_UTC=Date.UTC(2026,10,15,23,0,0); // November 16 00:00 in Europe/Warsaw
+function halloweenActive(){return Date.now()<HALLOWEEN_END_UTC}
+function skinPrice(i){return i===HALLOWEEN_SKIN_INDEX?HALLOWEEN_PRICE:50}
+function canPurchaseSkin(i){return i!==HALLOWEEN_SKIN_INDEX||halloweenActive()}
+let experience=0,completedLevels=0,runScoreTracked=0,speedChoice=1,tutorialSeen=false,tutorialOpen=false,tutorialStep=0;
+let selectedWorld='garden',countdownExpired=false;
 const storageKey='squishy-merge-v3';
-const language=(navigator.language||'pl').toLowerCase().startsWith('pl')?'pl':'en';
-const tr={pl:{next:'NASTĘPNE',collection:'Kolekcja',shop:'Sklep',menu:'MENU',restart:'OD NOWA',owned:'Odblokowany',buy:'Kup',candy:'cukierków',end:'KONIEC GRY!',final:'Końcowa forma!',flower:'Kwiatek',crown:'Korona'},en:{next:'NEXT',collection:'Collection',shop:'Shop',menu:'MENU',restart:'RESTART',owned:'Unlocked',buy:'Buy',candy:'candies',end:'GAME OVER!',final:'Final form!',flower:'Flower',crown:'Crown'}}[language];
-const ux={pl:{level:'Poziom',nextGoal:'Do kolejnego poziomu',maxLevel:'Wszystkie poziomy odkryte!',skip:'Pomiń',next:'Dalej',start:'Graj!',how:'Jak grać?',speed:'Szybkość gry',steps:[
-{icon:'👆',title:'Wybierz miejsce',body:'Dotknij planszy i przesuń palcem w lewo lub w prawo, żeby ustawić Squishy.'},
-{icon:'💗',title:'Upuść Squishy',body:'Puść palec, aby zrzucić postać. Trzy najmniejsze takie same Squishy łączą się w jedną większą!'},
-{icon:'✨',title:'Łącz i odkrywaj',body:'Kolejne jednakowe postacie łączą się parami. Zdobywaj punkty i cukierki, kupuj nowe postacie oraz odkrywaj poziomy.'}
-]},en:{level:'Level',nextGoal:'Points to next level',maxLevel:'All levels discovered!',skip:'Skip',next:'Next',start:'Play!',how:'How to play?',speed:'Game speed',steps:[
-{icon:'👆',title:'Choose where to drop',body:'Touch the board and slide left or right to position your Squishy.'},
-{icon:'💗',title:'Drop your Squishy',body:'Release your finger to drop. Three matching smallest Squishies merge into a bigger one!'},
-{icon:'✨',title:'Merge and discover',body:'Other matching characters merge in pairs. Earn points and candy, collect characters, and discover new levels.'}
-]}}[language];
+const browserLanguage=(navigator.language||'en').toLowerCase().split(/[-_]/)[0];
+const language=['pl','en','de','es','cs'].includes(browserLanguage)?browserLanguage:'en';
+const allTranslations={"pl":{"next":"NASTĘPNE","collection":"Kolekcja","shop":"Sklep","menu":"MENU","restart":"OD NOWA","owned":"Odblokowany","buy":"Kup","candy":"cukierków","end":"KONIEC GRY!","final":"Końcowa forma!","flower":"Kwiatek","crown":"Korona","merge":"Połączenie!","rainbow":"TĘCZOWE CZYSZCZENIE!","puff":"PUF!","level":"Poziom","nextGoal":"Do ukończenia poziomu","maxLevel":"Wszystkie poziomy ukończone!","skip":"Pomiń","nextStep":"Dalej","start":"Graj!","how":"Jak grać?","speed":"Szybkość gry","reward":"Nagroda","season":"Halloweenowy Squishy","seasonDeadline":"Dostępny do 15 listopada","seasonEnded":"Wydarzenie zakończone","seasonCountdown":"Do końca Halloween","notAvailable":"Niedostępny","playUpdate":"Dostępna jest nowa aktualizacja!","update":"Aktualizuj przez Google Play","later":"Później","earnedMessage":"Poziom ukończony","tierNames":["Lawendowy","Truskawkowy","Brzoskwiniowy","Toffi","Miętowy","Kwiatek","Korona","Finał"],"worlds":{"garden":"Ogródek","candy":"Cukiernia","cloud":"Chmurkowa Dolina","star":"Kraina Gwiazd","moon":"Księżycowe Wzgórze","pumpkin":"Dyniowa Noc"},"steps":[["👆","Wybierz miejsce","Dotknij planszy i przesuń palcem w bok, aby ustawić Squishy."],["💗","Upuść Squishy","Puść palec. Trzy najmniejsze jednakowe Squishy łączą się w większą postać, kolejne formy łączą się parami."],["🍬","Odkrywaj krainy","Za każdy ukończony poziom otrzymujesz 25 cukierków. Kupuj za nie postacie w sklepie!"]],"timeUnits":["dni","godz.","min","sek."],"skinNames":["Listek","Kwiatek","Korona","Kropeczki","Kocie uszy","Trzy włoski","Płomyk","Fontanna","Pluszak","Gwiazdka","Panda","Chmurka","Dyniowy Squishy"]},"en":{"next":"NEXT","collection":"Collection","shop":"Shop","menu":"MENU","restart":"RESTART","owned":"Unlocked","buy":"Buy","candy":"candies","end":"GAME OVER!","final":"Final form!","flower":"Flower","crown":"Crown","merge":"Merge!","rainbow":"RAINBOW CLEAR!","puff":"POOF!","level":"Level","nextGoal":"To finish level","maxLevel":"All levels complete!","skip":"Skip","nextStep":"Next","start":"Play!","how":"How to play?","speed":"Game speed","reward":"Reward","season":"Halloween Squishy","seasonDeadline":"Available until November 15","seasonEnded":"Event ended","seasonCountdown":"Halloween ends in","notAvailable":"Unavailable","playUpdate":"A new update is available!","update":"Update through Google Play","later":"Later","earnedMessage":"Level completed","tierNames":["Lavender","Strawberry","Peach","Toffee","Mint","Flower","Crown","Final"],"worlds":{"garden":"Garden","candy":"Candy Shop","cloud":"Cloud Valley","star":"Star Land","moon":"Moonlit Hill","pumpkin":"Pumpkin Night"},"steps":[["👆","Choose where to drop","Touch the board and slide sideways to position your Squishy."],["💗","Drop your Squishy","Release your finger. Three tiny matching Squishies merge into one larger character; the next forms merge in pairs."],["🍬","Discover worlds","Earn 25 candies every time you complete a level, then use them to buy characters in the shop!"]],"timeUnits":["days","hrs","min","sec"],"skinNames":["Leaf","Flower","Crown","Polka Dots","Cat Ears","Three Hairs","Flame","Fountain","Plushie","Little Star","Panda","Cloud","Pumpkin Squishy"]},"de":{"next":"ALS NÄCHSTES","collection":"Sammlung","shop":"Shop","menu":"MENÜ","restart":"NEUSTART","owned":"Freigeschaltet","buy":"Kaufen","candy":"Bonbons","end":"SPIEL VORBEI!","final":"Letzte Form!","flower":"Blume","crown":"Krone","merge":"Verschmolzen!","rainbow":"REGENBOGEN-BEFREIUNG!","puff":"PUFF!","level":"Level","nextGoal":"Bis zum Abschluss","maxLevel":"Alle Level abgeschlossen!","skip":"Überspringen","nextStep":"Weiter","start":"Spielen!","how":"So geht's","speed":"Spieltempo","reward":"Belohnung","season":"Halloween-Squishy","seasonDeadline":"Bis 15. November verfügbar","seasonEnded":"Event beendet","seasonCountdown":"Halloween endet in","notAvailable":"Nicht verfügbar","playUpdate":"Ein Update ist verfügbar!","update":"Über Google Play aktualisieren","later":"Später","earnedMessage":"Level abgeschlossen","tierNames":["Lavendel","Erdbeere","Pfirsich","Toffee","Minze","Blume","Krone","Finale"],"worlds":{"garden":"Garten","candy":"Süßwarenladen","cloud":"Wolkental","star":"Sternenland","moon":"Mondhügel","pumpkin":"Kürbisnacht"},"steps":[["👆","Position wählen","Berühre das Spielfeld und wische seitlich, um Squishy zu platzieren."],["💗","Squishy fallen lassen","Lass los. Drei gleiche kleine Squishys verschmelzen; größere Figuren verbinden sich paarweise."],["🍬","Welten entdecken","Für jedes abgeschlossene Level bekommst du 25 Bonbons. Kaufe damit neue Figuren im Shop!"]],"timeUnits":["Tage","Std.","Min.","Sek."],"skinNames":["Blatt","Blume","Krone","Punkte","Katzenohren","Drei Haare","Flamme","Fontäne","Plüschtier","Sternchen","Panda","Wolke","Kürbis-Squishy"]},"es":{"next":"SIGUIENTE","collection":"Colección","shop":"Tienda","menu":"MENÚ","restart":"REINICIAR","owned":"Desbloqueado","buy":"Comprar","candy":"caramelos","end":"¡FIN DEL JUEGO!","final":"¡Forma final!","flower":"Flor","crown":"Corona","merge":"¡Fusión!","rainbow":"¡LIMPIEZA ARCOÍRIS!","puff":"¡PUF!","level":"Nivel","nextGoal":"Para completar el nivel","maxLevel":"¡Todos los niveles completados!","skip":"Omitir","nextStep":"Siguiente","start":"¡Jugar!","how":"Cómo jugar","speed":"Velocidad","reward":"Premio","season":"Squishy de Halloween","seasonDeadline":"Disponible hasta el 15 de noviembre","seasonEnded":"Evento finalizado","seasonCountdown":"Halloween termina en","notAvailable":"No disponible","playUpdate":"¡Hay una actualización disponible!","update":"Actualizar mediante Google Play","later":"Más tarde","earnedMessage":"Nivel completado","tierNames":["Lavanda","Fresa","Melocotón","Toffee","Menta","Flor","Corona","Final"],"worlds":{"garden":"Jardín","candy":"Dulcería","cloud":"Valle de Nubes","star":"Tierra de Estrellas","moon":"Colina Lunar","pumpkin":"Noche de Calabazas"},"steps":[["👆","Elige dónde soltar","Toca el tablero y desliza el dedo a los lados para colocar tu Squishy."],["💗","Suelta tu Squishy","Levanta el dedo. Tres Squishies pequeños iguales se unen; después se fusionan de dos en dos."],["🍬","Descubre mundos","Consigue 25 caramelos al completar cada nivel y úsalos para comprar personajes en la tienda."]],"timeUnits":["días","h","min","s"],"skinNames":["Hoja","Flor","Corona","Lunares","Orejas de gato","Tres pelos","Llama","Fuente","Peluche","Estrellita","Panda","Nube","Squishy Calabaza"]},"cs":{"next":"DALŠÍ","collection":"Sbírka","shop":"Obchod","menu":"MENU","restart":"ZNOVU","owned":"Odemčeno","buy":"Koupit","candy":"bonbonů","end":"KONEC HRY!","final":"Konečná podoba!","flower":"Květina","crown":"Koruna","merge":"Spojeno!","rainbow":"DUHOVÉ VYČIŠTĚNÍ!","puff":"PUF!","level":"Úroveň","nextGoal":"Do dokončení úrovně","maxLevel":"Všechny úrovně dokončeny!","skip":"Přeskočit","nextStep":"Dále","start":"Hrát!","how":"Jak hrát?","speed":"Rychlost hry","reward":"Odměna","season":"Halloweenský Squishy","seasonDeadline":"Dostupné do 15. listopadu","seasonEnded":"Událost skončila","seasonCountdown":"Do konce Halloweenu","notAvailable":"Nedostupné","playUpdate":"Je dostupná nová aktualizace!","update":"Aktualizovat přes Google Play","later":"Později","earnedMessage":"Úroveň dokončena","tierNames":["Levandule","Jahoda","Broskev","Toffee","Máta","Květina","Koruna","Finále"],"worlds":{"garden":"Zahrádka","candy":"Cukrárna","cloud":"Údolí mraků","star":"Hvězdná země","moon":"Měsíční kopec","pumpkin":"Dýňová noc"},"steps":[["👆","Vyber místo","Dotkni se herní plochy a posuň prstem do strany, kam chceš Squishy umístit."],["💗","Pusť Squishy","Pusť prst. Tři stejné nejmenší Squishy splynou; větší se spojují po dvojicích."],["🍬","Objevuj světy","Za každou dokončenou úroveň získáš 25 bonbonů. Za ně si kup další postavičky!"]],"timeUnits":["dny","hod.","min","sek."],"skinNames":["Lístek","Květina","Koruna","Puntíky","Kočičí uši","Tři vlásky","Plamínek","Fontána","Plyšák","Hvězdička","Panda","Mráček","Dýňový Squishy"]}};
+const tr=allTranslations[language],ux={...tr,next:tr.nextStep};
 function applyLanguage(){
  document.documentElement.lang=language;
+ document.title='Squishy Merge';
  for(const [selector,label] of [['#openCollection span',tr.collection],['#openShop span',tr.shop],['#nextRow span',tr.next],['#restart','↻ '+tr.restart],['#back','← '+tr.menu],['#collectionBack','← '+tr.menu],['#shopBack','← '+tr.menu]]){
   const n=document.querySelector(selector);if(n)n.textContent=label;
  }
@@ -168,8 +185,8 @@ function loadSave(){
    for(const skin of x.unlocked)if(Number.isInteger(skin)&&skin>=1&&skin<skins.length&&!unlocked.includes(skin))unlocked.push(skin);
   }
   if(unlocked.includes(x.selected))selected=x.selected;
-   bestProgress=Math.max(highScore,Number(x.bestProgress)||0);
-   rewardedStage=Math.max(0,Math.min(levelStages.length-1,Math.floor(Number(x.rewardedStage)||0)));
+   experience=x.levelProgressVersion===2?Math.max(0,Number(x.experience)||0):0;
+   completedLevels=x.levelProgressVersion===2?Math.max(0,Math.min(22,Math.floor(Number(x.completedLevels)||0))):0;
    speedChoice=[.8,1,1.25].includes(Number(x.speedChoice))?Number(x.speedChoice):1;
    tutorialSeen=!!x.tutorialSeen;
   if(x.run&&Array.isArray(x.run.bodies)&&x.run.bodies.length<=150)savedRun=x.run;
@@ -179,12 +196,12 @@ function loadSave(){
 function save(){
  try{
   if(playing){
-   savedRun={points,merges,drops,paidBands,earned,issuedRainbow,id,aim,queue:[...queue],history:[...history],
+   savedRun={points,merges,drops,paidBands,earned,runScoreTracked,issuedRainbow,id,aim,queue:[...queue],history:[...history],
     activeId:active?.id??null,bodies:bodies.map(b=>({...b}))};
   }else if(document.getElementById('game').style.display==='block'&&!active){
    savedRun=null; // completed round, not simply paused in menu
   }
-  localStorage.setItem(storageKey,JSON.stringify({coins,unlocked,selected,highScore,bestProgress,rewardedStage,speedChoice,tutorialSeen,run:savedRun}));
+  localStorage.setItem(storageKey,JSON.stringify({coins,unlocked,selected,highScore,experience,completedLevels,levelProgressVersion:2,speedChoice,tutorialSeen,run:savedRun}));
  }catch(e){/* storage may be disabled in private browsing */}
 }
 function resumeRun(){
@@ -194,6 +211,7 @@ function resumeRun(){
   points=Math.max(0,Number(s.points)||0);merges=Math.max(0,Number(s.merges)||0);
   drops=Math.max(0,Number(s.drops)||0);paidBands=Math.max(0,Number(s.paidBands)||0);
   earned=Math.max(0,Number(s.earned)||0);issuedRainbow=!!s.issuedRainbow;
+   runScoreTracked=Number.isFinite(s.runScoreTracked)?Math.max(0,Number(s.runScoreTracked)):Math.max(0,Number(s.points)||0);
   id=Math.max(1,Number(s.id)||1);aim=Math.max(20,Math.min(W-20,Number(s.aim)||W/2));
   queue=Array.isArray(s.queue)?s.queue.filter(n=>Number.isInteger(n)&&n>=-2&&n<=4).slice(0,4):[];
   history=Array.isArray(s.history)?s.history.filter(n=>Number.isInteger(n)&&n>=-2&&n<=4).slice(-6):[];
@@ -212,18 +230,32 @@ function resumeRun(){
 }
 
 function refreshWallet(){for(const id of ['walletMenu','walletCollection','walletShop'])document.getElementById(id).querySelector('.walletAmount').textContent=coins;const gameAmount=document.getElementById('inGameCoins');if(gameAmount)gameAmount.textContent=coins}
+function getStageWorld(){
+ const idx=Math.min(levelStages.length-1,completedLevels);
+ return levelStages[idx].world;
+}
+function applyWorld(world){
+ if(selectedWorld===world&&document.documentElement.dataset.world===world)return;
+ selectedWorld=world;document.documentElement.dataset.world=world;
+ const palettes={garden:['#fffafa','#f3ecff','#e5fff2'],candy:['#fff4f3','#ffdbed','#f8e4ad'],cloud:['#f4fdff','#dcf3ff','#d9f4fa'],star:['#fcf3ff','#eadbff','#d8e8ff'],moon:['#f3f2ff','#d7dafc','#e7c9f7'],pumpkin:['#fff1e1','#ffd2a2','#ffdec4']};
+ const colors=palettes[world]||palettes.garden;
+ for(let i=0;i<3;i++)document.documentElement.style.setProperty('--world-'+i,colors[i]);
+}
 function updateLevel(){
- bestProgress=Math.max(bestProgress,points);
- let index=0;for(let i=1;i<levelStages.length;i++)if(bestProgress>=levelStages[i].at)index=i;
- if(index>rewardedStage){
-  let bonus=0;for(let i=rewardedStage+1;i<=index;i++)bonus+=levelStages[i].bonus;
-  rewardedStage=index;coins+=bonus;message='🌟 '+ux.level+' '+(index+1)+'! +'+bonus+' 🍬';msgAge=0;refreshWallet();save();
+ if(playing&&points>runScoreTracked){experience+=points-runScoreTracked;runScoreTracked=points;}
+ let completed=0;while(completed<levelStages.length&&experience>=levelStages[completed].at)completed++;
+ if(completed>completedLevels){
+  const gained=(completed-completedLevels)*25;completedLevels=completed;coins+=gained;earned+=gained;
+  message='🌟 '+tr.earnedMessage+'! +'+gained+' 🍬';msgAge=0;refreshWallet();save();
  }
- const now=levelStages[index],next=levelStages[index+1];
- document.getElementById('levelName').textContent='🌸 '+ux.level+' '+(index+1)+' · '+now[language];
- document.getElementById('levelReward').textContent=next?'🎁 +'+next.bonus+' 🍬':'🏆';
- document.getElementById('levelGoal').textContent=next?ux.nextGoal+': '+Math.max(0,next.at-bestProgress):ux.maxLevel;
- const pct=next?Math.max(0,Math.min(100,(bestProgress-now.at)/(next.at-now.at)*100)):100;
+ applyWorld(getStageWorld());
+ const done=completedLevels===levelStages.length;
+ const stage=levelStages[Math.min(completedLevels,levelStages.length-1)];
+ const previous=completedLevels?levelStages[completedLevels-1].at:0;
+ document.getElementById('levelName').textContent='🌸 '+tr.level+' '+Math.min(completedLevels+1,22)+'/22 · '+tr.worlds[stage.world];
+ document.getElementById('levelReward').textContent=done?'🏆':'🎁 +25 🍬';
+ document.getElementById('levelGoal').textContent=done?tr.maxLevel:tr.nextGoal+': '+Math.max(0,stage.at-experience);
+ const pct=done?100:Math.max(0,Math.min(100,(experience-previous)/(stage.at-previous)*100));
  const fill=document.getElementById('levelFill');fill.style.width=pct+'%';fill.setAttribute('role','progressbar');fill.setAttribute('aria-valuenow',Math.round(pct));fill.setAttribute('aria-valuemin','0');fill.setAttribute('aria-valuemax','100');
 }
 function refreshSpeedControls(){
@@ -234,10 +266,10 @@ function refreshSpeedControls(){
  document.getElementById('tutorialOpenBtn').setAttribute('aria-label',ux.how);
 }
 function renderTutorial(){
- const step=ux.steps[tutorialStep];
- document.getElementById('tutorialIcon').textContent=step.icon;
- document.getElementById('tutorialHeading').textContent=step.title;
- document.getElementById('tutorialText').textContent=step.body;
+ const [icon,title,body]=ux.steps[tutorialStep];
+ document.getElementById('tutorialIcon').textContent=icon;
+ document.getElementById('tutorialHeading').textContent=title;
+ document.getElementById('tutorialText').textContent=body;
  document.getElementById('tutorialDots').textContent=ux.steps.map((_,i)=>i===tutorialStep?'●':'○').join(' ');
  document.getElementById('tutorialSkip').textContent=ux.skip;
  document.getElementById('tutorialNext').textContent=tutorialStep===ux.steps.length-1?ux.start:ux.next;
@@ -251,8 +283,7 @@ function closeTutorial(){
  tutorialOpen=false;tutorialSeen=true;last=0;acc=0;
  document.getElementById('tutorialOverlay').style.display='none';save();
 }
-function award(){let n=Math.floor(points/10000);if(n<=paidBands)return;let gain=(n-paidBands)*5;
- coins+=gain;earned+=gain;paidBands=n;message='+'+gain+' '+tr.candy+'!';msgAge=0;save();refreshWallet()}
+function award(){updateLevel()} // Bonus candies come from levels, never a record score.
 function pickKind(){const weights=[34,30,24,10,2],recent=history.slice(-5);
  const allowed=weights.map((w,k)=>({k,w})).filter(o=>!(recent.at(-1)===o.k&&recent.at(-2)===o.k)
  && !(o.k===0&&recent.filter(v=>v===0).length>=2));
@@ -333,7 +364,13 @@ function decoration(c,skin,r){
  if(type==='star'){c.fillStyle='#ffca63';c.strokeStyle='#fff5c0';c.lineWidth=r*.035;c.beginPath();for(let j=0;j<10;j++){const a=-Math.PI/2+j*Math.PI/5,rd=j%2?r*.13:r*.28;c.lineTo(Math.cos(a)*rd,Math.sin(a)*rd-r*.94)}c.closePath();c.fill();c.stroke()}
  if(type==='panda'){for(const s of [-1,1]){c.fillStyle='#766284';c.beginPath();c.arc(s*r*.58,-r*.80,r*.26,0,Math.PI*2);c.fill();c.fillStyle='#f8dcf0';c.beginPath();c.arc(s*r*.58,-r*.8,r*.12,0,Math.PI*2);c.fill()}}
  if(type==='cloud'){c.fillStyle='#fffdf8';for(const [x,y,sz] of [[-.26,-.92,.23],[0,-1.06,.3],[.30,-.92,.22]]){c.beginPath();c.arc(r*x,r*y,r*sz,0,Math.PI*2);c.fill()}}
- if(type==='plush'){c.strokeStyle='#ffffffb9';c.lineWidth=r*.045;c.setLineDash([r*.07,r*.1]);c.beginPath();c.arc(0,0,r*.77,0,Math.PI);c.stroke();c.setLineDash([]);c.fillStyle='#ffa9d1';c.beginPath();c.ellipse(0,r*.56,r*.31,r*.12,0,0,7);c.fill()}
+ if(type==='pumpkin'){
+   c.lineCap='round';c.strokeStyle='#db6f36';c.lineWidth=r*.065;
+   for(const v of [-.43,.43]){c.beginPath();c.moveTo(v*r*.82,-r*.55);c.bezierCurveTo(v*r*1.1,-r*.06,v*r*.92,r*.34,v*r*.71,r*.60);c.stroke()}
+   c.fillStyle='#65bc68';c.beginPath();c.moveTo(-r*.13,-r*.93);c.lineTo(-r*.08,-r*1.40);c.quadraticCurveTo(r*.18,-r*1.48,r*.18,-r*1.27);c.lineTo(r*.12,-r*.91);c.closePath();c.fill();
+   c.fillStyle='#7ddc83';c.beginPath();c.ellipse(r*.28,-r*1.25,r*.30,r*.12,-.38,0,Math.PI*2);c.fill();
+  }
+  if(type==='plush'){c.strokeStyle='#ffffffb9';c.lineWidth=r*.045;c.setLineDash([r*.07,r*.1]);c.beginPath();c.arc(0,0,r*.77,0,Math.PI);c.stroke();c.setLineDash([]);c.fillStyle='#ffa9d1';c.beginPath();c.ellipse(0,r*.56,r*.31,r*.12,0,0,7);c.fill()}
  c.restore();
 }
 function face(c,r,b){
@@ -442,7 +479,7 @@ function spawn(){
 function reset(){
  savedRun=null;bodies=[];puffs=[];petals=[];fusions=[];traces=[];active=null;points=0;merges=0;pops=0;spills=0;drops=0;aim=180;
  heldFor=0;blockedFor=0;issuedRainbow=false;playing=true;petalTime=0;message='';msgAge=0;id=0;
- earned=0;paidBands=0;queue=[];history=[];fillQueue();spawn();save();
+ earned=0;paidBands=0;runScoreTracked=0;queue=[];history=[];fillQueue();spawn();save();
 }
 function drop(){if(!playing||!active||!active.held)return;removeInvalidRainbows();active.held=false;active.vy=Math.max(active.vy,120);heldFor=0;save();}
 function aimAt(e){const rect=cvs.getBoundingClientRect();const radius=active?r(active):21;aim=Math.max(radius+2,Math.min(W-radius-2,(e.clientX-rect.left)/rect.width*W));if(active?.held)active.x=aim;}
@@ -480,7 +517,7 @@ function merge(){
   bodies.push({id:id++,kind:7,skin:keepSkin,x,y,vx:(a.vx+b.vx)*.2,vy:0,
     spin:0,angle:0,rollV:0,impact:.2,squish:.15,squishV:0,morph:.6,
     held:false,cool:.6,rest:0});
-  merges++;points+=180;award();message='✨ Merge!';msgAge=0;save();
+  merges++;points+=180;award();message='✨ '+tr.merge;msgAge=0;save();
   return true;
  }
  for(let kind=6;kind>=0;kind--){const seen=new Set();for(const seed of bodies){if(seed.kind!==kind||seed.held||seed.cool>0||seen.has(seed.id))continue;
@@ -499,10 +536,10 @@ function merge(){
    message='🌸 '+tr.final;msgAge=0;
  }else{const next=kind+1,RN=R[next];const bigger={id:id++,kind:next,x:Math.max(RN,Math.min(W-RN,x)),y:Math.max(RN,Math.min(H-RN,y)),vx:0,vy:0,spin:0,angle:0,rollV:0,impact:.4,squish:.15,squishV:0,morph:1,held:false,cool:.32,rest:0};bodies.push(bigger);
    for(let k=0;k<9;k++){for(const q of bodies)if(q!==bigger&&!q.held)collision(q,bigger);bodies.forEach(b=>{if(!b.held)border(b)})}
-   message='✨ '+(next===5?tr.flower:next===6?tr.crown:names[next])+'!';msgAge=0;}
+   message='✨ '+(next===5?tr.flower:next===6?tr.crown:tr.tierNames[next])+'!';msgAge=0;}
  if(isActive){active=null;drops++;points+=5;}save();return true;
  }}return false}
-function finish(){playing=false;active=null;highScore=Math.max(points,highScore);award();save();refreshWallet();message=tr.end+' '+points+' • +'+earned+' 🍬 • '+highScore;msgAge=0;}
+function finish(){updateLevel();playing=false;active=null;highScore=Math.max(points,highScore);save();refreshWallet();message=tr.end+' '+points+' • +'+earned+' 🍬';msgAge=0;}
 function simulate(dt){if(!playing)return;removeInvalidRainbows();msgAge+=dt;heldFor+=active?.held?dt:0;
  if(active?.held&&heldFor>=5)drop();
  petalTime+=dt;if(petalTime>.5&&petals.length<30){petalTime=0;petals.push({x:rr(0,W),y:-10,size:rr(3.5,7),age:0,speed:rr(20,38),phase:rr(0,7),settled:false})}
@@ -539,15 +576,37 @@ function simulate(dt){if(!playing)return;removeInvalidRainbows();msgAge+=dt;held
    if(b.rest>.18){active=null;drops++;points+=3;award();
      // Check right at impact, even if a large merge happened this very frame.
      if(b.kind===-1&&!rainbowAllowed()){b.kind=0;issuedRainbow=false;}
-     if(b.kind===-1){bodies=[];puffs=[];blockedFor=0;points+=140;award();puff(b.x,b.y,5);message='🌈 TĘCZOWY CLEAR!';msgAge=0}
+     if(b.kind===-1){bodies=[];puffs=[];blockedFor=0;points+=140;award();puff(b.x,b.y,5);message='🌈 '+tr.rainbow;msgAge=0}
      if(b.kind===-2){const cx=b.x,cy=b.y;let cleared=0;
        bodies=bodies.filter(other=>{if(other===b)return false;if(other.kind===-1||other.kind===-2)return true;
          const nearby=Math.hypot(other.x-cx,other.y-cy)<116+r(other)*.15;if(nearby)cleared++;return !nearby});
-       blockedFor=0;points+=45+cleared*12;award();puff(cx,cy,6);message='PUF! '+cleared;msgAge=0}
+       blockedFor=0;points+=45+cleared*12;award();puff(cx,cy,6);message=tr.puff+' '+cleared;msgAge=0}
      save();}}
  if(!active&&playing)spawn();
 }
-function drawPetal(c,x,y,s,a,alpha){c.save();c.translate(x,y);c.rotate(a);c.globalAlpha=alpha;c.fillStyle='#f7adcf';c.strokeStyle='#e39cbb';c.lineWidth=.6;c.beginPath();c.moveTo(0,s*.43);c.bezierCurveTo(-s*.87,s*.04,-s*.55,-s*.95,0,-s*.86);c.bezierCurveTo(s*.53,-s*.98,s*.85,s*.02,0,s*.43);c.fill();c.stroke();c.restore()}
+function drawPetal(c,x,y,s,a,alpha){
+ c.save();c.translate(x,y);c.rotate(a);c.globalAlpha=alpha;
+ const world=selectedWorld;
+ if(world==='candy'){
+  c.fillStyle='#faadc6';c.strokeStyle='#fff3d5';c.lineWidth=1;
+  c.beginPath();c.arc(0,0,s*.8,0,Math.PI*2);c.fill();c.stroke();
+  c.strokeStyle='#fff';c.lineWidth=1.4;c.beginPath();c.arc(0,0,s*.43,0,Math.PI);c.stroke();
+ }else if(world==='cloud'){
+  c.fillStyle='#ffffff';c.beginPath();c.arc(-s*.4,0,s*.5,0,Math.PI*2);c.arc(0,-s*.3,s*.7,0,Math.PI*2);c.arc(s*.45,0,s*.5,0,Math.PI*2);c.fill();
+ }else if(world==='star'||world==='moon'){
+  c.fillStyle=world==='moon'?'#ffe5a6':'#ffe99d';c.beginPath();
+  for(let i=0;i<10;i++){const ang=-Math.PI/2+i*Math.PI/5;const d=(i%2?s*.36:s);c.lineTo(Math.cos(ang)*d,Math.sin(ang)*d)}c.closePath();c.fill();
+ }else if(world==='pumpkin'){
+  c.fillStyle='#ffa65a';c.strokeStyle='#f18857';c.lineWidth=.8;
+  c.beginPath();c.ellipse(0,0,s*.85,s*.75,0,0,Math.PI*2);c.fill();c.stroke();
+  c.fillStyle='#79bb65';c.fillRect(-s*.1,-s*.92,s*.22,s*.35);
+ }else{
+  c.fillStyle='#f7adcf';c.strokeStyle='#e39cbb';c.lineWidth=.6;c.beginPath();
+  c.moveTo(0,s*.43);c.bezierCurveTo(-s*.87,s*.04,-s*.55,-s*.95,0,-s*.86);
+  c.bezierCurveTo(s*.53,-s*.98,s*.85,s*.02,0,s*.43);c.fill();c.stroke();
+ }
+ c.restore();
+}
 function cloud(c,p){const t=p.age/1.4;let fade=Math.max(0,1-t);
  if(t<.38)sprite(c,p.kind===4?4:-2,p.x,p.y,(43+t*120)*(p.kind===4?1.45:.8),0,0,1);
  for(let i=0;i<10;i++){const a=i*Math.PI/5,d=11+t*(40+i%3*5),x=p.x+Math.cos(a)*d,y=p.y+Math.sin(a)*d-t*18,sz=13+t*11;
@@ -607,22 +666,45 @@ function renderCards(where){
  skins.forEach((sk,i)=>{
   if(shop&&i<3)return;if(!shop&&!unlocked.includes(i))return;
   const owned=unlocked.includes(i),chosen=selected===i,card=document.createElement('div');
-  card.className='skinCard'+(chosen?' selected':'')+(owned?'':' locked');
+   const seasonal=i===HALLOWEEN_SKIN_INDEX,price=skinPrice(i),canBuy=canPurchaseSkin(i);
+  card.className='skinCard'+(chosen?' selected':'')+(owned?'':' locked')+(seasonal?' seasonalCard':'');
   const picture=document.createElement('canvas');picture.width=240;picture.height=240;card.appendChild(picture);
-  const button=document.createElement('button');
+  if(seasonal){const mark=document.createElement('strong');mark.className='seasonTag';mark.textContent='🎃 '+tr.skinNames[i];card.appendChild(mark);}
+   const button=document.createElement('button');
   if(owned){button.textContent=chosen?'✓':'✓';button.className='owned'+(chosen?' selected':'')}
   else {const coin=document.createElement('span');coin.className='pepperCoin';button.appendChild(coin);
-   const value=document.createElement('span');value.textContent='50';button.appendChild(value)}
-  button.setAttribute('aria-label',owned?tr.owned+' '+sk[0]:tr.buy+' '+sk[0]+' 50 '+tr.candy);
-  button.disabled=chosen||(!shop&&!owned)||(shop&&!owned&&coins<50);
+   const value=document.createElement('span');value.textContent=canBuy?price:tr.notAvailable;button.appendChild(value)}
+  button.setAttribute('aria-label',owned?tr.owned+' '+tr.skinNames[i]:canBuy?tr.buy+' '+tr.skinNames[i]+' '+price+' '+tr.candy:tr.notAvailable+' '+tr.skinNames[i]);
+  button.disabled=chosen||(!shop&&!owned)||(shop&&!owned&&(!canBuy||coins<price));
   button.onclick=()=>{if(owned){selected=i;save();refreshViews()}
-   else if(shop&&coins>=50){coins-=50;unlocked.push(i);selected=i;save();refreshViews()}};
+   else if(shop&&canPurchaseSkin(i)&&coins>=skinPrice(i)){coins-=skinPrice(i);unlocked.push(i);selected=i;save();refreshViews()}};
   card.appendChild(button);root.appendChild(card);
   const c=picture.getContext('2d');c.clearRect(0,0,240,240);
   if(finalAtlasReady&&i<9){asset(c,i===0?4:(i<=2?i+4:i+4),120,124,196)}else sprite(c,7,120,130,77,0,0,1,{id:i+16,skin:i});
  });
 }
 function refreshViews(){refreshWallet();drawHome();renderCards('shop');renderCards('collection')}
+function updateHalloweenCountdown(){
+ const remaining=HALLOWEEN_END_UTC-Date.now(),available=remaining>0;
+ const secs=Math.max(0,Math.ceil(remaining/1000)),day=Math.floor(secs/86400),hour=Math.floor(secs%86400/3600),minute=Math.floor(secs%3600/60),sec=secs%60;
+ const parts=[day,hour,minute,sec].map((n,i)=>n+' '+tr.timeUnits[i]).join(' · ');
+ const label=available?'🎃 '+tr.seasonDeadline+' · '+tr.seasonCountdown+': '+parts:'🎃 '+tr.seasonEnded;
+ for(const id of ['seasonPromo','seasonShopNote'])document.getElementById(id).textContent=label;
+ if(countdownExpired!==!available){countdownExpired=!available;renderCards('shop')}
+}
+function wirePlayUpdateNotice(){
+ window.squishyPlayUpdateAvailable=()=>{
+  document.getElementById('playUpdateBanner').style.display='flex';
+  document.getElementById('playUpdateText').textContent=tr.playUpdate;
+  document.getElementById('playUpdateNow').textContent=tr.update;
+  document.getElementById('playUpdateLater').setAttribute('aria-label',tr.later);
+ };
+ document.getElementById('playUpdateNow').onclick=()=>{
+  if(window.SquishyUpdates&&typeof window.SquishyUpdates.requestUpdate==='function')window.SquishyUpdates.requestUpdate();
+ };
+ document.getElementById('playUpdateLater').onclick=()=>document.getElementById('playUpdateBanner').style.display='none';
+}
+
 function showPage(page){
  for(const [id,key] of [['home','home'],['game','game'],['collectionScreen','collection'],['shopScreen','shop']])
   document.getElementById(id).style.display=key===page?'block':'none';
@@ -644,6 +726,6 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden&&playing)sa
 window.addEventListener('pagehide',()=>{if(playing)save()});
 let lastSavedAt=0;
 const originalLoop=loop; // periodic autosave is handled in game paint callback below
-loadSave();applyLanguage();refreshSpeedControls();refreshViews();updateLevel();
+loadSave();applyLanguage();refreshSpeedControls();refreshViews();updateLevel();wirePlayUpdateNotice();updateHalloweenCountdown();setInterval(updateHalloweenCountdown,1000);
 })();
 </script></body></html>
