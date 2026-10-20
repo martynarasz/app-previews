@@ -88,6 +88,14 @@ main{max-width:440px;padding:12px 12px 28px}
 #levelStrip{max-width:420px;margin:7px auto 9px;background:#fff9feee;border:2px solid white;border-radius:18px;padding:8px 12px;box-shadow:0 5px 15px #bd93bd25}
 .levelLine{display:flex;justify-content:space-between;gap:8px;font-size:13px;font-weight:900;color:#8267a6}
 .levelTrack{height:8px;background:#f3def3;border-radius:12px;overflow:hidden;margin:7px 0}
+.levelRewardMini{display:inline-flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap}
+.levelRewardMini .pepperCoin{width:19px;height:19px}
+#levelRewardToast{pointer-events:none;position:absolute;z-index:9;top:26%;left:50%;width:min(82%,270px);transform:translate(-50%,-10%) scale(.84);opacity:0;
+ background:linear-gradient(145deg,#fffdf2,#ffe9f7);border:3px solid white;border-radius:25px;padding:17px 15px;box-shadow:0 12px 32px #9d75ab72;text-align:center;color:#9063a6;font-size:16px;font-weight:1000}
+.levelRewardValue{display:flex;justify-content:center;align-items:center;gap:13px;padding-top:6px;font-size:35px;color:#ac6fa0;text-shadow:0 2px white}
+.levelRewardValue .pepperCoin{width:52px;height:52px;filter:drop-shadow(0 5px 4px #d5a2b2)}
+@keyframes levelRewardPop{0%{opacity:0;transform:translate(-50%,0%) scale(.65)}13%{opacity:1;transform:translate(-50%,-22%) scale(1.1)}23%,68%{opacity:1;transform:translate(-50%,-23%) scale(1)}100%{opacity:0;transform:translate(-50%,-65%) scale(.97)}}
+@media(prefers-reduced-motion:reduce){#levelRewardToast{transition:none}@keyframes levelRewardPop{0%,10%,80%{opacity:1;transform:translate(-50%,-23%) scale(1)}100%{opacity:0;transform:translate(-50%,-23%) scale(1)}}}
 #levelFill{height:100%;width:0;background:linear-gradient(90deg,#8fd9a8,#c19de9);border-radius:12px;transition:width .3s}
 #levelGoal{display:block;font-size:11px;color:#9b80a9}
 #speedRow{display:flex;justify-content:center;align-items:center;gap:8px;margin:3px auto 9px}
@@ -123,8 +131,8 @@ main{max-width:440px;padding:12px 12px 28px}
 .skinCard .seasonTag{display:block!important;grid-column:2;white-space:normal;font-size:17px;line-height:1.25;color:#a4574c}
 .skinCard .seasonTag small{display:block!important;color:#8a607e;font-size:11px;font-weight:750;padding-top:9px}
 .seasonalCard button{grid-column:2;font-size:16px;align-self:start}
-.menuBtns button{min-height:139px!important;padding:12px 11px 12px!important;overflow:visible}
-.menuBtns button .menuIcon{width:82px!important;height:82px!important;flex:0 0 82px;object-fit:contain!important;padding:6px;overflow:visible;filter:drop-shadow(0 3px 5px #d2a2bc3b)}
+.menuBtns button{min-height:157px!important;padding:12px 10px 10px!important;overflow:visible}
+.menuBtns button .menuIcon{width:106px!important;height:106px!important;flex:0 0 106px;object-fit:contain!important;padding:0;overflow:visible;filter:drop-shadow(0 3px 5px #d2a2bc3b)}
 .menuBtns button span:last-child{flex-shrink:0;line-height:1.25}
 #board{background:linear-gradient(160deg,var(--world-0,#fffafa),var(--world-1,#f3ecff) 56%,var(--world-2,#e5fff2))!important;transition:background .7s ease}
 #nextRow{background:var(--world-0,#fff7f9)!important;transition:background .7s ease}
@@ -148,9 +156,13 @@ main{max-width:440px;padding:12px 12px 28px}
 <div class="menuBtns"><button id="openCollection" aria-label="Kolekcja"><img class="menuIcon" src="../squishy-3d/assets/collection-v5.webp" alt=""><span>Kolekcja</span></button><button id="openShop" aria-label="Sklep"><img class="menuIcon" src="../squishy-3d/assets/shop-v5.webp" alt=""><span>Sklep</span></button></div>
 </section>
 <section id="game"><div id="status">⭐ 0　<span class="pepperCoin"></span> <span id="inGameCoins">0</span></div><div id="nextRow"><span>NASTĘPNE</span><canvas id="nextCanvas" width="600" height="165"></canvas></div>
-<div id="levelStrip" role="status" aria-live="polite"><div class="levelLine"><span id="levelName">🌸 Poziom 1</span><span id="levelReward"></span></div><div class="levelTrack"><div id="levelFill"></div></div><small id="levelGoal"></small></div>
+<div id="levelStrip" role="status" aria-live="polite"><div class="levelLine"><span id="levelName">🌸 Poziom 1</span><span id="levelReward" class="levelRewardMini"><span class="pepperCoin" aria-hidden="true"></span><span id="levelRewardAmount">+25</span></span></div><div class="levelTrack"><div id="levelFill"></div></div><small id="levelGoal"></small></div>
 <div id="speedRow"><div id="speedControls" role="group" aria-label="Szybkość gry"><button data-speed="0.8">🌿 0.8×</button><button data-speed="1">🌸 1×</button><button data-speed="1.25">⚡ 1.25×</button></div><button id="tutorialOpenBtn" aria-label="Jak grać?">?</button></div>
-<div id="boardWrap"><canvas id="board" width="1080" height="1395"></canvas><div id="count"></div></div>
+<div id="boardWrap"><canvas id="board" width="1080" height="1395"></canvas><div id="count"></div>
+<div id="levelRewardToast" role="status" aria-live="polite" aria-atomic="true">
+ <span id="rewardToastMessage"></span>
+ <div class="levelRewardValue"><span class="pepperCoin" aria-hidden="true"></span><strong id="rewardToastAmount">+25</strong></div>
+</div></div>
 <div id="feedback"></div><button id="restart">↻ OD NOWA</button><button id="back">← MENU</button></section>
 <section id="collectionScreen"><div class="screenHead"><button id="collectionBack">← MENU</button><span class="srOnly">Kolekcja</span><span class="wallet" id="walletCollection"><span class="pepperCoin"></span><span class="walletAmount">0</span></span></div>
 <div class="skinGrid" id="collectionCards"></div></section>
@@ -172,7 +184,9 @@ const skins=[
 let coins=0,unlocked=[],selected=-1,highScore=0,paidBands=0,earned=0,queue=[],history=[],traces=[],savedRun=null;
 // Twenty-two rewarded levels: 18 regular + 4 Halloween, each worth 25 candies.
 const stageKeys=['garden','garden','garden','garden','candy','candy','candy','candy','cloud','cloud','cloud','cloud','star','star','star','star','moon','moon','pumpkin','pumpkin','pumpkin','pumpkin'];
-const levelStages=stageKeys.map((world,i)=>({world,at:(i+1)*280+120*i*(i+1)/2,bonus:25}));
+// Slower progression: 5x the original score thresholds, with 25 candy for every level.
+const LEVEL_PACE_MULTIPLIER=5;
+const levelStages=stageKeys.map((world,i)=>({world,at:Math.round(((i+1)*280+120*i*(i+1)/2)*LEVEL_PACE_MULTIPLIER),bonus:25}));
 const HALLOWEEN_SKIN_INDEX=12,HALLOWEEN_PRICE=100;
 const HALLOWEEN_END_UTC=Date.UTC(2026,10,15,23,0,0); // November 16 00:00 in Europe/Warsaw
 function halloweenActive(){return Date.now()<HALLOWEEN_END_UTC}
@@ -262,19 +276,30 @@ function applyWorld(world){
  const colors=palettes[world]||palettes.garden;
  for(let i=0;i<3;i++)document.documentElement.style.setProperty('--world-'+i,colors[i]);
 }
+function showLevelReward(gained){
+ const toast=document.getElementById('levelRewardToast');
+ document.getElementById('rewardToastMessage').textContent=tr.earnedMessage+'!';
+ document.getElementById('rewardToastAmount').textContent='+'+gained;
+ toast.setAttribute('aria-label',tr.earnedMessage+'! +'+gained+' '+tr.candy);
+ toast.style.animation='none';
+ void toast.offsetWidth; // restart the pop animation for each level achieved
+ toast.style.animation='levelRewardPop 2.6s ease-out forwards';
+}
 function updateLevel(){
  if(playing&&points>runScoreTracked){experience+=points-runScoreTracked;runScoreTracked=points;}
  let completed=0;while(completed<levelStages.length&&experience>=levelStages[completed].at)completed++;
  if(completed>completedLevels){
   const gained=(completed-completedLevels)*25;completedLevels=completed;coins+=gained;earned+=gained;
-  message='🌟 '+tr.earnedMessage+'! +'+gained+' 🍬';msgAge=0;refreshWallet();save();
+  message='🌟 '+tr.earnedMessage+'!';msgAge=0;refreshWallet();showLevelReward(gained);save();
  }
  applyWorld(getStageWorld());
  const done=completedLevels===levelStages.length;
  const stage=levelStages[Math.min(completedLevels,levelStages.length-1)];
  const previous=completedLevels?levelStages[completedLevels-1].at:0;
  document.getElementById('levelName').textContent='🌸 '+tr.level+' '+Math.min(completedLevels+1,22)+'/22 · '+tr.worlds[stage.world];
- document.getElementById('levelReward').textContent=done?'🏆':'🎁 +25 🍬';
+ document.getElementById('levelRewardAmount').textContent=done?'🏆':'+25';
+ document.querySelector('#levelReward .pepperCoin').style.display=done?'none':'inline-block';
+ document.getElementById('levelReward').setAttribute('aria-label',done?tr.maxLevel:tr.reward+' +25 '+tr.candy);
  document.getElementById('levelGoal').textContent=done?tr.maxLevel:tr.nextGoal+': '+Math.max(0,stage.at-experience);
  const pct=done?100:Math.max(0,Math.min(100,(experience-previous)/(stage.at-previous)*100));
  const fill=document.getElementById('levelFill');fill.style.width=pct+'%';fill.setAttribute('role','progressbar');fill.setAttribute('aria-valuenow',Math.round(pct));fill.setAttribute('aria-valuemin','0');fill.setAttribute('aria-valuemax','100');
@@ -337,16 +362,9 @@ fetch('../squishy-3d/assets/squishy-final-precise.b64').then(r=>{if(!r.ok)throw 
  .then(data=>{finalAtlas.src='data:image/webp;base64,'+data.trim()})
  .catch(()=>{finalAtlas.src='../squishy-3d/assets/squishy-assets-v5.webp'});
 finalAtlas.onerror=()=>{if(!finalAtlasReady&&finalAtlas.src.indexOf('squishy-assets-v5.webp')===-1){finalAtlas.src='../squishy-3d/assets/squishy-assets-v5.webp'}};
-function useMenuArt(id,file){
- const element=document.querySelector(id+' .menuIcon');
- if(!element)return;
- fetch('../squishy-3d/assets/'+file).then(r=>{if(!r.ok)throw new Error('Missing UI art');return r.text()})
- .then(b64=>{element.src='data:image/webp;base64,'+b64.trim()})
- .catch(()=>{ /* keep previous icon if offline */ });
-}
-useMenuArt('#openCollection','squishy-collection-internal.b64');
-useMenuArt('#openShop','squishy-shop-internal.b64');
-const homeArt=new Image();let homeReady=false;
+// Keep the original, fully illustrated v5 menu icons.
+ // The alternative internal .b64 icons are cropped at their lower edges.
+ const homeArt=new Image();let homeReady=false;
 homeArt.onload=()=>{homeReady=true;drawHome()};
 homeArt.src='../squishy-3d/assets/squishy-home-v5.webp';
 // Core game tiers use real cutouts from the same polished atlas as the shop.
