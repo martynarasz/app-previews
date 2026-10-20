@@ -138,8 +138,8 @@ main{max-width:440px;padding:12px 12px 28px}
 <div class="topbar"><span class="wallet" id="walletMenu"><span class="pepperCoin"></span><span class="walletAmount">0</span></span></div>
 <canvas id="hero" width="780" height="780"></canvas>
 <button id="play" aria-label="Graj">▶</button>
-<div id="halloweenSeasonBanner" role="region" aria-label="Halloween Season" hidden>
- <div class="seasonTitleBig">🎃 HALLOWEEN SEASON ✨</div>
+<div id="halloweenSeasonBanner" role="region" hidden aria-label="Halloween">
+ <div id="seasonHeading" class="seasonTitleBig"></div>
  <div id="seasonSub" class="seasonSub"></div>
  <div id="seasonCountdownValue" class="seasonCountdownBig"></div>
  <button id="seasonShopBtn"></button>
@@ -692,7 +692,7 @@ function renderCards(where){
   const picture=document.createElement('canvas');picture.width=240;picture.height=240;
    if(seasonal){
      const wrap=document.createElement('div');wrap.className='seasonFigure';
-     const ribbon=document.createElement('div');ribbon.className='seasonRibbon';ribbon.textContent='🎃 HALLOWEEN SQUISHY';
+     const ribbon=document.createElement('div');ribbon.className='seasonRibbon';ribbon.textContent='🎃 '+tr.season;
      wrap.appendChild(ribbon);wrap.appendChild(picture);card.appendChild(wrap);
      const mark=document.createElement('strong');mark.className='seasonTag';mark.textContent='🎃 '+tr.skinNames[i];
      const info=document.createElement('small');info.textContent=tr.seasonDesc;mark.appendChild(info);card.appendChild(mark);
@@ -722,6 +722,8 @@ function updateHalloweenCountdown(){
      language==='en'?(day===1?'day':'days'):
      language==='de'?(day===1?'Tag':'Tage'):(day===1?'día':'días');
    const parts=[day+' '+dayWord,hour+' '+tr.timeUnits[1],minute+' '+tr.timeUnits[2],sec+' '+tr.timeUnits[3]].join(' · ');
+   document.getElementById('halloweenSeasonBanner').setAttribute('aria-label',tr.seasonBadge);
+   document.getElementById('seasonHeading').textContent='🎃 '+tr.seasonBadge+' ✨';
    document.getElementById('seasonSub').textContent=tr.seasonDesc;
    document.getElementById('seasonShopBtn').textContent=tr.seasonShop;
    document.getElementById('seasonCountdownValue').textContent='⏳ '+parts;
