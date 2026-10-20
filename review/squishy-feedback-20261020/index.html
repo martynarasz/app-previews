@@ -197,6 +197,56 @@ body{padding-bottom:0}
  #home .seasonTitleBig{font-size:13px}
 }
 
+/* Mobile game: keep the ENTIRE round and both navigation actions in one visible
+   viewport, even after resuming a saved game or returning from the shop.
+   The canvas scales inside the flexible grid row, never pushes controls down. */
+body.game-active{height:var(--game-viewport,100dvh);min-height:0;overflow:hidden;overscroll-behavior:none}
+body.game-active main{height:100%;min-height:0;overflow:hidden}
+#game{
+ height:100%;min-height:0;min-width:0;overflow:hidden;
+ grid-template-rows:min-content min-content min-content min-content minmax(0,1fr) min-content min-content;
+ gap:clamp(2px,.45dvh,5px);align-items:center;justify-items:stretch;
+}
+#game #status{font-size:clamp(14px,2.25dvh,19px);padding:0;line-height:1.25;min-height:0}
+#game #status .pepperCoin{width:clamp(16px,2.7dvh,22px);height:clamp(16px,2.7dvh,22px)}
+#game #nextRow{min-height:0;height:clamp(36px,6dvh,52px);margin:0 2px;padding:1px 6px;gap:7px;border-radius:14px}
+#game #nextCanvas{width:auto;max-width:57%;height:min(100%,45px);aspect-ratio:600 / 165;object-fit:contain}
+#game #levelStrip{width:100%;max-width:none;margin:0;padding:clamp(4px,.8dvh,7px) 10px;border-radius:13px}
+#game #levelStrip .levelLine{font-size:clamp(11px,1.8dvh,13px)}
+#game #levelStrip .levelTrack{height:6px;margin:4px 0}
+#game #levelGoal{font-size:clamp(10px,1.55dvh,11px);line-height:1.1}
+#game #speedRow{width:100%;min-height:0;height:clamp(35px,5.7dvh,44px);margin:0;gap:6px}
+#game #speedControls{height:100%;align-items:stretch;padding:3px;gap:2px;border-radius:15px}
+#game #speedControls button{padding:2px 3px;font-size:clamp(10px,1.6dvh,12px);border-radius:11px}
+#game #tutorialOpenBtn{height:100%;min-width:36px;width:36px;flex-shrink:0;padding:0;font-size:18px}
+#game #boardWrap{
+ display:flex;align-items:center;justify-content:center;
+ width:100%;height:100%;min-height:0;min-width:0;max-width:none;margin:0 auto;
+}
+#game #board{
+ display:block;flex:0 0 auto;width:auto;height:auto;max-width:100%;max-height:100%;
+ aspect-ratio:360 / 465;border-radius:clamp(14px,3.3dvh,27px);
+ box-shadow:0 3px 12px #9071ac39;
+}
+#game #feedback{height:clamp(16px,2.8dvh,22px);min-height:0;line-height:1.2;margin:0;font-size:clamp(11px,1.8dvh,14px);overflow:hidden}
+#gameActions{display:flex;align-items:stretch;justify-content:center;gap:8px;min-height:0;height:clamp(40px,6.3dvh,50px);padding:0 1px}
+#gameActions button{
+ flex:1 1 0;min-width:0;height:100%;padding:3px 8px;margin:0;
+ border-radius:14px;font-size:clamp(12px,1.85dvh,15px);line-height:1.1;
+ touch-action:manipulation;
+}
+#gameActions #restart{background:#e5d6f6;color:#755b98}
+#gameActions #back{background:#fffafeea;color:#9078a6;border:2px solid #fff}
+@media(max-height:650px){
+ #game{gap:2px}
+ #game #nextRow{height:34px}
+ #game #levelStrip{padding:3px 8px}
+ #game #levelStrip .levelTrack{margin:2px 0;height:5px}
+ #game #speedRow{height:33px}
+ #game #feedback{height:15px}
+ #gameActions{height:39px}
+}
+
 </style></head><body><main>
 
 <section id="home">
@@ -219,7 +269,7 @@ body{padding-bottom:0}
  <span id="rewardToastMessage"></span>
  <div class="levelRewardValue"><span class="pepperCoin" aria-hidden="true"></span><strong id="rewardToastAmount">+25</strong></div>
 </div></div>
-<div id="feedback"></div><button id="restart">↻ OD NOWA</button><button id="back">← MENU</button></section>
+<div id="feedback"></div><div id="gameActions"><button id="restart">↻ OD NOWA</button><button id="back">← MENU</button></div></section>
 <section id="collectionScreen"><div class="screenHead"><button id="collectionBack">← MENU</button><span class="srOnly">Kolekcja</span><span class="wallet" id="walletCollection"><span class="pepperCoin"></span><span class="walletAmount">0</span></span></div>
 <p class="skinChangeNotice" id="collectionSkinNotice"></p><div class="skinGrid" id="collectionCards"></div></section>
 <section id="shopScreen"><div class="screenHead"><button id="shopBack">← MENU</button><span class="srOnly">Sklep</span><span class="wallet" id="walletShop"><span class="pepperCoin"></span><span class="walletAmount">0</span></span></div>
@@ -931,12 +981,40 @@ function wirePlayUpdateNotice(){
  document.getElementById('playUpdateLater').onclick=()=>document.getElementById('playUpdateBanner').style.display='none';
 }
 
+// The saved game must fit again after each navigation/rotation/browser bar resize.
+// Measure the flexible board row rather than assuming 100vw is the usable height.
+function fitGameBoard(){
+ if(document.getElementById('game').style.display!=='grid')return;
+ const height=window.visualViewport?.height||window.innerHeight;
+ if(Number.isFinite(height)&&height>0)
+  document.documentElement.style.setProperty('--game-viewport',height+'px');
+ const box=document.getElementById('boardWrap'),board=document.getElementById('board');
+ const w=box.clientWidth,h=box.clientHeight;
+ if(w>0&&h>0){
+  const size=Math.max(1,Math.floor(Math.min(w,h*360/465)));
+  board.style.width=size+'px';
+  board.style.height=Math.floor(size*465/360)+'px';
+ }
+}
 function showPage(page){
+ if(page!=='game'&&playing)save();
  for(const [id,key] of [['home','home'],['game','game'],['collectionScreen','collection'],['shopScreen','shop']])
-  document.getElementById(id).style.display=key===page?'block':'none';
- if(page!=='game'){if(playing)save();playing=false;}
+  document.getElementById(id).style.display=key===page?(key==='game'?'grid':'block'):'none';
+ document.body.classList.toggle('game-active',page==='game');
+ if(page!=='game')playing=false;
+ // The shop/collection and the game have different document heights.
+ // Never restore their old scroll offset when opening another screen.
+ window.scrollTo(0,0);
+ if(page==='game'){
+  fitGameBoard();
+  requestAnimationFrame(fitGameBoard);
+ }
  if(page==='shop'||page==='collection')refreshViews();
 }
+window.addEventListener('resize',fitGameBoard);
+window.visualViewport?.addEventListener('resize',fitGameBoard);
+window.addEventListener('pageshow',fitGameBoard);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)fitGameBoard()});
 document.querySelector('#play').onclick=()=>{showPage('game');if(!resumeRun())reset();if(!tutorialSeen)openTutorial()};
 document.querySelector('#restart').onclick=reset;
 document.querySelector('#back').onclick=()=>showPage('home');
