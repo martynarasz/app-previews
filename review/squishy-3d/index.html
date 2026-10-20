@@ -110,6 +110,7 @@ main{max-width:440px;padding:12px 12px 28px}
 .seasonCountdown:empty{display:none}
 #halloweenSeasonBanner{position:relative;overflow:hidden;margin:8px 0 17px;border:3px solid #fff;border-radius:25px;padding:15px 15px 14px;background:radial-gradient(circle at 95% 0%,#ffcd75aa,transparent 37%),linear-gradient(135deg,#ffcc91,#ffe6bf 53%,#f9d3e7);box-shadow:0 9px 24px #be878750;color:#95536f}
 #halloweenSeasonBanner[hidden]{display:none!important}
+#home:has(#halloweenSeasonBanner:not([hidden])) #hero{width:min(100%,285px);margin:0 auto}
 #halloweenSeasonBanner:before{content:'✦ ✦ ✦';position:absolute;top:2px;right:8px;letter-spacing:7px;color:#fff9df;font-size:17px}
 #halloweenSeasonBanner .seasonTitleBig{font-size:20px;font-weight:1000;letter-spacing:.6px;position:relative;color:#8f4d87;text-shadow:0 1px white}
 #halloweenSeasonBanner .seasonSub{font-size:12px;margin:5px 0;font-weight:800}
@@ -136,15 +137,15 @@ main{max-width:440px;padding:12px 12px 28px}
 
 <section id="home">
 <div class="topbar"><span class="wallet" id="walletMenu"><span class="pepperCoin"></span><span class="walletAmount">0</span></span></div>
-<canvas id="hero" width="780" height="780"></canvas>
-<button id="play" aria-label="Graj">▶</button>
 <div id="halloweenSeasonBanner" role="region" hidden aria-label="Halloween">
  <div id="seasonHeading" class="seasonTitleBig"></div>
  <div id="seasonSub" class="seasonSub"></div>
  <div id="seasonCountdownValue" class="seasonCountdownBig"></div>
  <button id="seasonShopBtn"></button>
  </div>
- <div class="menuBtns"><button id="openCollection" aria-label="Kolekcja"><img class="menuIcon" src="assets/collection-v5.webp" alt=""><span>Kolekcja</span></button><button id="openShop" aria-label="Sklep"><img class="menuIcon" src="assets/shop-v5.webp" alt=""><span>Sklep</span></button></div>
+ <canvas id="hero" width="780" height="780"></canvas>
+<button id="play" aria-label="Graj">▶</button>
+<div class="menuBtns"><button id="openCollection" aria-label="Kolekcja"><img class="menuIcon" src="assets/collection-v5.webp" alt=""><span>Kolekcja</span></button><button id="openShop" aria-label="Sklep"><img class="menuIcon" src="assets/shop-v5.webp" alt=""><span>Sklep</span></button></div>
 </section>
 <section id="game"><div id="status">⭐ 0　<span class="pepperCoin"></span> <span id="inGameCoins">0</span></div><div id="nextRow"><span>NASTĘPNE</span><canvas id="nextCanvas" width="600" height="165"></canvas></div>
 <div id="levelStrip" role="status" aria-live="polite"><div class="levelLine"><span id="levelName">🌸 Poziom 1</span><span id="levelReward"></span></div><div class="levelTrack"><div id="levelFill"></div></div><small id="levelGoal"></small></div>
