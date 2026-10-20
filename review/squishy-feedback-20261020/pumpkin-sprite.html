@@ -33,6 +33,12 @@ const skins=[
 ];
 const HALLOWEEN_SKIN_INDEX=12, GAME_ASSETS=[0,1,2,3,4,5,6];
 let selected=12,paintTime=0,finalAtlasReady=false;
+const pumpkinSprite=new Image();let pumpkinSpriteReady=false;
+pumpkinSprite.onload=()=>{pumpkinSpriteReady=true};
+fetch('../squishy-3d/assets/squishy-halloween-sprite.b64')
+ .then(r=>{if(!r.ok)throw new Error('Missing seasonal sprite');return r.text()})
+ .then(b64=>{pumpkinSprite.src='data:image/webp;base64,'+b64.trim()})
+ .catch(()=>{pumpkinSpriteReady=false});
 const finalAtlas=new Image();
 finalAtlas.onload=()=>{finalAtlasReady=true};
 fetch('../squishy-3d/assets/squishy-final-precise.b64')
@@ -170,6 +176,16 @@ function sprite(c,kind,x,y,radius,angle=0,impact=0,opacity=1,b=null){
  c.shadowColor='#7055814f';c.shadowBlur=radius*.22;c.shadowOffsetY=radius*.12;
  if(kind===-2){if(!asset(c,13,0,0,radius*2.20))special(c,kind,radius);c.restore();return;}
  if(kind<0){special(c,kind,radius);c.restore();return;}
+ if(kind===7&&b?.skin===HALLOWEEN_SKIN_INDEX&&pumpkinSpriteReady){
+  // Preserve the approved PNG's shape, transparent edges and original expression.
+  // Stem extends above the standard Squishy body, as with other costume skins.
+  const width=radius*2.32,height=width*(209/224);
+  c.shadowColor='rgba(123,76,92,.32)';c.shadowBlur=radius*.12;
+  c.shadowOffsetY=radius*.11;
+  c.drawImage(pumpkinSprite,-width/2,-radius*1.30,width,height);
+  c.restore();return;
+ }
+ // Fallback if the image fails to load: the old drawn costume over the cream Squishy.
  // Use the EXACT cream 3D Squishy sprite already in the game's final atlas.
  // The costume is drawn above it, not a replacement for its face.
  if(kind===7&&b?.skin===HALLOWEEN_SKIN_INDEX&&asset(c,3,0,0,radius*2.34)){
