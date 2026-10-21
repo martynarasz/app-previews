@@ -247,6 +247,12 @@ body.game-active main{height:100%;min-height:0;overflow:hidden}
  #gameActions{height:39px}
 }
 
+/* A completed round should never appear to be an unexplained freeze. */
+#roundEnd[hidden]{display:none!important}
+#roundEnd{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:#fff9fbe8;border-radius:23px}
+#roundEnd .endCard{display:flex;flex-direction:column;align-items:center;gap:13px;padding:14px;text-align:center;color:#785c98}
+#roundEndTitle{font-size:clamp(17px,3dvh,23px);font-weight:900}
+#roundEndRestart{font-size:clamp(13px,2dvh,18px);padding:12px 20px}
 </style></head><body><main>
 
 <section id="home">
@@ -268,7 +274,7 @@ body.game-active main{height:100%;min-height:0;overflow:hidden}
 <div id="levelRewardToast" role="status" aria-live="polite" aria-atomic="true">
  <span id="rewardToastMessage"></span>
  <div class="levelRewardValue"><span class="pepperCoin" aria-hidden="true"></span><strong id="rewardToastAmount">+25</strong></div>
-</div></div>
+</div><div id="roundEnd" hidden role="status"><div class="endCard"><strong id="roundEndTitle"></strong><button id="roundEndRestart"></button></div></div></div>
 <div id="feedback"></div><div id="gameActions"><button id="restart">↻ OD NOWA</button><button id="back">← MENU</button></div></section>
 <section id="collectionScreen"><div class="screenHead"><button id="collectionBack">← MENU</button><span class="srOnly">Kolekcja</span><span class="wallet" id="walletCollection"><span class="pepperCoin"></span><span class="walletAmount">0</span></span></div>
 <p class="skinChangeNotice" id="collectionSkinNotice"></p><div class="skinGrid" id="collectionCards"></div></section>
@@ -382,6 +388,7 @@ function resumeRun(){
   active=bodies.find(b=>b.id===s.activeId)||null;
   if(active&&!active.held)active=null;
   playing=true;heldFor=0;blockedFor=0;acc=0;last=0;
+  document.getElementById('roundEnd').hidden=true;
   fillQueue();if(!active)spawn();drawQueue();
   return true;
  }catch(e){savedRun=null;return false}
@@ -720,6 +727,7 @@ function spawn(){
 function reset(){
  savedRun=null;bodies=[];puffs=[];petals=[];fusions=[];traces=[];active=null;points=0;merges=0;pops=0;spills=0;drops=0;aim=180;
  heldFor=0;blockedFor=0;issuedRainbow=false;playing=true;petalTime=0;message='';msgAge=0;id=0;
+ document.getElementById('roundEnd').hidden=true;
  earned=0;paidBands=0;runMergeTracked=0;queue=[];history=[];fillQueue();spawn();save();
 }
 function drop(){if(!playing||!active||!active.held)return;removeInvalidRainbows();active.held=false;active.vy=Math.max(active.vy,120);heldFor=0;save();}
@@ -780,7 +788,11 @@ function merge(){
    message='✨ '+(next===5?tr.flower:next===6?tr.crown:tr.tierNames[next])+'!';msgAge=0;}
  if(isActive){active=null;drops++;points+=5;}save();return true;
  }}return false}
-function finish(){updateLevel();playing=false;active=null;highScore=Math.max(points,highScore);save();refreshWallet();message=tr.end+' '+points+' • +'+earned+' 🍬';msgAge=0;}
+function finish(){updateLevel();playing=false;active=null;highScore=Math.max(points,highScore);save();refreshWallet();message=tr.end+' '+points+' • +'+earned+' 🍬';msgAge=0;
+ document.getElementById('roundEndTitle').textContent=tr.end;
+ document.getElementById('roundEndRestart').textContent=tr.restart;
+ document.getElementById('roundEnd').hidden=false;
+}
 function simulate(dt){if(!playing)return;removeInvalidRainbows();msgAge+=dt;heldFor+=active?.held?dt:0;
  if(active?.held&&heldFor>=5)drop();
  petalTime+=dt;if(petalTime>.5&&petals.length<30){petalTime=0;petals.push({x:rr(0,W),y:-10,size:rr(3.5,7),age:0,speed:rr(20,38),phase:rr(0,7),settled:false})}
@@ -823,6 +835,8 @@ function simulate(dt){if(!playing)return;removeInvalidRainbows();msgAge+=dt;held
          const nearby=Math.hypot(other.x-cx,other.y-cy)<116+r(other)*.15;if(nearby)cleared++;return !nearby});
        blockedFor=0;points+=45+cleared*12;award();puff(cx,cy,6);message=tr.puff+' '+cleared;msgAge=0}
      save();}}
+ // If a merge removed the active character, recover on this same frame.
+ if(active&&!bodies.includes(active)){active=null;heldFor=0;}
  if(!active&&playing)spawn();
 }
 function drawPetal(c,x,y,s,a,alpha){
@@ -897,9 +911,17 @@ function paint(){
  count.textContent=n||'';count.style.display=n?'block':'none';
  feedback.textContent=(!playing||msgAge<1.5)?message:'';
 }
-let lastHomeDraw=0;
-function loop(ts){paintTime=ts/1000;if(playing&&ts-lastSavedAt>1900){save();lastSavedAt=ts;}if(!last)last=ts;
-if(ts-lastHomeDraw>=85&&document.getElementById('home').style.display!=='none'){drawHome();lastHomeDraw=ts;}const dt=Math.min(.06,(ts-last)/1000);last=ts;if(playing&&!tutorialOpen){acc+=dt*speedChoice;let n=0;while(acc>=1/120&&n<8){simulate(1/120);acc-=1/120;n++}}updateLevel();paint();requestAnimationFrame(loop)}requestAnimationFrame(loop);
+let lastHomeDraw=0,frameHandle=0;
+function loop(ts){
+ // Keep one upcoming frame scheduled even if drawing throws temporarily.
+ frameHandle=requestAnimationFrame(loop);
+ paintTime=ts/1000;if(playing&&ts-lastSavedAt>1900){save();lastSavedAt=ts;}if(!last)last=ts;
+ if(ts-lastHomeDraw>=85&&document.getElementById('home').style.display!=='none'){drawHome();lastHomeDraw=ts;}
+ const dt=Math.min(.06,(ts-last)/1000);last=ts;
+ if(playing&&!tutorialOpen){acc+=dt*speedChoice;let n=0;while(acc>=1/120&&n<8){simulate(1/120);acc-=1/120;n++}}
+ updateLevel();paint();
+}
+frameHandle=requestAnimationFrame(loop);
 
 // Changing the active character deliberately ends only the current round.
  // Wallet, permanent merge milestones and owned characters are kept.
@@ -999,7 +1021,8 @@ function fitGameBoard(){
 function showPage(page){
  if(page!=='game'&&playing)save();
  for(const [id,key] of [['home','home'],['game','game'],['collectionScreen','collection'],['shopScreen','shop']])
-  document.getElementById(id).style.display=key===page?(key==='game'?'grid':'block'):'none';
+  // The home page uses a viewport-fitted CSS grid; block forces scrolling.
+  document.getElementById(id).style.display=key===page?((key==='game'||key==='home')?'grid':'block'):'none';
  document.body.classList.toggle('game-active',page==='game');
  if(page!=='game')playing=false;
  // The shop/collection and the game have different document heights.
@@ -1013,10 +1036,17 @@ function showPage(page){
 }
 window.addEventListener('resize',fitGameBoard);
 window.visualViewport?.addEventListener('resize',fitGameBoard);
-window.addEventListener('pageshow',fitGameBoard);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)fitGameBoard()});
+function resumeAnimationLoop(){
+ if(document.hidden)return;
+ cancelAnimationFrame(frameHandle);
+ last=0;acc=0;frameHandle=requestAnimationFrame(loop);
+ fitGameBoard();
+}
+window.addEventListener('pageshow',resumeAnimationLoop);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)resumeAnimationLoop()});
 document.querySelector('#play').onclick=()=>{showPage('game');if(!resumeRun())reset();if(!tutorialSeen)openTutorial()};
 document.querySelector('#restart').onclick=reset;
+document.querySelector('#roundEndRestart').onclick=reset;
 document.querySelector('#back').onclick=()=>showPage('home');
 document.querySelector('#openCollection').onclick=()=>showPage('collection');
 document.querySelector('#openShop').onclick=()=>showPage('shop');
