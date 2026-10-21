@@ -510,6 +510,15 @@ fetch('assets/squishy-final-precise.b64').then(r=>{if(!r.ok)throw new Error('Atl
  .then(data=>{finalAtlas.src='data:image/webp;base64,'+data.trim()})
  .catch(()=>{finalAtlas.src='assets/squishy-assets-v5.webp'});
 finalAtlas.onerror=()=>{if(!finalAtlasReady&&finalAtlas.src.indexOf('squishy-assets-v5.webp')===-1){finalAtlas.src='assets/squishy-assets-v5.webp'}};
+// Three new transparent Squishies share one asset in cards and physics:
+// star (skin 9), purple circles (skin 10), blue cloud (skin 11).
+const customSkinAtlas=new Image();let customSkinReady=false;
+customSkinAtlas.onload=()=>{customSkinReady=true;refreshViews()};
+customSkinAtlas.onerror=()=>{customSkinReady=false};
+fetch('assets/squishy-new-skins-20261021.b64')
+ .then(response=>{if(!response.ok)throw new Error('New Squishy sprites unavailable');return response.text()})
+ .then(content=>{customSkinAtlas.src='data:image/webp;base64,'+content.trim()})
+ .catch(()=>{customSkinReady=false});
 // Keep the original, fully illustrated v5 menu icons.
  // The alternative internal .b64 icons are cropped at their lower edges.
  const homeArt=new Image();let homeReady=false;
@@ -667,6 +676,13 @@ function sprite(c,kind,x,y,radius,angle=0,impact=0,opacity=1,b=null){
  // The costume is drawn above it, not a replacement for its face.
  if(kind===7&&b?.skin===HALLOWEEN_SKIN_INDEX&&asset(c,3,0,0,radius*2.34)){
   drawPumpkinCostume(c,radius);c.restore();return;
+ }
+ // The collectible skin and its in-game final form must match exactly.
+ if(kind===7&&customSkinReady&&b&&Number.isInteger(b.skin)&&b.skin>=9&&b.skin<=11){
+  const index=b.skin-9,side=256,size=radius*2.34;
+  c.shadowColor='rgba(112,85,129,.30)';c.shadowBlur=radius*.12;
+  c.drawImage(customSkinAtlas,index*side,0,side,side,-size/2,-size/2,size,size);
+  c.restore();return;
  }
  // Every mochi on the board, including the small/medium stages, uses the real
  // transparent 3D assets. The same artwork is used in the upcoming-piece tray.
