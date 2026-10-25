@@ -104,6 +104,14 @@ main{padding-top:max(15px,env(safe-area-inset-top));padding-left:10px;padding-ri
 @media(prefers-reduced-motion:reduce){.pet-stage{transition:none!important}}
 
 .pet-stage{transition:none!important}
+
+/* v7.2 - keep bottom captions visible and readable above the phone safe area */
+main{overflow:visible!important;padding-bottom:max(44px, calc(env(safe-area-inset-bottom) + 32px))!important}
+.msg{display:block!important;margin:10px auto 8px!important;min-height:30px!important;padding:7px 12px!important;max-width:94%;font-size:clamp(12px,3.4vw,14px)!important;line-height:1.45!important;font-weight:850!important;color:#753c7d!important;text-shadow:0 1px 0 #fff9!important;text-align:center;overflow-wrap:anywhere}
+.smallprint{display:block!important;position:relative!important;visibility:visible!important;text-align:center!important;margin:11px auto 5px!important;padding:9px 14px!important;max-width:98%;width:max-content;border:1px solid #fff8;border-radius:20px;background:#fff8ffb0;box-shadow:0 3px 12px #b589b72a;color:#754477!important;font-size:clamp(11px,2.9vw,13px)!important;font-weight:750!important;line-height:1.45!important;letter-spacing:.1px}
+.test-caption{font-size:11px!important;color:#734775!important;margin:6px 0 0}
+.test-mode .test-tools{margin:8px auto 6px;max-width:100%}
+@media(max-width:360px){.smallprint{padding:7px 8px!important;font-size:11px!important}}
 </style></head><body>
 <main id="main"><header class="header"><button class="icon-btn" id="sound" aria-label="Sound">♫</button><div class="logo-wrap"><span class="logo">Squishy Chick</span><span class="subtitle">♡ POCKET PET ♡</span></div><button class="icon-btn settings" id="settings" aria-label="Settings">⚙</button></header>
 <div class="dashboard"><div class="hearts" id="hearts" aria-label="Hearts"></div><div class="age" id="age"></div></div>
@@ -219,6 +227,7 @@ function touchedChick(e){
     }
     return bitmap.data[(sy*bitmap.width+sx)*4+3]>55;
   }catch(_){
+    // Canvas is not available on an unusual WebView: use a conservative ellipse.
     const x=(lx-bw/2)/(bw*.40),y=(ly-bh/2)/(bh*.40);
     return x*x+y*y<=1;
   }
