@@ -103,6 +103,7 @@ main{padding-top:max(15px,env(safe-area-inset-top));padding-left:10px;padding-ri
 @media(min-width:540px){.scene{height:clamp(530px,75vw,660px)!important}.actions{max-width:520px;margin:16px auto 7px}}
 @media(prefers-reduced-motion:reduce){.pet-stage{transition:none!important}}
 
+.pet-stage{transition:none!important}
 </style></head><body>
 <main id="main"><header class="header"><button class="icon-btn" id="sound" aria-label="Sound">♫</button><div class="logo-wrap"><span class="logo">Squishy Chick</span><span class="subtitle">♡ POCKET PET ♡</span></div><button class="icon-btn settings" id="settings" aria-label="Settings">⚙</button></header>
 <div class="dashboard"><div class="hearts" id="hearts" aria-label="Hearts"></div><div class="age" id="age"></div></div>
@@ -155,7 +156,7 @@ let lastPlay=now();
 const scene=el('scene'),petBox=el('petStage');
 const body2d={x:0,y:0,vx:0,vy:0,angle:0,spin:0,drag:false,ready:false,levitateUntil:0,lastFrame:0};
 let heldPointer=null,holdTimer=0,holdFired=false;
-const clampSpeed=(v)=>Math.max(-1150,Math.min(1150,v));
+const clampSpeed=(v)=>Math.max(-850,Math.min(850,v));
 function bounds(){const w=scene.clientWidth,h=scene.clientHeight,pw=petBox.offsetWidth||150,ph=petBox.offsetHeight||150;
 return {w,h,pw,ph,left:13,right:Math.max(13,w-pw-13),top:18,bottom:Math.max(18,h-ph-18)};
 }
@@ -163,20 +164,20 @@ function keepInside(){const b=bounds();body2d.x=Math.min(b.right,Math.max(b.left
 function renderBody(){petBox.style.transform='translate3d('+body2d.x.toFixed(1)+'px,'+body2d.y.toFixed(1)+'px,0) rotate('+body2d.angle.toFixed(3)+'rad)';}
 function resizeBody(){const b=bounds();if(!body2d.ready){body2d.x=(b.w-b.pw)/2;body2d.y=b.bottom;body2d.ready=true}else keepInside();renderBody()}
 resizeBody();if(window.ResizeObserver){new ResizeObserver(resizeBody).observe(scene)}else window.addEventListener('resize',resizeBody);
-function bouncePet(amount=1){const b=bounds();body2d.drag=false;body2d.vy=Math.max(-700,Math.min(-210,-b.h*.97*amount));body2d.vx+= (Math.random()-.5)*145;body2d.spin+=(Math.random()-.5)*2.3;}
-function levitatePet(){body2d.levitateUntil=performance.now()+3500;body2d.vy=-210;body2d.vx+=(Math.random()-.5)*75;
+function bouncePet(amount=1){const b=bounds();body2d.drag=false;body2d.vy=Math.max(-590,Math.min(-190,-b.h*.82*amount));body2d.vx+= (Math.random()-.5)*105;body2d.spin+=(Math.random()-.5)*1.6;}
+function levitatePet(){body2d.levitateUntil=performance.now()+3500;body2d.vy=-175;body2d.vx+=(Math.random()-.5)*50;
 chirp('hug');s.joy=clamp(s.joy+8);setMessage('hugs');special='cuddle';specialUntil=now()+850;lastPlay=now();heartReward();save();render();updateSprite()}
 function stepBody(ts){const dt=Math.min(.034,Math.max(.001,(ts-(body2d.lastFrame||ts-16))/1000));body2d.lastFrame=ts;const b=bounds();
 if(!body2d.drag){const float=ts<body2d.levitateUntil;
- if(float){body2d.vy+=(Math.sin(ts/280)*380-300)*dt;body2d.vx+=Math.sin(ts/780)*32*dt}
- else body2d.vy+=1120*dt;
+ if(float){body2d.vy+=(Math.sin(ts/300)*310-250)*dt;body2d.vx+=Math.sin(ts/800)*25*dt}
+ else body2d.vy+=970*dt;
  body2d.x+=body2d.vx*dt;body2d.y+=body2d.vy*dt;body2d.angle+=body2d.spin*dt;
- body2d.vx*=Math.pow(float?.992:.985,dt*60);body2d.spin*=Math.pow(.94,dt*60);
- if(body2d.x<=b.left){body2d.x=b.left;body2d.vx=Math.abs(body2d.vx)*.76;body2d.spin*=-.8}
- if(body2d.x>=b.right){body2d.x=b.right;body2d.vx=-Math.abs(body2d.vx)*.76;body2d.spin*=-.8}
- if(body2d.y<=b.top){body2d.y=b.top;body2d.vy=Math.abs(body2d.vy)*.65;body2d.spin*=-.7}
+ body2d.vx*=Math.pow(float?.990:.980,dt*60);body2d.spin*=Math.pow(.94,dt*60);
+ if(body2d.x<=b.left){body2d.x=b.left;body2d.vx=Math.abs(body2d.vx)*.67;body2d.spin*=-.8}
+ if(body2d.x>=b.right){body2d.x=b.right;body2d.vx=-Math.abs(body2d.vx)*.67;body2d.spin*=-.8}
+ if(body2d.y<=b.top){body2d.y=b.top;body2d.vy=Math.abs(body2d.vy)*.54;body2d.spin*=-.7}
  if(body2d.y>=b.bottom){body2d.y=b.bottom;
-  if(body2d.vy>85)body2d.vy=-body2d.vy*.48;else body2d.vy=0;
+  if(body2d.vy>85)body2d.vy=-body2d.vy*.39;else body2d.vy=0;
   body2d.vx*=.92;
   body2d.angle*=.94;
  }
@@ -186,9 +187,46 @@ if(!body2d.drag){const float=ts<body2d.levitateUntil;
 keepInside();renderBody();requestAnimationFrame(stepBody)}
 requestAnimationFrame(stepBody);
 function localPoint(e){const r=scene.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top}}
+// Only the visible pixels of the chick can start a tap, drag, or long-press.
+// This avoids jumping when the user touches the cushion or empty glass dome.
+const spriteHitCache=new Map();
+function touchedChick(e){
+  const img=el('pet');
+  if(!img || !img.complete || !img.naturalWidth || !img.naturalHeight)return false;
+  const rect=petBox.getBoundingClientRect();
+  const bw=petBox.offsetWidth,bh=petBox.offsetHeight;
+  if(!bw||!bh)return false;
+  const dx=e.clientX-(rect.left+rect.width/2),dy=e.clientY-(rect.top+rect.height/2);
+  const angle=body2d.angle;
+  const ca=Math.cos(angle),sa=Math.sin(angle);
+  const lx=dx*ca+dy*sa+bw/2,ly=-dx*sa+dy*ca+bh/2;
+  const fit=Math.min(bw/img.naturalWidth,bh/img.naturalHeight);
+  const imageWidth=img.naturalWidth*fit,imageHeight=img.naturalHeight*fit;
+  const sx=Math.floor((lx-(bw-imageWidth)/2)/fit);
+  const sy=Math.floor((ly-(bh-imageHeight)/2)/fit);
+  if(sx<0||sy<0||sx>=img.naturalWidth||sy>=img.naturalHeight)return false;
+  try{
+    let bitmap=spriteHitCache.get(img.src);
+    if(!bitmap){
+      const canvas=document.createElement('canvas');
+      canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;
+      const context=canvas.getContext('2d',{willReadFrequently:true});
+      context.drawImage(img,0,0);
+      const data=context.getImageData(0,0,canvas.width,canvas.height).data;
+      bitmap={data,width:canvas.width};
+      if(spriteHitCache.size>=12)spriteHitCache.delete(spriteHitCache.keys().next().value);
+      spriteHitCache.set(img.src,bitmap);
+    }
+    return bitmap.data[(sy*bitmap.width+sx)*4+3]>55;
+  }catch(_){
+    const x=(lx-bw/2)/(bw*.40),y=(ly-bh/2)/(bh*.40);
+    return x*x+y*y<=1;
+  }
+}
 scene.addEventListener('pointerdown',e=>{
  if(e.target.closest('#poop'))return;
  if(e.pointerType==='mouse'&&e.button!==0)return;
+ if(!touchedChick(e))return;
  lastPlay=now();clearTimeout(holdTimer);holdFired=false;
  const p=localPoint(e);
  heldPointer={id:e.pointerId,x:p.x,y:p.y,lastX:p.x,lastY:p.y,lastT:performance.now(),startX:p.x,startY:p.y,moved:false};
@@ -201,7 +239,7 @@ scene.addEventListener('pointermove',e=>{
  if(Math.hypot(p.x-heldPointer.startX,p.y-heldPointer.startY)>9){heldPointer.moved=true;clearTimeout(holdTimer)}
  if(heldPointer.moved){
   body2d.drag=true;const b=bounds();
-  body2d.vx=clampSpeed((p.x-heldPointer.lastX)/dt*.7);body2d.vy=clampSpeed((p.y-heldPointer.lastY)/dt*.7);
+  body2d.vx=clampSpeed((p.x-heldPointer.lastX)/dt*.54);body2d.vy=clampSpeed((p.y-heldPointer.lastY)/dt*.54);
   body2d.x=Math.max(b.left,Math.min(b.right,p.x-b.pw/2));
   body2d.y=Math.max(b.top,Math.min(b.bottom,p.y-b.ph/2));
   body2d.angle=Math.max(-.30,Math.min(.30,body2d.vx*.00035));
@@ -211,8 +249,8 @@ scene.addEventListener('pointermove',e=>{
 });
 function releasePet(e){if(!heldPointer||e.pointerId!==heldPointer.id)return;
  clearTimeout(holdTimer);
- if(heldPointer.moved){body2d.drag=false;body2d.spin=Math.max(-3,Math.min(3,body2d.vx*.0035));
-  if(Math.abs(body2d.vx)+Math.abs(body2d.vy)<110)body2d.vy=-250;
+ if(heldPointer.moved){body2d.drag=false;body2d.spin=Math.max(-2.1,Math.min(2.1,body2d.vx*.0027));
+  if(Math.abs(body2d.vx)+Math.abs(body2d.vy)<105)body2d.vy=-185;
   chirp('jump');special='hop';specialUntil=now()+550;updateSprite()
  }else if(!holdFired){jump()}
  heldPointer=null;lastPlay=now();}
